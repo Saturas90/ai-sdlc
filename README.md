@@ -1,6 +1,6 @@
 # ai-sdlc
 
-Ein dateibasiertes **SDLC-Toolkit für Claude Code**: Es bildet deinen Ablauf
+Ein dateibasiertes **SDLC-Toolkit für Claude Code und Codex**: Es bildet deinen Ablauf
 *Projektplan → Issue → (Architektur) → Implementierungsplan → Implementierung → Abschluss*
 mit Review-Gates, menschlichen Freigaben und Commits ab — als kleine, token­arme Skills
 und spezialisierte Sub-Agenten. Alle Artefakte sind Markdown im jeweiligen Projekt-Repo.
@@ -9,11 +9,19 @@ und spezialisierte Sub-Agenten. Alle Artefakte sind Markdown im jeweiligen Proje
 
 ```powershell
 cd <pfad-zu-diesem-repo>    # dorthin, wo du ai-sdlc abgelegt/geklont hast
-./install.ps1              # Symlinks nach ~/.claude  (Fallback: kopieren; ./install.ps1 -Copy erzwingt Kopie)
+./install.ps1              # Claude nach ~/.claude, Codex nach ~/.codex; -Copy erzwingt Kopien
 ```
 
 Danach sind die Skills in **jedem** Projekt verfügbar. Symlinks brauchen Admin-Rechte
 _oder_ den Windows-Entwicklermodus (Einstellungen → System → Für Entwickler).
+Bei fehlenden Rechten kopiert der Installer. Eine bestehende Codex-`config.toml` behält alle
+anderen Einstellungen; der Installer aktualisiert nur `model`, `model_reasoning_effort` und
+die zwei Agent-Standardwerte. Abweichende Codex-Dateien werden vor dem Ersetzen unter
+`~/.codex/ai-sdlc-backups/` gesichert. Zum Prüfen ohne Änderungen am Benutzerprofil:
+
+```powershell
+pwsh -File tests/install-smoke.ps1
+```
 
 ## Nutzung im Zielprojekt
 
@@ -24,6 +32,9 @@ Wechsle in dein Tool-Projekt (Git-Repo) und lass dich vom Orchestrator führen:
 ```
 
 Oder eine Phase direkt aufrufen:
+
+In Claude Code mit `/naechster-schritt`, in Codex mit `$naechster-schritt`.
+Codex bietet zusätzlich `$init-reading` für eine kurze Bestandsaufnahme.
 
 | Skill | Zweck |
 |-------|-------|
@@ -60,7 +71,7 @@ aus Versehen überspringen. Da Claude-Code-Skills einander nur *empfehlen* (kein
 bleibt die letzte Sicherung deine Freigabe; wer die Gates härter erzwingen will, kann optional einen
 `PreToolUse`-Hook ergänzen, der Commits ohne freigegebenes Artefakt blockt.
 
-## Architektur des Toolkits (Orchestrator + Sub-Agenten)
+## Claude-Code-Agenten (Orchestrator + Sub-Agenten)
 
 Der **Orchestrator** (`/naechster-schritt`, läuft in der Session) hält keinen schweren Kontext:
 er erkennt nur den Stand und delegiert die Facharbeit an spezialisierte Sub-Agenten, die je
@@ -86,8 +97,24 @@ Modell pro Agent steht im Frontmatter der Datei unter `.claude/agents/` und läs
 frei anpassen (`model: opus|sonnet|haiku`). Läuft die Session selbst auf **Sonnet**, ist die
 Orchestrierung günstig; `architekt` zieht bei Bedarf Opus.
 
+## Codex-Modellwahl
+
+Die Codex-Quellen liegen unter [`codex/`](codex/) und werden nach `~/.codex/`
+installiert. Der Standard ist **GPT-6 Sol/medium**. Normale Architektur nutzt Sol/high,
+mechanische Aufträge GPT-6 Luna/low. Issue-Texte, Dokumentationsnachzüge,
+Implementierungsplanung und normale Kaltreviews nutzen gezielt GPT-5.6 Terra.
+GPT-6 Astra/xhigh ist kritischen Architekturentscheidungen, Implementierungen und
+Reviews vorbehalten. Die Codex-Regeln halten Aufgaben sequenziell und begrenzen Kontext,
+Delegation und wiederholte Prüfungen, ohne fachliche Gates zu verkürzen.
+
+Änderungen an `codex/config.defaults.toml` werden beim nächsten `install.ps1` in eine
+vorhandene Codex-Konfiguration übernommen. Änderungen an verlinkten Codex-Dateien wirken
+direkt; bei Kopien den Installer erneut ausführen. Neue Modell- und Rollenwerte gelten
+erst für neue Codex-Sitzungen und Agenten.
+
 ## Anpassen
 
-- Regeln/Kategorien: nur `share/konventionen.md`.
+- Claude-Regeln/Kategorien: `share/konventionen.md`.
 - Dokumentaufbau: `share/vorlagen/*.md`.
+- Codex-Modellrouting: `codex/AGENTS.md`, `codex/agents/` und `codex/config.defaults.toml`.
 - Nach dem Ändern von Dateinamen/Struktur `install.ps1` erneut ausführen.
