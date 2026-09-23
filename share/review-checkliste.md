@@ -1,18 +1,10 @@
 # Review-Checkliste
 
-Von `reviewer` und `reviewer-kritisch` genutzt (DRY: hier ändern, nicht in den Agenten).
+Die Checkliste steht jetzt direkt im Body der Reviewer-Agenten (spart je Spawn einen Lese-Schritt).
+Wirst du als Reviewer auf diese Datei verwiesen, lies den Body deines Agenten ab dem Ende des Frontmatters
+und wende dessen Prüfpunkte und Rückgabevertrag an (einschließlich `Blockierend: ja/nein`):
+`reviewer` → `~/.claude/agents/reviewer.md`, Architekturplan → `~/.claude/agents/reviewer-architektur.md`,
+sonst → `~/.claude/agents/reviewer-kritisch.md`.
 
-Prüfe den Gegenstand gegen: das **Issue (Scope!)**, ggf. Architektur/Impl-Plan,
-`~/.claude/ai-sdlc/konventionen.md` und — bei Code — Korrektheit/Robustheit.
-
-Achte besonders auf:
-- **Scope-Treue**: wird geplant/umgesetzt, was nicht im Issue steht? (kritisch/hoch)
-- Vollständigkeit gegenüber den Akzeptanzkriterien.
-- Interpretationsspielraum / Mehrdeutigkeit in Plänen (hoch).
-- Korrektheit, Sicherheit, Datenverlust, Fehlerbehandlung, Randfälle bei Code (kritisch/hoch).
-- Struktur-Regeln: Offene Fragen am Ende? Out of Scope referenziert/abgelehnt?
-
-Kategorien (Definitionen in `konventionen.md`): kritisch / hoch / mittel / niedrig.
-
-**Rückgabe (kompakt):** Findings als Liste — je `Kategorie | Fundstelle | Problem | konkreter Vorschlag`.
-Letzte Zeile: `Blockierend: ja/nein` (ja, sobald ≥1 kritisch/hoch). **Bessere nichts selbst aus** — du bewertest nur.
+Pflege: Änderungen sinngemäß in allen drei Reviewer-Agenten nachziehen; `reviewer-architektur` weicht bei
+Bezugsdokumenten und Code-Bezug bewusst ab. Den Blockierend-Wortlaut auch in `mutations-pruefer.md` gleich halten.

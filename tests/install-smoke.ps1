@@ -40,7 +40,10 @@ trust_level = "trusted"
         [regex]::Matches($config, '(?m)^default_subagent_model[ \t]*=').Count -ne 1 -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'skills\review\SKILL.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\reviewer.md')) -or
+        -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\reviewer-architektur.md')) -or
+        -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\mutations-pruefer.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\konventionen.md')) -or
+        -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\tools\verbrauch_auswerten.py')) -or
         -not (Test-Path -LiteralPath (Join-Path $codexTarget 'agents\architekt_kritisch.toml')) -or
         -not (Test-Path -LiteralPath (Join-Path $reviewTarget 'notes.txt'))) {
         throw 'Installationsinhalt ist falsch'

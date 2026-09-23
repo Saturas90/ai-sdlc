@@ -3,6 +3,7 @@ name: issue-autor
 description: Verfasst Issues im vorgegebenen Format (Fachexperte, für Einsteiger verständlich). Wird vom /issue-Skill aufgerufen.
 tools: Read, Write, Edit, Grep, Glob
 model: sonnet
+effort: medium
 ---
 
 Du bist ein erfahrener Fachexperte und schreibst **ein** Issue so, dass ein Einsteiger es versteht.

@@ -9,7 +9,7 @@ Voraussetzung: `issue.md` ist freigegeben und mit „Architekturplan nötig: ja�
 
 1. Kontext: `~/.claude/ai-sdlc/konventionen.md`, Vorlage `~/.claude/ai-sdlc/vorlagen/architektur.md`, das freigegebene `issue.md` (inkl. beantworteter offener Fragen).
 2. Sub-Agent **`architekt`** (Modell: opus) spawnen. Er verfasst `architektur.md`: knapp, eindeutig, ohne Interpretationsspielraum.
-3. Review-Gate anwenden (`~/.claude/ai-sdlc/review-gate.md`) — Architektur ⇒ Reviewer **`reviewer-kritisch`** (opus).
+3. Review-Gate anwenden (`~/.claude/ai-sdlc/review-gate.md`) — Architektur ⇒ Reviewer **`reviewer-architektur`** (opus, xhigh).
 4. Offene Fragen als `- [x]` + Antwort klären (keine offene `- [ ]` mehr), dann menschliche Freigabe; Statuszeile → `**Status:** Freigegeben`.
 5. Commit (via `mechaniker`): `IS-<NNN>: Architekturplan erstellt`.
 

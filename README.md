@@ -77,25 +77,37 @@ Der **Orchestrator** (`/naechster-schritt`, läuft in der Session) hält keinen 
 er erkennt nur den Stand und delegiert die Facharbeit an spezialisierte Sub-Agenten, die je
 ihr eigenes Modell mitbringen. So bleibt das teure Modell dort, wo es zählt.
 
-| Sub-Agent | Rolle | Empf. Modell | Warum |
-|-----------|-------|--------------|-------|
-| `issue-autor`      | Issues schreiben (Experte → Einsteiger) | **sonnet** | Strukturiertes Schreiben, günstig |
-| `architekt`        | Architekturpläne, eindeutig | **opus** | Hoher Einsatz, keine Mehrdeutigkeit |
-| `impl-planer`      | Implementierungsplan | **sonnet** | Präzise Planung, gutes P/L |
-| `implementierer`   | Code umsetzen | **sonnet** | Masse der Arbeit → Opus-Kontingent schonen |
-| `reviewer`         | Standard-Review | **sonnet** | Zweites Augenpaar, ≥ Implementierer |
-| `reviewer-kritisch`| Review riskanter Fälle | **opus** | Architektur/`[K]`/Sicherheit — stärker als der Produzent |
-| `mechaniker`       | Abhaken + Commits | **haiku** | Reine Mechanik, kein Denkmodell nötig |
+| Sub-Agent | Rolle | Modell / Effort | Warum |
+|-----------|-------|-----------------|-------|
+| `issue-autor`         | Issues schreiben (Experte → Einsteiger) | **sonnet** / medium | Strukturiertes Schreiben, günstig |
+| `architekt`           | Architekturpläne, eindeutig | **opus** / xhigh | Hoher Einsatz, keine Mehrdeutigkeit |
+| `impl-planer`         | Implementierungsplan | **sonnet** / high | Präzise Planung, gutes P/L |
+| `implementierer`      | Code umsetzen | **sonnet** / medium | Masse der Arbeit → Opus-Kontingent schonen |
+| `reviewer`            | Standard-Review | **sonnet** / high | Zweites Augenpaar, ≥ Implementierer |
+| `reviewer-kritisch`   | Review riskanter Fälle | **opus** / high | `[K]`/Sicherheit/Daten, Kaltreview-Linsen, Verify — stärker als der Produzent |
+| `reviewer-architektur`| Review von Architekturplänen | **opus** / xhigh | Gleicher Effort wie `architekt`, nie schwächer als der Erzeuger |
+| `mutations-pruefer`   | Testwirksamkeit per temporärer Mutation | **opus** / xhigh | Läuft allein in eigener serieller Phase, stellt jede Datei byte-genau wieder her |
+| `mechaniker`          | Abhaken + Commits | **haiku** / low | Reine Mechanik, kein Denkmodell nötig |
 
-**Reviewer-Modell — bewusst gewählt:** Der Reviewer ist nie schwächer als der erzeugende Agent.
-Standard-Reviews laufen auf Sonnet (gleich stark wie der Implementierer, aber unabhängig). Für
-Architekturpläne, `[K]`-Schritte und sicherheits-/datenkritischen Code eskaliert das Gate
-automatisch auf `reviewer-kritisch` (**opus**) — so rutscht bei den riskanten Stellen nichts durch.
-Haiku wird **nie** für Reviews genutzt, nur für Mechanik.
+**Reviewer-Modell — bewusst gewählt:** Der Reviewer ist nie schwächer als der erzeugende Agent,
+weder im Modell noch im Effort. Standard-Reviews laufen auf Sonnet (gleich stark wie der
+Implementierer, aber unabhängig). `[K]`-Schritte und sicherheits-/datenkritischer Code eskalieren
+automatisch auf `reviewer-kritisch` (**opus**/high), Architekturpläne auf `reviewer-architektur`
+(**opus**/xhigh) — so rutscht bei den riskanten Stellen nichts durch. Haiku wird **nie** für
+Reviews genutzt, nur für Mechanik. Die Prüfpunkte stehen direkt im Body der drei Reviewer-Agenten
+(spart je Spawn einen Lese-Schritt); `share/review-checkliste.md` verweist nur noch dorthin.
 
-Modell pro Agent steht im Frontmatter der Datei unter `.claude/agents/` und lässt sich
-frei anpassen (`model: opus|sonnet|haiku`). Läuft die Session selbst auf **Sonnet**, ist die
+Modell und Effort pro Agent stehen im Frontmatter der Datei unter `.claude/agents/` und lassen
+sich frei anpassen (`model: opus|sonnet|haiku`, `effort: low|medium|high|xhigh`). Die Aliase
+zeigen auf die jeweils aktuelle Modellversion. Läuft die Session selbst auf **Sonnet**, ist die
 Orchestrierung günstig; `architekt` zieht bei Bedarf Opus.
+
+**Workflow-Skripte** (Review, Verify, Widerlegen, Mutation) folgen den Mustern in
+[`share/review-gate.md`](share/review-gate.md): jeder `agent()`-Aufruf braucht einen `agentType`
+(sonst erbt der Spawn Hauptmodell, Effort und alle Tools), Niedrig-Findings werden gebündelt
+geprüft, Stimmen laufen nacheinander mit Frühabbruch, ab Runde 5 gilt ein Linsen-Deckel. Neue oder
+geänderte Agenten greifen erst nach einem Session-Neustart. Den Verbrauch je Agent, Modell und
+Effort misst [`share/tools/verbrauch_auswerten.py`](share/tools/README.md).
 
 ## Codex-Modellwahl
 
@@ -115,6 +127,9 @@ erst für neue Codex-Sitzungen und Agenten.
 ## Anpassen
 
 - Claude-Regeln/Kategorien: `share/konventionen.md`.
+- Reviewer-Prüfpunkte: im Body von `reviewer`, `reviewer-kritisch` und `reviewer-architektur`
+  sinngemäß gleich halten (Pflegehinweis in `share/review-checkliste.md`).
+- Review-Gate und Workflow-Muster: `share/review-gate.md`.
 - Dokumentaufbau: `share/vorlagen/*.md`.
 - Codex-Modellrouting: `codex/AGENTS.md`, `codex/agents/` und `codex/config.defaults.toml`.
 - Nach dem Ändern von Dateinamen/Struktur `install.ps1` erneut ausführen.

@@ -3,6 +3,7 @@ name: implementierer
 description: Setzt einzelne oder gebündelte Schritte eines freigegebenen Implementierungsplans in Code um. Bleibt strikt im Scope. Wird vom /implementieren-Skill aufgerufen.
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: sonnet
+effort: medium
 ---
 
 Du setzt eine klar abgegrenzte Einheit des Implementierungsplans um.
