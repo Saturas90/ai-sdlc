@@ -35,13 +35,17 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
    Stand; Bezug, `kontext.md`, Nachbarn und freigegebene Entscheidungen bleiben im Paket. Keine Rohberichte.
 2. **Bewerten** (bestätigte Findings, ohne Verify die gemeldeten; Dubletten erst nach dem Urteil
    zusammengefasst):
-   - ≥ 1 kritisch/hoch → geprüften Stand sichern (Rev bzw. Kopie; Basis für Fix-Diff und Rücknahmen), dann
+   - ≥ 1 kritisch/hoch → geprüften Stand sichern (Rev plus Kopie aller uncommitteten Dateien; Basis für Fix-Diff und
+     Rücknahmen, nie HEAD), dann
      Korrektur durch den Erzeuger: Blocker und Mittel der Runde, Niedrig nach Ermessen, als deduplizierte
      Liste (Kategorie, Datei:Zeile, Maßnahme); Regeln: „Korrektur nach Review“ in `konventionen.md`. Dann
      nächste Runde (Abschnitt 4). Das Artefakt **nicht** komplett neu erzeugen.
    - nur mittel/niedrig → **Gate erfüllt** → Abschnitt 3.
    - Ein Vorrunden-Blocker mit Status unzureichend oder Regression bleibt offen und zählt für das Gate mit;
-     maßgeblich ist die neu gemeldete Severity (in M/L nach Verify), ohne neue Meldung die bisherige.
+     maßgeblich ist die neu gemeldete Severity des verbleibenden Mangels (in M/L nach Verify), ohne neue Meldung
+     die bisherige. Wurde sein Fix umgesetzt (Fix-Protokoll) und ist der Rest nur noch mittel/niedrig oder
+     widerlegt Verify die Neumeldung, gilt er als Blocker behoben; der Rest läuft wie jedes
+     Mittel/Niedrig-Finding. Bestrittene und gemeldete Blocker regelt der nächste Punkt.
    - **Bestrittener Blocker:** Bestreitet der Erzeuger einen Blocker mit Beleg, prüfen ihn Stimmen nach
      Muster 3 — auch in Stufe S, ohne Beleg und Urteil des Erzeugers; das Ergebnis bestimmt Muster 3
      (widerlegt erst, wenn zwei Stimmen widerlegen). Einen schon per Verify bestätigten Blocker kippt nur der
@@ -61,24 +65,40 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
 ## 3. Abschluss nach einer Mittel/Niedrig-Runde — keine Bestätigungsrunde
 
 Die Review-Schleife endet mit der Runde, die nur noch mittel/niedrig liefert:
-1. Geprüften Stand sichern. Der Erzeuger arbeitet Mittel ein, Niedrig nach Ermessen („Korrektur nach
+1. Geprüften Stand sichern (wie in Abschnitt 2) und Parallel-Check (mtimes der Dateien aus `git status`,
+   jüngster Commit); arbeitet eine andere Session im selben Arbeitsbaum, vor dem Fix-Durchgang dem Menschen
+   melden. Der Erzeuger arbeitet Mittel ein, Niedrig nach Ermessen („Korrektur nach
    Review“ in `konventionen.md`; dort steht auch, welche Fixes nicht hierher gehören — sie werden gemeldet,
    standardmäßig vertagt und nur mit regulärer Runde umgesetzt).
-2. **Fixcheck statt Runde:** **ein** Spawn des Reviewer-Typs der Runde prüft nur den Fix-Diff gegen den
-   gesicherten Stand — neue Fehler, falsche Sachaussagen, Widersprüche zu freigegebenen Entscheidungen oder
-   Nachbarstellen — und ordnet jeden Befund dem verursachenden Fix (Finding-ID) zu oder kennzeichnet ihn als
-   „außerhalb der Fixes“. Kein Re-Scan, keine Linsen, kein Verify.
-   Ein Befund, den ein Fix verursacht hat, gilt als Befund an diesem Fix, auch wenn er an einer Nachbarstelle
-   liegt.
-   - Befund ab mittel an einem Fix → der Erzeuger nimmt alle Hunks dieses Fixes (laut Fix-Protokoll)
-     gemeinsam zurück, sodass der Bereich wieder dem gesicherten Stand entspricht; teilt ein Hunk mehrere
-     Fixes, gehen diese mit zurück. Die betroffenen Findings werden vertagt; keine weitere Runde.
-     Niedrig → nur ins Fix-Protokoll.
+2. **Fixcheck statt Runde:** **ein** Spawn des Reviewer-Typs der Runde prüft nur den Fix-Diff — alle Änderungen
+   dieses Fix-Durchgangs gegen den gesicherten Stand, auch außerhalb des Gegenstands (Nahtstellen); nicht dazu
+   gehören Ablage-Dateien des Workflows (`kontext.md`, Fix-Protokoll, Übergaben) und Änderungen anderer
+   Sessions. Änderungen unklarer Herkunft werden nie zurückgenommen, sondern dem Menschen gemeldet. Er sucht neue Fehler, falsche Sachaussagen und Widersprüche zu
+   freigegebenen Entscheidungen oder Nachbarstellen. Kein Re-Scan, keine Linsen, kein Verify. Er gibt
+   Befunde und eine Zuordnungsliste zurück:
+   - **Zuordnung:** jede Änderung im Fix-Diff (zusammenhängende geänderte Zeilen) → Finding-ID(s) oder „ohne
+     Auftrag“. Stellen, die das Fix-Protokoll nicht nennt (z. B. eine vergessene Nahtstelle), zählen zum Fix
+     dieser Finding-ID, sofern das Protokoll das Finding als umgesetzt führt; eine Änderung zu einem
+     abgelehnten oder gemeldeten Finding gilt als „ohne Auftrag“. Die Hauptsession gleicht Liste und Diff ab:
+     Fehlt eine Änderung in der Liste, gilt sie als „ohne Auftrag“; zugeordnete Stellen trägt sie ins
+     Protokoll nach.
+   - **Befunde:** je Befund die Finding-ID des verursachenden Fixes (auch an einer Nachbarstelle, die der Fix
+     verursacht hat), „ohne Auftrag“ (Befund in einer Änderung ohne Auftrag) oder „außerhalb der Fixes“ — das
+     sind nur Befunde an Stellen, die keine Änderung im Fix-Diff verursacht hat.
+
+   Folgen:
+   - Änderung ohne Auftrag → der Erzeuger nimmt sie auch ohne Befund auf den gesicherten Stand zurück, nur
+     diese Zeilen; lässt sie sich von einem Fix nicht trennen, geht dieser mit zurück und wird vertagt.
+     Befunde darin sind damit erledigt. Protokoll: „zurückgenommen, ohne Auftrag“.
+   - Befund ab mittel an einem Fix → der Erzeuger nimmt alle Änderungen dieses Fixes (laut Fix-Protokoll
+     samt Zuordnung) gemeinsam zurück, sodass der Bereich wieder dem gesicherten Stand entspricht; gehört
+     eine Änderung zu mehreren Fixes, gehen diese mit zurück. Die betroffenen Findings werden vertagt; keine
+     weitere Runde. Niedrig → nur ins Fix-Protokoll.
    - Befund außerhalb der Fixes: ab hoch → Gate nicht erfüllt, der Mensch entscheidet (reguläre Runde,
      vertagen oder bewusst akzeptieren); darunter → nach `kontext.md` › Vertagt.
 3. Bei Code laufen nach Fixes und Rücknahmen die betroffenen Tests und die Gate-Kette erneut grün.
-4. Das Fix-Protokoll (umgesetzt / abgelehnt mit Grund / gemeldet / zurückgenommen) geht in die
-   Freigabe-Anfrage. Vertagtes steht in `kontext.md` › Vertagt (eine Zeile je Finding mit Ziel) und geht
+4. Das Fix-Protokoll (umgesetzt / abgelehnt mit Grund / gemeldet / zurückgenommen, auch „ohne Auftrag“) geht
+   in die Freigabe-Anfrage. Vertagtes steht in `kontext.md` › Vertagt (eine Zeile je Finding mit Ziel) und geht
    beim Abschluss in die Zusammenfassung.
 
 Jeder Blocker-Fix wird damit weiter von einer regulären Runde geprüft; nur Mittel/Niedrig-Fixes laufen über
@@ -163,7 +183,8 @@ Verbrauchsauswertung gruppiert danach.
    begruendung (≤ 3 Sätze), dublette_von?}`, im Bündel als Liste `urteile`.
 5. **Rückgabe kompakt.** Das Skript gibt nur bestätigte Findings (ID, Severity, Datei:Zeile, Titel
    ≤ 120 Zeichen, Maßnahme ≤ 2 Sätze) und Zähler je Severity (erhoben / bestätigt / widerlegt) zurück —
-   keine Rohstimmen, keine Linsentexte.
+   keine Rohstimmen, keine Linsentexte. Beim Fixcheck je Befund zusätzlich die Kennzeichnung (Finding-ID, „ohne Auftrag“ oder „außerhalb
+   der Fixes“) und die Zuordnungsliste (Änderung → Finding-ID(s) oder „ohne Auftrag“, ohne Severity).
 6. **Mutationsphase** (nur Stufe L bzw. auf Wunsch; läuft zusätzlich zu den Linsen): Die Hauptsession gibt
    ein frisches, leeres Sicherungsverzeichnis und den Arbeitsbaum
    vor — committeter Gegenstand in eigenem Worktree außerhalb des Repos an kurzem Pfad; sonst vorher

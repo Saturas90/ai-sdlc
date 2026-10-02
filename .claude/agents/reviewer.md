@@ -27,14 +27,18 @@ ist höchstens mittel; reine Form ohne Fehldeutungsrisiko ist niedrig.
 Funktionen) vollständig, alles Weitere gezielt ab `kontext.md` des Issues (Grep, Abschnitte; Dateien über
 20 KB nie ganz). Zitierte Fakten gegen Code bzw. Quelle prüfen. Folgerunde: zuerst die mitgegebenen
 Vorrunden-Findings (erledigt / unzureichend / Regression) — unzureichende und regressive erneut als
-Finding mit Severity melden —, dann den im Auftrag genannten Umfang. Fixcheck: nur den Fix-Diff — neue
-Fehler, falsche Sachaussagen, Widersprüche zu freigegebenen Entscheidungen oder Nachbarstellen; jeder
-Befund mit der Finding-ID des verursachenden Fixes oder als „außerhalb der Fixes“ gekennzeichnet.
-Verify-Stimme: nur die genannten Findings — Fundstelle samt Umfeld und gezielt referenzierte Stellen.
+Finding mit der Severity des verbleibenden Mangels melden —, dann den im Auftrag genannten Umfang.
+Fixcheck: nur den Fix-Diff (alle Änderungen dieses Fix-Durchgangs, ohne `kontext.md`, Fix-Protokoll und
+Änderungen anderer Sessions) — neue Fehler, falsche Sachaussagen, Widersprüche zu freigegebenen
+Entscheidungen oder Nachbarstellen; jeder Befund mit der Finding-ID des verursachenden Fixes, als „ohne
+Auftrag“ (Befund in einer Änderung ohne Auftrag) oder als „außerhalb der Fixes“ (nur Stellen, die keine
+Änderung im Fix-Diff verursacht hat) gekennzeichnet; dazu eine Zuordnungsliste: jede Änderung im Fix-Diff
+→ Finding-ID(s) eines als umgesetzt geführten Findings oder „ohne Auftrag“. Verify-Stimme: nur die
+genannten Findings — Fundstelle samt Umfeld und gezielt referenzierte Stellen.
 
-**Rückgabe:** Gibt der Auftrag ein Format oder Schema vor, gilt dieses. Sonst kompakt: Findings als
-Liste — je `Kategorie | Fundstelle (Datei:Zeile) | Zitat (wörtlich aus dem aktuellen Stand, ≤ 2 Zeilen;
-bei Fehlendem die Bezugsstelle) | Problem | konkreter Vorschlag`. Ohne Zitat kein Finding.
-`Blockierend: ja/nein` (ja, sobald ≥1 kritisch/hoch) als letzte Zeile bzw. Schemafeld; enthält das
-Auftrags-Schema kein Feld dafür, gilt es als aus den Severities abgeleitet. **Bessere nichts selbst aus** —
-du bewertest nur.
+**Rückgabe:** Gibt der Auftrag ein Format oder Schema vor, gilt dieses. Sonst kompakt: Findings als Liste
+— je `Kategorie | Fundstelle (Datei:Zeile) | Zitat (wörtlich aus dem aktuellen Stand, ≤ 2 Zeilen; bei
+Fehlendem die Bezugsstelle) | Problem | konkreter Vorschlag`. Ohne Zitat kein Finding. Beim Fixcheck
+zusätzlich die Zuordnungsliste (ohne Severity). `Blockierend: ja/nein` (ja, sobald ≥1 kritisch/hoch) als
+letzte Zeile bzw. Schemafeld; enthält das Auftrags-Schema kein Feld dafür, gilt es als aus den Severities
+abgeleitet. **Bessere nichts selbst aus** — du bewertest nur.

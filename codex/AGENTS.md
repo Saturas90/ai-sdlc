@@ -32,68 +32,82 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   fortsetzen, höchstens zweimal, danach frisch mit Findings und `kontext.md`. Arbeitet der Hauptagent
   selbst als Autor, gilt das für die Sitzung: je Einheit neu beginnen bzw. ab etwa 200K Kontext mit
   Übergabe in `kontext.md` › Stand wechseln.
-- **Stabil prüfen:** Erst Umsetzung und passende Tests abschließen, dann unabhängiges Kaltreview
-  gegen einen unveränderten, gesicherten Stand (Rev oder Dateikopie; dafür ist kein eigener Commit
-  nötig). Dem Reviewer übergeben: Runde bzw. Fixcheck, ab Runde 2 die offenen Findings der Vorrunde als
-  Tabelle (ID, Datei:Zeile, ein Satz, Status; bestrittene gekennzeichnet), den Fix-Diff gegen den
-  gesicherten Stand und `kontext.md`; für den Fixcheck die eingearbeiteten Findings der Runde mit ID, das
-  Fix-Protokoll mit Fundstellen je ID und den Fix-Diff. Blockierende Findings (kritisch/hoch) samt Mittel derselben Runde
-  gesammelt beheben, dann erneut prüfen: Runde 1 und 2 vollständig samt Nachbarn, ab Runde 3 nur
-  Vorrunden-Blocker und Fix-Diff samt Nahtstellen; neuer Scope, neue Akzeptanzkriterien, Verträge oder
-  normative Klauseln und Nutzerentscheidungen werden dabei voll geprüft. Ein früheres Finding mit Status unzureichend oder Regression bleibt offen; maßgeblich ist die neu gemeldete
-  Severity, ohne neue Meldung die bisherige. Lehnt der Autor einen Blocker mit Beleg
-  ab, bleibt er offen, bis der Reviewer der nächsten Runde (ohne Autorenbegründung) oder der Nutzer die
-  Ablehnung bestätigt. Keine laufenden Vollreviews während der Bearbeitung. Vorgeschriebene Tests und
-  Gates erhalten; breite Läufe nach Stabilisierung, Wiederholungen nur wegen neuer Änderungen, Fehler oder
-  offener Risiken. Logs in Dateien, im Kontext nur Ergebnis und relevante Fehlerausschnitte.
-  Testlaufzeit allein ist kein Grund für einen zusätzlichen Agenten.
-- **Abschluss ohne Bestätigungsrunde:** Liefert eine Runde nur mittel/niedrig, ist das Gate erfüllt:
-  Mittel einarbeiten, Niedrig nach Ermessen, dann **ein** Fixcheck nur des Fix-Diffs durch den Reviewer
-  der Runde — keine weitere Runde. Der Reviewer ordnet jeden Befund dem verursachenden Fix (Finding-ID) zu
-  oder kennzeichnet ihn als außerhalb der Fixes. Befund ab mittel an einem Fix (auch an einer Nachbarstelle, die der Fix
-  verursacht): alle Änderungen dieses Fixes zurücknehmen, sodass der Bereich wieder dem gesicherten Stand
-  entspricht, und das Finding vertagen. Befund außerhalb der Fixes: ab hoch ist das Gate nicht erfüllt und
-  der Nutzer entscheidet; darunter nach Vertagt. Nicht hierher gehören Fixes, die unter „Korrekturen
-  minimal“ zu melden sind: Mittel/Niedrig standardmäßig vertagen; Blocker-Fixes und alles mit
-  Entscheidungsbedarf dem Nutzer vorlegen, nie selbst vertagen. Fix-Protokoll und Vertagtes gehen in die
+- **Stabil prüfen:** Erst Umsetzung und passende Tests abschließen, dann unabhängiges Kaltreview gegen einen
+  unveränderten, gesicherten Stand (Rev plus Kopie aller uncommitteten Dateien; dafür ist kein eigener
+  Commit nötig; Rücknahmen nie gegen HEAD). Dem Reviewer übergeben: Runde bzw. Fixcheck, ab Runde 2 die
+  offenen Findings der Vorrunde als Tabelle (ID, Datei:Zeile, ein Satz, Status; bestrittene gekennzeichnet),
+  den Fix-Diff gegen den gesicherten Stand und `kontext.md`; für den Fixcheck die eingearbeiteten Findings
+  der Runde mit ID, das Fix-Protokoll mit Fundstellen je ID und den Fix-Diff. Blockierende Findings
+  (kritisch/hoch) samt Mittel derselben Runde gesammelt beheben, dann erneut prüfen: Runde 1 und 2
+  vollständig samt Nachbarn, ab Runde 3 nur Vorrunden-Blocker und Fix-Diff samt Nahtstellen; neuer Scope,
+  neue Akzeptanzkriterien, Verträge oder normative Klauseln und Nutzerentscheidungen werden dabei voll
+  geprüft. Ein früheres Finding mit Status unzureichend oder Regression bleibt offen; maßgeblich ist die neu
+  gemeldete Severity, ohne neue Meldung die bisherige. Wurde der Fix eines früheren Blockers umgesetzt und
+  wird der verbleibende Mangel nur noch als mittel/niedrig gemeldet, gilt er als Blocker behoben; der Rest
+  läuft wie jedes Mittel/Niedrig-Finding. Abgelehnte und gemeldete Blocker regeln die folgenden Sätze. Lehnt
+  der Autor einen Blocker mit Beleg ab, bleibt er offen, bis der Reviewer der nächsten Runde (ohne
+  Autorenbegründung) oder der Nutzer die Ablehnung bestätigt. Keine laufenden Vollreviews während der
+  Bearbeitung. Vorgeschriebene Tests und Gates erhalten; breite Läufe nach Stabilisierung, Wiederholungen
+  nur wegen neuer Änderungen, Fehler oder offener Risiken. Logs in Dateien, im Kontext nur Ergebnis und
+  relevante Fehlerausschnitte. Testlaufzeit allein ist kein Grund für einen zusätzlichen Agenten.
+- **Abschluss ohne Bestätigungsrunde:** Liefert eine Runde nur mittel/niedrig, ist das Gate erfüllt: Mittel
+  einarbeiten, Niedrig nach Ermessen, dann **ein** Fixcheck nur des Fix-Diffs (alle Änderungen dieses
+  Fix-Durchgangs gegen den gesicherten Stand, auch außerhalb des Gegenstands; nicht dazu gehören
+  `kontext.md`, Fix-Protokoll, Übergaben und Änderungen anderer Sitzungen; Änderungen unklarer Herkunft nie
+  zurücknehmen, sondern dem Nutzer melden; arbeitet laut Parallel-Check (mtimes der Dateien aus `git
+  status`, jüngster Commit) eine andere Sitzung im selben Arbeitsbaum, vor dem Fix-Durchgang melden) durch
+  den Reviewer der Runde — keine weitere Runde. Der Reviewer liefert Befunde (gekennzeichnet mit Finding-ID,
+  „ohne Auftrag“ oder „außerhalb der Fixes“) und eine Zuordnung jeder Änderung im Fix-Diff zu Finding-ID(s)
+  oder „ohne Auftrag“; Stellen, die das Fix-Protokoll nicht nennt, zählen zum Fix dieser Finding-ID, sofern
+  das Protokoll das Finding als umgesetzt führt; Änderungen zu abgelehnten oder gemeldeten Findings und
+  Änderungen, die in der Zuordnung fehlen, gelten als ohne Auftrag. Der Hauptagent gleicht Zuordnung und
+  Diff ab und ergänzt das Protokoll. Änderungen ohne Auftrag nimmt der Autor auch ohne Befund zurück, nur
+  diese Zeilen (untrennbar von einem Fix: der Fix geht mit zurück und wird vertagt); Befunde darin sind
+  damit erledigt, Protokoll „zurückgenommen, ohne Auftrag“. Befund ab mittel an einem Fix (auch an einer
+  Nachbarstelle, die der Fix verursacht): alle Änderungen dieses Fixes zurücknehmen, sodass der Bereich
+  wieder dem gesicherten Stand entspricht, und das Finding vertagen. Befund außerhalb der Fixes (nur an
+  Stellen, die keine Änderung im Fix-Diff verursacht hat): ab hoch ist das Gate nicht erfüllt und der Nutzer
+  entscheidet; darunter nach Vertagt. Nicht hierher gehören Fixes, die unter „Korrekturen minimal“ zu melden
+  sind: Mittel/Niedrig standardmäßig vertagen; Blocker-Fixes und alles mit Entscheidungsbedarf dem Nutzer
+  vorlegen, nie selbst vertagen. Fix-Protokoll (samt Zuordnung und Rücknahmen) und Vertagtes gehen in die
   Freigabe-Anfrage; Vertagtes steht laufend in `kontext.md` › Vertagt und geht beim Abschluss in die
   Zusammenfassung.
-- **Konvergenz:** Bestätigt Runde 3 oder eine spätere Runde noch Blocker, anhalten und dem Nutzer
-  Verlauf und Optionen vorlegen (Grundsatzentscheidung, Variante streichen, Scope schneiden, weitere
-  Runden mit Anzahl); nach den gewählten Runden gilt der Stopp erneut. Mehr als 10 Blocker oder mehr als
-  40 Findings in einer Runde heißen: Gegenstand zu groß, dem Nutzer melden. Für Einheiten mit
-  `Prüftiefe: L` sieht Codex keinen Mutationsnachweis vor: vor der Umsetzung dem Nutzer melden.
-- **Korrekturen minimal:** Nur die übergebenen Findings, lokal; Formulierungsvorschläge aus Findings
-  nicht ungeprüft übernehmen, neue Sachaussagen gegen Code oder Primärquelle prüfen, dieselbe Regel an
-  allen Fundstellen gleichziehen, Unzutreffendes mit Beleg ablehnen. Melden statt umsetzen, was Scope,
+- **Konvergenz:** Bestätigt Runde 3 oder eine spätere Runde noch Blocker, anhalten und dem Nutzer Verlauf
+  und Optionen vorlegen (Grundsatzentscheidung, Variante streichen, Scope schneiden, weitere Runden mit
+  Anzahl); nach den gewählten Runden gilt der Stopp erneut. Mehr als 10 Blocker oder mehr als 40 Findings in
+  einer Runde heißen: Gegenstand zu groß, dem Nutzer melden. Für Einheiten mit `Prüftiefe: L` sieht Codex
+  keinen Mutationsnachweis vor: vor der Umsetzung dem Nutzer melden.
+- **Korrekturen minimal:** Nur die übergebenen Findings, lokal; Formulierungsvorschläge aus Findings nicht
+  ungeprüft übernehmen, neue Sachaussagen gegen Code oder Primärquelle prüfen, dieselbe Regel an allen
+  Fundstellen gleichziehen, Unzutreffendes mit Beleg ablehnen. Melden statt umsetzen, was Scope,
   Akzeptanzkriterien, Verträge, freigegebene Entscheidungen oder die Schrittstruktur ändert oder eine
   Nutzerentscheidung braucht — nach einer Runde ohne Blocker zusätzlich, was eine neue Regel, Variante oder
-  einen neuen Ablaufschritt einführt, also das Ergebnis eines schon eindeutig geregelten Falls ändert, ohne dass eine vorrangige Quelle
-  (CLAUDE.md, freigegebenes Artefakt, Nutzerentscheidung, normatives Dokument) es so vorgibt, oder eine
-  Fallunterscheidung schafft, die andere Stellen mitbeachten müssen; widersprechen sich zwei Stellen ohne
-  klare Rangfolge, melden. Nicht darunter fallen Korrekturen (Angleichen an eine solche vorrangige Quelle; die
-  Quelle an eine abweichende Kopie anzugleichen ist keine Korrektur) und Präzisierungen bestehender Aussagen, Verweise,
-  Wortlaut, die Gliederung des Dokuments und durch Tests abgedeckte lokale Robustheits-Fixes im Code ohne
-  Vertragsänderung. Ergebnis je Finding: umgesetzt (mit Fundstellen Datei:Zeile), abgelehnt mit Grund oder
-  gemeldet.
+  einen neuen Ablaufschritt einführt, also das Ergebnis eines schon eindeutig geregelten Falls ändert, ohne
+  dass eine vorrangige Quelle (CLAUDE.md, freigegebenes Artefakt, Nutzerentscheidung, normatives Dokument)
+  es so vorgibt, oder eine Fallunterscheidung schafft, die andere Stellen mitbeachten müssen; widersprechen
+  sich zwei Stellen ohne klare Rangfolge, melden. Nicht darunter fallen Korrekturen (Angleichen an eine
+  solche vorrangige Quelle; die Quelle an eine abweichende Kopie anzugleichen ist keine Korrektur) und
+  Präzisierungen bestehender Aussagen, Verweise, Wortlaut, die Gliederung des Dokuments und durch Tests
+  abgedeckte lokale Robustheits-Fixes im Code ohne Vertragsänderung. Ergebnis je Finding: umgesetzt (mit
+  Fundstellen Datei:Zeile), abgelehnt mit Grund oder gemeldet.
 - **Kontext klein halten:** Gezielte Suche/Ausschnitte, keine wiederholten Gesamtdokumente. Liegt im
-  Issue-Ordner ein `kontext.md` (Anker mit Datei:Zeile, Normauszüge, Tests, bewusst Irrelevantes,
-  Vertagtes, Stand; höchstens 8 KB), zuerst diese Datei lesen, ab den Ankern gezielt suchen und neue
-  relevante Stellen dort ergänzen; Reviewer begrenzt sie nicht, sie schreiben nicht hinein. Fehlt sie,
-  legt die erste Phase sie an, die sie braucht, sofern CLAUDE.md sie nicht ausschließt; eine bloße
-  Aufzählung der Ordnerinhalte schließt sie nicht aus. Der Hauptagent überschreibt „Stand“ (bzw. die
-  dort verwiesene projekteigene Übergabe) vor jedem Commit und mitten im Gate am Ende jeder Runde und vor dem
-  Fixcheck (Gegenstand, Runde, Gate-Schritt, offene Findings als Tabelle oder Verweis auf eine Datei im
-  Issue-Ordner, Ablage des gesicherten Stands); eine neue Sitzung setzt dort fort, statt neu zu
-  erzeugen. Artefaktbudgets ohne Projektwerte: Issue ≤ 12 KB, Architektur und Plan ≤ 20 KB,
-  Zusammenfassung ≤ 6 KB, jedes weitere geprüfte Dokument ≤ 25 KB; gesprengt heißt schneiden, in
-  `kontext.md` zuerst Anker kürzen, nie „Vertagt“ oder „Stand“. Entscheidungen und offenen Stand in
-  vorhandenen Artefakten pflegen. Kein Neustart ohne gesicherten Stand. Wiederkehrende Fehler erst mit
-  einem minimalen Reproduzierer diagnostizieren, bevor aufwendige Nachweise erneut laufen.
-- **Tokenbudget nach Aufwand:** Nur die aktuelle Phase und benötigte Referenzen laden; Aufträge an
-  Rollen mit Pfaden, Scope und Prüfkriterien statt voller Gesprächshistorie übergeben. Erst gezielte
-  Tests, breite Pflicht-Gates einmal am stabilen Stand; erneute Läufe nur bei Änderung, Fehler oder
-  offenem Risiko. Reasoning nur für konkrete schwierige Arbeit erhöhen.
+  Issue-Ordner ein `kontext.md` (Anker mit Datei:Zeile, Normauszüge, Tests, bewusst Irrelevantes, Vertagtes,
+  Stand; höchstens 8 KB), zuerst diese Datei lesen, ab den Ankern gezielt suchen und neue relevante Stellen
+  dort ergänzen; Reviewer begrenzt sie nicht, sie schreiben nicht hinein. Fehlt sie, legt die erste Phase
+  sie an, die sie braucht, sofern CLAUDE.md sie nicht ausschließt; eine bloße Aufzählung der Ordnerinhalte
+  schließt sie nicht aus. Der Hauptagent überschreibt „Stand“ (bzw. die dort verwiesene projekteigene
+  Übergabe) vor jedem Commit und mitten im Gate am Ende jeder Runde und vor dem Fixcheck (Gegenstand, Runde,
+  Gate-Schritt, offene Findings als Tabelle oder Verweis auf eine Datei im Issue-Ordner, Ablage des
+  gesicherten Stands); eine neue Sitzung setzt dort fort, statt neu zu erzeugen. Artefaktbudgets ohne
+  Projektwerte: Issue ≤ 12 KB, Architektur und Plan ≤ 20 KB, Zusammenfassung ≤ 6 KB, jedes weitere geprüfte
+  Dokument ≤ 25 KB; gesprengt heißt schneiden, in `kontext.md` zuerst Anker kürzen, nie „Vertagt“ oder
+  „Stand“. Entscheidungen und offenen Stand in vorhandenen Artefakten pflegen. Kein Neustart ohne
+  gesicherten Stand. Wiederkehrende Fehler erst mit einem minimalen Reproduzierer diagnostizieren, bevor
+  aufwendige Nachweise erneut laufen.
+- **Tokenbudget nach Aufwand:** Nur die aktuelle Phase und benötigte Referenzen laden; Aufträge an Rollen
+  mit Pfaden, Scope und Prüfkriterien statt voller Gesprächshistorie übergeben. Erst gezielte Tests, breite
+  Pflicht-Gates einmal am stabilen Stand; erneute Läufe nur bei Änderung, Fehler oder offenem Risiko.
+  Reasoning nur für konkrete schwierige Arbeit erhöhen.
 
 Die Modelleinstellungen gelten für neue Sitzungen/Agenten; ein laufender Hauptagent wechselt
 sein Modell nicht durch eine Dateieditierung. Falls eine nötige Rolle oder ihr Modell nicht verfügbar
