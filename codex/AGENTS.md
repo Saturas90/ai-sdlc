@@ -1,7 +1,11 @@
 # Arbeitsweise: Tokenverbrauch und Qualität
 
 Diese persönlichen Vorgaben ergänzen die Repository-Regeln. Explizite Nutzeranweisungen und
-fachliche Freigaben gelten weiterhin; Qualitätsgates, Scope und Reviewtiefe werden nicht reduziert.
+fachliche Freigaben gelten weiterhin; Qualitätsgates und Scope werden nicht reduziert. Regelt die
+CLAUDE.md des Repositories eine Teilregel selbst (z. B. Rundenumfang, Kaltreview, Freigabe vor
+Korrekturen, Budgets), gilt jeweils diese; alles Übrige unten bleibt bestehen. Hat sie ein abweichendes
+Severity-Schema, vor der ersten Runde die hier verwendeten Stufen (blockierend, mittel, niedrig) darauf
+abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag und in „Stand“ festhalten.
 
 - **Sequenziell als Standard.** Umsetzung, Prüfung, Korrektur und Commit nacheinander.
   Parallelisierung nur auf ausdrücklichen Nutzerwunsch, nicht allein wegen verfügbarer Agenten.
@@ -24,16 +28,68 @@ fachliche Freigaben gelten weiterhin; Qualitätsgates, Scope und Reviewtiefe wer
   Keine zweite Bearbeitung derselben Aufgabe durch Haupt- und Unteragent. Unteragenten erhalten
   einen knappen Auftrag mit Pfaden, Scope, Freigaben, offenen Findings und Prüfkriterien;
   keine vollständige Gesprächsvererbung als Standard. Ergebnisse: Dateien, Befunde, Tests, Blocker.
+  Je Planeinheit einen frischen Autor; einen Autor nur für die Korrekturrunden derselben Einheit
+  fortsetzen, höchstens zweimal, danach frisch mit Findings und `kontext.md`. Arbeitet der Hauptagent
+  selbst als Autor, gilt das für die Sitzung: je Einheit neu beginnen bzw. ab etwa 200K Kontext mit
+  Übergabe in `kontext.md` › Stand wechseln.
 - **Stabil prüfen:** Erst Umsetzung und passende Tests abschließen, dann unabhängiges Kaltreview
-  gegen einen unveränderten Stand. Zusammengehörige Findings beheben, dann den vollständigen
-  relevanten Scope samt Nachbarn erneut prüfen. Keine laufenden Vollreviews während der Bearbeitung.
-  Vorgeschriebene Tests und Gates erhalten; breite Läufe nach Stabilisierung, Wiederholungen nur
-  wegen neuer Änderungen, Fehler oder offener Risiken. Logs in Dateien, im Kontext nur Ergebnis
-  und relevante Fehlerausschnitte. Testlaufzeit allein ist kein Grund für einen zusätzlichen Agenten.
-- **Kontext klein halten:** Gezielte Suche/Ausschnitte, keine wiederholten Gesamtdokumente.
-  Entscheidungen und offenen Stand in vorhandenen Artefakten pflegen. Bei langer Arbeit kompakte
-  Übergabe je Einheit; kein Neustart ohne gesicherten Stand. Wiederkehrende Fehler erst mit einem
-  minimalen Reproduzierer diagnostizieren, bevor aufwendige Nachweise erneut laufen.
+  gegen einen unveränderten, gesicherten Stand (Rev oder Dateikopie; dafür ist kein eigener Commit
+  nötig). Dem Reviewer übergeben: Runde bzw. Fixcheck, ab Runde 2 die offenen Findings der Vorrunde als
+  Tabelle (ID, Datei:Zeile, ein Satz, Status; bestrittene gekennzeichnet), den Fix-Diff gegen den
+  gesicherten Stand und `kontext.md`; für den Fixcheck die eingearbeiteten Findings der Runde mit ID, das
+  Fix-Protokoll mit Fundstellen je ID und den Fix-Diff. Blockierende Findings (kritisch/hoch) samt Mittel derselben Runde
+  gesammelt beheben, dann erneut prüfen: Runde 1 und 2 vollständig samt Nachbarn, ab Runde 3 nur
+  Vorrunden-Blocker und Fix-Diff samt Nahtstellen; neuer Scope, neue Akzeptanzkriterien, Verträge oder
+  normative Klauseln und Nutzerentscheidungen werden dabei voll geprüft. Ein früheres Finding mit Status unzureichend oder Regression bleibt offen; maßgeblich ist die neu gemeldete
+  Severity, ohne neue Meldung die bisherige. Lehnt der Autor einen Blocker mit Beleg
+  ab, bleibt er offen, bis der Reviewer der nächsten Runde (ohne Autorenbegründung) oder der Nutzer die
+  Ablehnung bestätigt. Keine laufenden Vollreviews während der Bearbeitung. Vorgeschriebene Tests und
+  Gates erhalten; breite Läufe nach Stabilisierung, Wiederholungen nur wegen neuer Änderungen, Fehler oder
+  offener Risiken. Logs in Dateien, im Kontext nur Ergebnis und relevante Fehlerausschnitte.
+  Testlaufzeit allein ist kein Grund für einen zusätzlichen Agenten.
+- **Abschluss ohne Bestätigungsrunde:** Liefert eine Runde nur mittel/niedrig, ist das Gate erfüllt:
+  Mittel einarbeiten, Niedrig nach Ermessen, dann **ein** Fixcheck nur des Fix-Diffs durch den Reviewer
+  der Runde — keine weitere Runde. Der Reviewer ordnet jeden Befund dem verursachenden Fix (Finding-ID) zu
+  oder kennzeichnet ihn als außerhalb der Fixes. Befund ab mittel an einem Fix (auch an einer Nachbarstelle, die der Fix
+  verursacht): alle Änderungen dieses Fixes zurücknehmen, sodass der Bereich wieder dem gesicherten Stand
+  entspricht, und das Finding vertagen. Befund außerhalb der Fixes: ab hoch ist das Gate nicht erfüllt und
+  der Nutzer entscheidet; darunter nach Vertagt. Nicht hierher gehören Fixes, die unter „Korrekturen
+  minimal“ zu melden sind: Mittel/Niedrig standardmäßig vertagen; Blocker-Fixes und alles mit
+  Entscheidungsbedarf dem Nutzer vorlegen, nie selbst vertagen. Fix-Protokoll und Vertagtes gehen in die
+  Freigabe-Anfrage; Vertagtes steht laufend in `kontext.md` › Vertagt und geht beim Abschluss in die
+  Zusammenfassung.
+- **Konvergenz:** Bestätigt Runde 3 oder eine spätere Runde noch Blocker, anhalten und dem Nutzer
+  Verlauf und Optionen vorlegen (Grundsatzentscheidung, Variante streichen, Scope schneiden, weitere
+  Runden mit Anzahl); nach den gewählten Runden gilt der Stopp erneut. Mehr als 10 Blocker oder mehr als
+  40 Findings in einer Runde heißen: Gegenstand zu groß, dem Nutzer melden. Für Einheiten mit
+  `Prüftiefe: L` sieht Codex keinen Mutationsnachweis vor: vor der Umsetzung dem Nutzer melden.
+- **Korrekturen minimal:** Nur die übergebenen Findings, lokal; Formulierungsvorschläge aus Findings
+  nicht ungeprüft übernehmen, neue Sachaussagen gegen Code oder Primärquelle prüfen, dieselbe Regel an
+  allen Fundstellen gleichziehen, Unzutreffendes mit Beleg ablehnen. Melden statt umsetzen, was Scope,
+  Akzeptanzkriterien, Verträge, freigegebene Entscheidungen oder die Schrittstruktur ändert oder eine
+  Nutzerentscheidung braucht — nach einer Runde ohne Blocker zusätzlich, was eine neue Regel, Variante oder
+  einen neuen Ablaufschritt einführt, also das Ergebnis eines schon eindeutig geregelten Falls ändert, ohne dass eine vorrangige Quelle
+  (CLAUDE.md, freigegebenes Artefakt, Nutzerentscheidung, normatives Dokument) es so vorgibt, oder eine
+  Fallunterscheidung schafft, die andere Stellen mitbeachten müssen; widersprechen sich zwei Stellen ohne
+  klare Rangfolge, melden. Nicht darunter fallen Korrekturen (Angleichen an eine solche vorrangige Quelle; die
+  Quelle an eine abweichende Kopie anzugleichen ist keine Korrektur) und Präzisierungen bestehender Aussagen, Verweise,
+  Wortlaut, die Gliederung des Dokuments und durch Tests abgedeckte lokale Robustheits-Fixes im Code ohne
+  Vertragsänderung. Ergebnis je Finding: umgesetzt (mit Fundstellen Datei:Zeile), abgelehnt mit Grund oder
+  gemeldet.
+- **Kontext klein halten:** Gezielte Suche/Ausschnitte, keine wiederholten Gesamtdokumente. Liegt im
+  Issue-Ordner ein `kontext.md` (Anker mit Datei:Zeile, Normauszüge, Tests, bewusst Irrelevantes,
+  Vertagtes, Stand; höchstens 8 KB), zuerst diese Datei lesen, ab den Ankern gezielt suchen und neue
+  relevante Stellen dort ergänzen; Reviewer begrenzt sie nicht, sie schreiben nicht hinein. Fehlt sie,
+  legt die erste Phase sie an, die sie braucht, sofern CLAUDE.md sie nicht ausschließt; eine bloße
+  Aufzählung der Ordnerinhalte schließt sie nicht aus. Der Hauptagent überschreibt „Stand“ (bzw. die
+  dort verwiesene projekteigene Übergabe) vor jedem Commit und mitten im Gate am Ende jeder Runde und vor dem
+  Fixcheck (Gegenstand, Runde, Gate-Schritt, offene Findings als Tabelle oder Verweis auf eine Datei im
+  Issue-Ordner, Ablage des gesicherten Stands); eine neue Sitzung setzt dort fort, statt neu zu
+  erzeugen. Artefaktbudgets ohne Projektwerte: Issue ≤ 12 KB, Architektur und Plan ≤ 20 KB,
+  Zusammenfassung ≤ 6 KB, jedes weitere geprüfte Dokument ≤ 25 KB; gesprengt heißt schneiden, in
+  `kontext.md` zuerst Anker kürzen, nie „Vertagt“ oder „Stand“. Entscheidungen und offenen Stand in
+  vorhandenen Artefakten pflegen. Kein Neustart ohne gesicherten Stand. Wiederkehrende Fehler erst mit
+  einem minimalen Reproduzierer diagnostizieren, bevor aufwendige Nachweise erneut laufen.
 - **Tokenbudget nach Aufwand:** Nur die aktuelle Phase und benötigte Referenzen laden; Aufträge an
   Rollen mit Pfaden, Scope und Prüfkriterien statt voller Gesprächshistorie übergeben. Erst gezielte
   Tests, breite Pflicht-Gates einmal am stabilen Stand; erneute Läufe nur bei Änderung, Fehler oder

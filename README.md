@@ -17,7 +17,10 @@ _oder_ den Windows-Entwicklermodus (Einstellungen → System → Für Entwickler
 Bei fehlenden Rechten kopiert der Installer. Eine bestehende Codex-`config.toml` behält alle
 anderen Einstellungen; der Installer aktualisiert nur `model`, `model_reasoning_effort` und
 die zwei Agent-Standardwerte. Abweichende Codex-Dateien werden vor dem Ersetzen unter
-`~/.codex/ai-sdlc-backups/` gesichert. Zum Prüfen ohne Änderungen am Benutzerprofil:
+`~/.codex/ai-sdlc-backups/` gesichert, versehentlich in kopierte Claude-Verzeichnisse gelegte eigene
+Dateien unter `~/.claude/ai-sdlc-backups/`. Lokale Änderungen an installierten Repo-Dateien werden ohne
+Sicherung überschrieben — Änderungen gehören ins Repo; Messbaselines nach `~/.claude/ai-sdlc-baselines/`.
+Der Installer braucht PowerShell 7 (`pwsh`). Zum Prüfen ohne Änderungen am Benutzerprofil:
 
 ```powershell
 pwsh -File tests/install-smoke.ps1
@@ -50,16 +53,29 @@ Codex bietet zusätzlich `$init-reading` für eine kurze Bestandsaufnahme.
 
 ```
 projektplan.md
-issues/IS-<NNN>-<slug>/{issue,architektur,impl-plan,zusammenfassung}.md
+issues/IS-<NNN>-<slug>/{issue,kontext,architektur,impl-plan,zusammenfassung}.md
 ```
+
+`kontext.md` ist das **Kontextpaket** des Issues (≤ 8 KB, kein Freigabe-Artefakt): relevante Stellen
+als Anker mit Datei:Zeile, tragende Normauszüge, Tests, bewusst Irrelevantes und der Stand für die
+nächste Session. Jeder Agent steigt dort ein, statt das Projekt erneut zu durchsuchen.
 
 ## Regeln (Kurzfassung)
 
 - Jedes Planungsartefakt durchläuft ein **Review-Gate** und wird iteriert, bis keine
   **kritisch/hoch**-Findings offen sind — erst dann **menschliche Freigabe**.
-- **Offene Fragen** stehen am Ende und werden vor der nächsten Phase beantwortet.
+- **Prüftiefe** je Gegenstand: **S** = ein Reviewer (Projektplan, Issue, Plan ohne `[K]`, normale
+  Einheit, Zusammenfassung), **M** = Workflow mit ≤ 2 Linsen (Architektur, `[K]`), **L** = ≤ 4 Linsen +
+  Mutation (im Plan markiert). Verifiziert werden nur Blocker, Verifizierer stufen nie hoch.
+- **Keine Bestätigungsrunde:** Liefert eine Runde nur mittel/niedrig, werden diese eingearbeitet und
+  nur ihr Diff per **Fixcheck** (ein Agent) geprüft; ein fehlerhafter Fix wird zurückgenommen.
+  Folgerunden: Runde 1–2 voller Kaltreview, ab Runde 3 Delta; Runde 3 mit Blockern ⇒ Entscheidung des
+  Menschen (Konvergenz-Stopp).
+- **Offene Fragen** stehen am Ende und werden — soweit schon im Entwurf — **vor** dem ersten Review beantwortet.
 - **Out of Scope** referenziert ein zukünftiges Issue _oder_ wird dauerhaft abgelehnt.
 - **Kein Scope-Creep**; der Abschluss gleicht Issue ↔ (Architektur) ↔ Plan ↔ Umsetzung ab.
+- **Kontext-Ökonomie:** Kontextpaket, Lese-Disziplin, Größenbudgets, frischer Implementierer je
+  Einheit, eine Session je Einheit (Details in den Konventionen).
 - Commits: `IS-<NNN>: <kurz>` je Planungsartefakt und je review-gesicherter Impl-Einheit.
 
 Vollständige Regeln: [`share/konventionen.md`](share/konventionen.md) · Gate: [`share/review-gate.md`](share/review-gate.md).
@@ -87,6 +103,7 @@ ihr eigenes Modell mitbringen. So bleibt das teure Modell dort, wo es zählt.
 | `reviewer-kritisch`   | Review riskanter Fälle | **opus** / high | `[K]`/Sicherheit/Daten, Kaltreview-Linsen, Verify — stärker als der Produzent |
 | `reviewer-architektur`| Review von Architekturplänen | **opus** / xhigh | Gleicher Effort wie `architekt`, nie schwächer als der Erzeuger |
 | `mutations-pruefer`   | Testwirksamkeit per temporärer Mutation | **opus** / xhigh | Läuft allein in eigener serieller Phase, stellt jede Datei byte-genau wieder her |
+| `rechercheur`         | Fakten erheben (Repo/Web), Kontextpaket füllen | **sonnet** / high | Typisiert und günstig statt `general-purpose` mit Hauptmodell |
 | `mechaniker`          | Abhaken + Commits | **haiku** / low | Reine Mechanik, kein Denkmodell nötig |
 
 **Reviewer-Modell — bewusst gewählt:** Der Reviewer ist nie schwächer als der erzeugende Agent,
@@ -95,19 +112,24 @@ Implementierer, aber unabhängig). `[K]`-Schritte und sicherheits-/datenkritisch
 automatisch auf `reviewer-kritisch` (**opus**/high), Architekturpläne auf `reviewer-architektur`
 (**opus**/xhigh) — so rutscht bei den riskanten Stellen nichts durch. Haiku wird **nie** für
 Reviews genutzt, nur für Mechanik. Die Prüfpunkte stehen direkt im Body der drei Reviewer-Agenten
-(spart je Spawn einen Lese-Schritt); `share/review-checkliste.md` verweist nur noch dorthin.
+(spart je Spawn einen Lese-Schritt); `share/review-checkliste.md` verweist nur noch dorthin. Jedes
+Finding trägt ein wörtliches Zitat aus dem aktuellen Stand; Einstufungsregeln (freigegebene
+Entscheidungen nicht neu verhandeln, fail-closed-Lücke höchstens mittel) bremsen Severity-Inflation.
 
 Modell und Effort pro Agent stehen im Frontmatter der Datei unter `.claude/agents/` und lassen
 sich frei anpassen (`model: opus|sonnet|haiku`, `effort: low|medium|high|xhigh`). Die Aliase
 zeigen auf die jeweils aktuelle Modellversion. Läuft die Session selbst auf **Sonnet**, ist die
 Orchestrierung günstig; `architekt` zieht bei Bedarf Opus.
 
-**Workflow-Skripte** (Review, Verify, Widerlegen, Mutation) folgen den Mustern in
+**Workflow-Skripte** (Prüftiefe M/L) folgen den Mustern in
 [`share/review-gate.md`](share/review-gate.md): jeder `agent()`-Aufruf braucht einen `agentType`
-(sonst erbt der Spawn Hauptmodell, Effort und alle Tools), Niedrig-Findings werden gebündelt
-geprüft, Stimmen laufen nacheinander mit Frühabbruch, ab Runde 5 gilt ein Linsen-Deckel. Neue oder
-geänderte Agenten greifen erst nach einem Session-Neustart. Den Verbrauch je Agent, Modell und
-Effort misst [`share/tools/verbrauch_auswerten.py`](share/tools/README.md).
+(sonst erbt der Spawn Hauptmodell, Effort und alle Tools), Findings werden vor dem Verify nur gebündelt
+und erst nach dem Urteil dedupliziert, nur Blocker der Linse werden verifiziert (gebündelt nach Datei, zweite Stimme nur bei Widerlegung oder
+Herabstufung unter hoch),
+Verify-Prompts sind kompakt mit Lese-Budget, Rückgaben enthalten nur bestätigte Findings und Zähler.
+Gemessen 09/2026 waren 85 % aller Workflow-Agenten Verify-Stimmen bei 3–10 % Widerlegungsquote.
+Neue oder geänderte Agenten greifen erst nach einem Session-Neustart. Den Verbrauch je Agent, Modell,
+Effort und Review-Serie misst [`share/tools/verbrauch_auswerten.py`](share/tools/README.md).
 
 ## Codex-Modellwahl
 
@@ -126,10 +148,11 @@ erst für neue Codex-Sitzungen und Agenten.
 
 ## Anpassen
 
-- Claude-Regeln/Kategorien: `share/konventionen.md`.
+- Claude-Regeln/Kategorien, Korrektur nach Review, Kontext-Ökonomie und Budgets: `share/konventionen.md`.
 - Reviewer-Prüfpunkte: im Body von `reviewer`, `reviewer-kritisch` und `reviewer-architektur`
   sinngemäß gleich halten (Pflegehinweis in `share/review-checkliste.md`).
-- Review-Gate und Workflow-Muster: `share/review-gate.md`.
+- Review-Gate (Prüftiefe, Abschluss ohne Bestätigungsrunde, Konvergenz-Stopp) und Workflow-Muster:
+  `share/review-gate.md`.
 - Dokumentaufbau: `share/vorlagen/*.md`.
 - Codex-Modellrouting: `codex/AGENTS.md`, `codex/agents/` und `codex/config.defaults.toml`.
 - Nach dem Ändern von Dateinamen/Struktur `install.ps1` erneut ausführen.

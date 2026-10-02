@@ -1,55 +1,171 @@
 # Review-Gate — Ablauf
 
 Von jeder Phase verwendet. Kategorien-Definitionen: Severity-Schema der Projekt-CLAUDE.md, falls
-vorhanden (hat Vorrang), sonst `konventionen.md`.
+vorhanden, sonst `konventionen.md`; weicht das Projektschema ab, bildet die Hauptsession vor Runde 1 alle hier
+verwendeten Stufen darauf ab (Blocker = „blockierend“ des Projekts, mittel, niedrig) und fragt bei unklarer
+Abbildung den Menschen; die Abbildung gehört ins Prüfpaket und in den „Stand“, Reviewer melden in den
+Stufen des Projekts. Regelt die Projekt-CLAUDE.md
+Teile des Ablaufs selbst (z. B. Rundenumfang, Kaltreview, Freigabe vor Korrekturen), gilt jeweils diese
+Teilregel; alles Übrige hier gilt weiter. Abschnitte 1–5 gelten immer; die Workflow-Muster nur bei
+Prüftiefe M/L lesen — bei einem bestrittenen Blocker in Stufe S auch Muster 1 und 3.
 
-**Eingabe:** das zu prüfende Artefakt (oder der Diff eines Impl-Schritts) + Kontext
-(Issue, ggf. Architektur/Impl-Plan).
+## 1. Prüftiefe (vor Runde 1 festlegen)
 
-1. **Review** — passenden Reviewer wählen und spawnen. Liefert Findings, je mit
-   `Kategorie | Fundstelle | Problem | Vorschlag` + „Blockierend: ja/nein“.
-   - **Standard** (Issue, Projektplan, Impl-Plan, normale Impl-Schritte) → `reviewer` (sonnet).
-   - **Kritisch** (`[K]`-Schritt, sicherheits-/datenkritischer Code) → `reviewer-kritisch` (opus, effort high).
-   - **Architekturplan** → `reviewer-architektur` (opus, effort xhigh = Effort des `architekt`).
-   - Reviewer ist immer ≥ dem erzeugenden Agenten (Modell **und** Effort). Nie schwächer reviewen als produziert wurde.
-2. **Bewerten:**
-   - ≥1 **kritisch/hoch** offen → nur diese Findings an den erzeugenden Agenten
-     (issue-autor / architekt / impl-planer / implementierer) zur **gezielten** Überarbeitung
-     zurückgeben, dann zurück zu Schritt 1. Das Artefakt **nicht** komplett neu erzeugen.
-   - Nur noch **mittel/niedrig** → Gate erfüllt.
-3. **Menschliche Freigabe** (nur Planungsartefakte): offene mittel/niedrig-Findings kurz
-   auflisten, dann um explizite Freigabe bitten. Erst nach „freigegeben“ weiter.
-4. **Impl-Schritt-Reviews:** kein Human-Gate pro Schritt. Nach erfülltem Gate abhaken + committen
-   (an `mechaniker` (haiku) delegieren).
+| Stufe | Gegenstand | Form |
+|-------|------------|------|
+| **S** | Projektplan, Issue, Impl-Plan ohne `[K]`, normale Impl-Einheit, Zusammenfassung | **ein** Reviewer-Spawn je Runde, kein Workflow, kein Verify (Ausnahme: bestrittener Blocker, Abschnitt 2) |
+| **M** | Architekturplan, Impl-Plan mit `[K]`, `[K]`-Einheit | Workflow: höchstens 2 Linsen + Verify der Blocker (Muster 2–5) |
+| **L** | Einheit mit `Prüftiefe: L` im freigegebenen Impl-Plan (Sicherheit, Datenverlust, Migration, Recovery; schließt `[K]` ein) oder auf ausdrücklichen Wunsch des Menschen | Workflow: höchstens 4 Linsen + Verify + Mutationsphase (Muster 6); ohne Code und Tests entfällt sie mit Begründung per `log()` |
 
-**Kosten:** Der Reviewer ist ein eigenständiges „zweites Augenpaar“ — Standard Sonnet, riskante
-Fälle Opus. Überarbeitungsrunden nur mit den offenen kritisch/hoch-Findings anstoßen, nicht das
-ganze Artefakt neu erzeugen.
+Reviewer nach Gegenstand, nie schwächer als der erzeugende Sub-Agent (Modell **und** Effort):
+Architekturplan oder ADR im Gegenstand → `reviewer-architektur` (opus, xhigh), auch in Stufe S; `[K]`,
+`Prüftiefe: L` oder sicherheits-/datenkritischer Inhalt → `reviewer-kritisch` (opus, high); sonst
+`reviewer` (sonnet, high). Erzeugnisse der Hauptsession (Projektplan, Zusammenfassung) prüft `reviewer`.
+Haiku reviewt nie. Eine höhere Stufe als die Tabelle nur mit Begründung im Chat bzw. per `log()` —
+allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
 
-## Workflow-Muster (Review/Verify in Workflow-Skripten)
+## 2. Runde
 
-Gilt für jedes Workflow-Skript mit Review-, Verify- oder Widerlegen-Stufen. Spart Spawns, ohne das
-Kaltreview-Prinzip (jede Runde verifiziert die Vorrunde **und** scannt vollständig neu) anzutasten.
+1. **Prüfpaket** übergeben statt Gesprächsverlauf: Gegenstand (Pfade bzw. Diff-Bereich mit Rev), Runde,
+   Bezug (Issue mit AK-IDs, ggf. Architektur/Plan-Schritte), `kontext.md`, Nachbarn, gegen die der
+   Gegenstand Annahmen trifft, freigegebene Entscheidungen (nicht neu verhandeln); ab Runde 2 die offenen
+   Findings der Vorrunde als Tabelle (ID, Datei:Zeile, ein Satz, Status) und den Fix-Diff gegen den
+   gesicherten Stand der Vorrunde. Für den Fixcheck statt Vorrunden-Tabelle und Vorrunden-Fix-Diff: die eingearbeiteten
+   Findings der Runde mit ID, das Fix-Protokoll mit Fundstellen je ID und den Fix-Diff gegen den gesicherten
+   Stand; Bezug, `kontext.md`, Nachbarn und freigegebene Entscheidungen bleiben im Paket. Keine Rohberichte.
+2. **Bewerten** (bestätigte Findings, ohne Verify die gemeldeten; Dubletten erst nach dem Urteil
+   zusammengefasst):
+   - ≥ 1 kritisch/hoch → geprüften Stand sichern (Rev bzw. Kopie; Basis für Fix-Diff und Rücknahmen), dann
+     Korrektur durch den Erzeuger: Blocker und Mittel der Runde, Niedrig nach Ermessen, als deduplizierte
+     Liste (Kategorie, Datei:Zeile, Maßnahme); Regeln: „Korrektur nach Review“ in `konventionen.md`. Dann
+     nächste Runde (Abschnitt 4). Das Artefakt **nicht** komplett neu erzeugen.
+   - nur mittel/niedrig → **Gate erfüllt** → Abschnitt 3.
+   - Ein Vorrunden-Blocker mit Status unzureichend oder Regression bleibt offen und zählt für das Gate mit;
+     maßgeblich ist die neu gemeldete Severity (in M/L nach Verify), ohne neue Meldung die bisherige.
+   - **Bestrittener Blocker:** Bestreitet der Erzeuger einen Blocker mit Beleg, prüfen ihn Stimmen nach
+     Muster 3 — auch in Stufe S, ohne Beleg und Urteil des Erzeugers; das Ergebnis bestimmt Muster 3
+     (widerlegt erst, wenn zwei Stimmen widerlegen). Einen schon per Verify bestätigten Blocker kippt nur der
+     Mensch. Ein gemeldeter Blocker-Fix (Scope, Vertrag, Entscheidung) bleibt offener Blocker, bis der Mensch
+     entschieden hat; von sich aus vertagt die Session Blocker nie.
+3. **Vollständigkeit:** Ist ein Reviewer, eine Linse oder der Fixcheck ausgefallen oder ohne gültiges
+   Ergebnis zurückgekommen, gibt es dafür kein Urteil — einmal wiederholen, sonst abbrechen und dem Menschen
+   melden. Ein fehlendes Review ist nie „keine Findings“. Ausgefallene Verify-Stimmen regelt Muster 3 (das
+   Finding hält).
+4. **Session-Wechsel mitten im Gate:** Am Ende jeder Runde und vor dem Fixcheck schreibt die Hauptsession
+   „Stand“ in `kontext.md` (bzw. die dort verwiesene projekteigene Übergabe-Ablage): Gegenstand, Prüftiefe,
+   Runde, Gate-Schritt (Review / Korrektur / Fixcheck), offene Findings (als Tabelle oder Verweis auf
+   eine Datei im Issue-Ordner bzw. an einem anderen sitzungsübergreifenden Ort, nie Scratchpad/Temp), Ablage
+   des gesicherten Stands, ggf. die Stufen-Abbildung. Eine
+   neue Session setzt dort fort, statt den Entwurf neu zu erzeugen.
 
-1. **`agentType` ist Pflicht.** Kein `agent()` ohne `agentType` — sonst erbt der Spawn Hauptmodell,
-   Effort (xhigh) und den vollen Tool-Satz (gemessen 09/2026: ~50K statt ~26K Tokens Start-Prompt).
+## 3. Abschluss nach einer Mittel/Niedrig-Runde — keine Bestätigungsrunde
+
+Die Review-Schleife endet mit der Runde, die nur noch mittel/niedrig liefert:
+1. Geprüften Stand sichern. Der Erzeuger arbeitet Mittel ein, Niedrig nach Ermessen („Korrektur nach
+   Review“ in `konventionen.md`; dort steht auch, welche Fixes nicht hierher gehören — sie werden gemeldet,
+   standardmäßig vertagt und nur mit regulärer Runde umgesetzt).
+2. **Fixcheck statt Runde:** **ein** Spawn des Reviewer-Typs der Runde prüft nur den Fix-Diff gegen den
+   gesicherten Stand — neue Fehler, falsche Sachaussagen, Widersprüche zu freigegebenen Entscheidungen oder
+   Nachbarstellen — und ordnet jeden Befund dem verursachenden Fix (Finding-ID) zu oder kennzeichnet ihn als
+   „außerhalb der Fixes“. Kein Re-Scan, keine Linsen, kein Verify.
+   Ein Befund, den ein Fix verursacht hat, gilt als Befund an diesem Fix, auch wenn er an einer Nachbarstelle
+   liegt.
+   - Befund ab mittel an einem Fix → der Erzeuger nimmt alle Hunks dieses Fixes (laut Fix-Protokoll)
+     gemeinsam zurück, sodass der Bereich wieder dem gesicherten Stand entspricht; teilt ein Hunk mehrere
+     Fixes, gehen diese mit zurück. Die betroffenen Findings werden vertagt; keine weitere Runde.
+     Niedrig → nur ins Fix-Protokoll.
+   - Befund außerhalb der Fixes: ab hoch → Gate nicht erfüllt, der Mensch entscheidet (reguläre Runde,
+     vertagen oder bewusst akzeptieren); darunter → nach `kontext.md` › Vertagt.
+3. Bei Code laufen nach Fixes und Rücknahmen die betroffenen Tests und die Gate-Kette erneut grün.
+4. Das Fix-Protokoll (umgesetzt / abgelehnt mit Grund / gemeldet / zurückgenommen) geht in die
+   Freigabe-Anfrage. Vertagtes steht in `kontext.md` › Vertagt (eine Zeile je Finding mit Ziel) und geht
+   beim Abschluss in die Zusammenfassung.
+
+Jeder Blocker-Fix wird damit weiter von einer regulären Runde geprüft; nur Mittel/Niedrig-Fixes laufen über
+den Fixcheck.
+
+## 4. Folgerunden und Konvergenz
+
+- **Umfang:** Runde 1 und 2 sind volle Kaltreviews: Vorrunden-Findings verifizieren (erledigt /
+  unzureichend / Regression), dann vollständiger Re-Scan des Gegenstands samt Nachbarn, zitierte Fakten
+  gegen Code bzw. Quelle. Ab Runde 3 **Delta:** Vorrunden-Blocker und der Fix-Diff samt Nahtstellen (gleiche
+  Regel an anderen Stellen, Aufrufer, Verweise). Kamen seit der Vorrunde neuer Scope, neue
+  Akzeptanzkriterien, Verträge oder normative Klauseln oder Entscheidungen des Menschen hinzu, prüft die
+  Runde diese Teile voll wie in Runde 1, samt Nahtstellen zum Rest.
+- **Konvergenz-Stopp:** Bestätigt Runde 3 oder eine spätere Runde noch Blocker, nicht weiter feilen. Dem
+  Menschen einen Konvergenzbericht vorlegen (je Runde erhoben / bestätigt / widerlegt, Anteil Regressionen
+  eigener Fixes, wiederkehrende Themen) mit Optionen: Grundsatzentscheidung statt Wortlaut-Feilen, Variante
+  streichen, Scope schneiden bzw. Issue teilen, bewusst weitere Runden (mit Anzahl). Weiter erst nach seiner
+  Entscheidung; nach den gewählten Runden gilt der Stopp erneut.
+- **Findings-Flut:** Mehr als 10 Blocker oder mehr als 40 Findings in einer Runde (Dubletten grob
+  zusammengefasst) heißen: Gegenstand zu groß oder unreif. Nicht einzeln verifizieren und abarbeiten,
+  sondern dem Menschen melden und schneiden bzw. grundsätzlich überarbeiten.
+
+## 5. Freigabe
+
+- **Planungsartefakte:** Prüftiefe, Runden, Ergebnis der letzten Runde, Fixcheck und Fix-Protokoll kurz
+  nennen (offene Mittel/Niedrig und Vertagtes auflisten), dann um explizite Freigabe bitten — bei stehender
+  Freigabe (`konventionen.md`) direkt freigeben. Erst danach weiter.
+- **Impl-Einheiten:** kein Human-Gate pro Einheit. Nach erfülltem Gate und abgeschlossenem Abschnitt 3
+  (Fixcheck, Rücknahmen, Tests grün) abhaken + committen (an `mechaniker` (haiku) delegieren).
+
+## Workflow-Muster (Prüftiefe M/L)
+
+Gilt für jedes Workflow-Skript mit Review-, Verify-, Fixcheck- oder Widerlegen-Stufen. Workflow-Namen:
+`<gegenstand>-r<N>` (N = Runde), ein eigener Fixcheck-Workflow `<gegenstand>-r<N>-fixcheck` — die
+Verbrauchsauswertung gruppiert danach.
+
+1. **`agentType` ist Pflicht** — im Workflow `agentType`, im Agent-Tool `subagent_type`. Ohne erbt der
+   Spawn Hauptmodell, Effort (xhigh) und den vollen Tool-Satz (gemessen 09/2026: ~50K statt ~26K Tokens
+   Start-Prompt); `general-purpose` nie für SDLC-Arbeit.
 
    | Rolle | `agentType` |
    |---|---|
-   | Breiter Review, Kaltreview-Linse, Verify/Widerlegen einzelner Findings (auch Niedrig-Bündel) | `reviewer-kritisch`; Nicht-[K]-Artefakte von Sonnet-Erzeugern auch `reviewer` |
-   | **Gegenstand Architekturplan** — alle Linsen und Verify-Stimmen (Vorrang vor der Zeile darüber) | `reviewer-architektur` |
+   | Linse, Fixcheck, Verify-Stimme (auch Bündel) | `reviewer-kritisch`; Nicht-[K]-Artefakte von Sonnet-Erzeugern auch `reviewer` |
+   | **Gegenstand Architekturplan** — alle Linsen, Stimmen und der Fixcheck (Vorrang vor der Zeile darüber) | `reviewer-architektur` |
    | Mutation (Testwirksamkeit) — immer allein in eigener serieller Phase, nie parallel zu lesenden Linsen | `mutations-pruefer` |
    | Überarbeiten, Fixen | der erzeugende Agent (`issue-autor`, `architekt`, `impl-planer`, `implementierer`) |
-   | Erheben, Recherche in Repo **oder Web** (WebFetch/WebSearch) | `Explore` mit explizitem `effort` (z. B. `'high'`); Fragen zu Claude Code: `claude-code-guide` |
+   | Erheben, Recherche in Repo **oder Web** | `rechercheur`; reine Dateisuche auch `Explore` mit explizitem `effort`; Fragen zu Claude Code: `claude-code-guide` |
    | Abhaken, Committen | `mechaniker` |
 
    Enthält der Gegenstand `architecture.md` oder ein ADR, laufen alle Linsen und Stimmen dazu über
-   `reviewer-architektur`, auch bei gemischtem Gegenstand. `Explore` hat alle Tools außer Edit/Write/Agent (laut Agent-Liste), also auch WebFetch/WebSearch.
-   Passt keine Rolle: `model` **und** `effort` explizit setzen und per `log()` begründen. Skripte leiten
-   „Blockierend" aus den Severities ab. Neue oder geänderte Agenten wirken erst nach einem Session-Neustart;
-   ist ein `agentType` unbekannt, bricht das Skript ab statt auf einen anderen Typ auszuweichen.
-
-   **Mutationsphase:** Die Hauptsession gibt ein frisches, leeres Sicherungsverzeichnis und den Arbeitsbaum
+   `reviewer-architektur`, auch bei gemischtem Gegenstand. Passt keine Rolle: `model` **und** `effort`
+   explizit setzen und per `log()` begründen. Skripte leiten „Blockierend“ aus den Severities ab. Neue oder
+   geänderte Agenten wirken erst nach einem Session-Neustart; ist ein `agentType` unbekannt, bricht das
+   Skript ab statt auf einen anderen Typ auszuweichen.
+2. **Linsen schlank.** Jede Linse mit eigener Leitfrage; ab Runde 2 ist eine davon die Vorrunden-Linse.
+   Vorrunden-Infos als kompakte Tabelle (ID, Datei:Zeile, ein Satz, Status), keine Berichtsdateien. Große
+   Gegenstände nach Dateien auf die Linsen verteilen, statt jede Linse alles lesen zu lassen; Normdokumente
+   nur abschnittsweise. Fokussiert arbeiten (Richtwert ≤ 30 Turns je Linse). Vor dem Verify nichts
+   zusammenführen: Findings derselben Datei und Nachbarschaft (±100 Zeilen bzw. gleicher Abschnitt) landen
+   im selben Bündel, die Stimme urteilt je Finding und kennzeichnet Dubletten. Erst nach dem Urteil fasst der
+   Koordinator Dubletten (gleiche Stelle, gleiche Maßnahme) für die Übergabe an den Erzeuger zusammen.
+3. **Verify nur für Blocker der Linse.** Nur Findings, die eine Linse als kritisch/hoch einstuft, werden
+   adversarial verifiziert. Mittel/Niedrig gehen ohne Verify an den Erzeuger; er prüft beim Einarbeiten jede
+   Stelle und lehnt Unzutreffendes mit Beleg ab.
+   - **Erste Stimme gebündelt:** höchstens 5 Findings je Spawn, deterministisch nach Datei bzw. Abschnitt
+     (±100 Zeilen) gruppiert; mehr als 5 in einer Nachbarschaft nach Zeilennummer in Fünferblöcke teilen,
+     Dubletten über Bündelgrenzen prüft der Koordinator nach dem Urteil. Eine **zweite Stimme** (einzeln) nur, wenn die erste widerlegt oder unter hoch
+     herabstuft. Jede Stimme erhält nur Finding und Gegenstand, **keine** Urteile vorheriger Stimmen und
+     nicht die Linsen-Severity.
+   - **Keine Hochstufung:** Verifizierer bestätigen, stufen herab oder widerlegen. Liegt die Severity einer
+     Stimme über der Linsen-Severity, übernimmt das Skript sie nicht, sondern meldet sie samt Begründung als
+     Hinweis an den Koordinator (gemessen 09/2026: von 331 nachgeprüften Hochstufungen hielt eine).
+   - **Ergebnis je Finding:** hält, solange nicht alle Stimmen widerlegen; Severity = Maximum der haltenden
+     Stimmen, höchstens die Linsen-Severity. Eine ausgefallene oder ungültige Stimme zählt **nie** als
+     Widerlegung: einmal wiederholen, sonst hält das Finding mit der Linsen-Severity. Fehlende, doppelte oder
+     widersprüchliche IDs im Bündel gelten als ausgefallene Stimme für genau diese Findings.
+4. **Verify-Prompt kompakt.** Eigener Kontextblock (Richtwert ≤ 1,5 KB) statt des Linsen-Kontexts: Repo/Rev,
+   zitierte Dateien und Zeilen, nur die für das Finding relevanten Entscheidungen als Einzeiler, das Schema.
+   Keine Liste aller Prüfgegenstände, keine Anweisungen zur Volllektüre, keine weitergereichte
+   Nutzeranfrage. Lese-Budget: zuerst die Fundstelle ±30 Zeilen, dann höchstens 5 weitere gezielte Aufrufe;
+   Volllektüre nur mit Begründung. Schema je Finding: `{id, haelt, severity, beleg (Datei:Zeile),
+   begruendung (≤ 3 Sätze), dublette_von?}`, im Bündel als Liste `urteile`.
+5. **Rückgabe kompakt.** Das Skript gibt nur bestätigte Findings (ID, Severity, Datei:Zeile, Titel
+   ≤ 120 Zeichen, Maßnahme ≤ 2 Sätze) und Zähler je Severity (erhoben / bestätigt / widerlegt) zurück —
+   keine Rohstimmen, keine Linsentexte.
+6. **Mutationsphase** (nur Stufe L bzw. auf Wunsch; läuft zusätzlich zu den Linsen): Die Hauptsession gibt
+   ein frisches, leeres Sicherungsverzeichnis und den Arbeitsbaum
    vor — committeter Gegenstand in eigenem Worktree außerhalb des Repos an kurzem Pfad; sonst vorher
    Parallel-Check auf **jede** aktive Session im selben Arbeitsbaum (mtimes aller Dateien aus `git status`,
    jüngster Commit), bei Aktivität oder im Zweifel erst nach ausdrücklicher Bestätigung des Menschen — und
@@ -78,26 +194,3 @@ Kaltreview-Prinzip (jede Runde verifiziert die Vorrunde **und** scannt vollstän
    die Baseline identisch ist oder jede Abweichung entschieden wurde: den eigens angelegten Worktree per
    `git worktree remove <pfad>` ohne `--force` (im Haupt-Tree-Modus entfällt das), das Sicherungsverzeichnis
    nur über den protokollierten, nicht leeren Pfad außerhalb des Repos; zuletzt die Offen-Markierung entfernen.
-2. **Nur Niedrig-Findings gebündelt prüfen.** Kritisch-, Hoch- und Mittel-Findings werden einzeln
-   adversarial verifiziert. Niedrig-Findings gehen gebündelt an einen Verifizierer: höchstens 8 je Spawn,
-   deterministisch im Skript (kein Agent) gruppiert nach Datei und 10-Zeilen-Fenster (Evidence ohne
-   Zeilennummer: nach Datei bzw. Dokument). Schema je Finding: hält/widerlegt + eigene Severity. Die
-   Finder-Severity dient nur dem Filtern im Skript und wird nicht mitgegeben. Stuft der Bündel-Verifizierer
-   ein Finding auf ≥ Mittel hoch, läuft es danach einzeln durch die adversariale Verifikation (Muster 3).
-   Nichts verwerfen; keine Vorrunden-Ergebnisse als Status mitgeben (Kaltreview).
-3. **Stimmen nacheinander, Abbruch sobald das Ergebnis feststeht.** Mehrere Stimmen zu **einem** Finding
-   laufen sequenziell (verschiedene Findings weiter parallel). Jede Stimme erhält nur Finding und
-   Gegenstand, **keine** Urteile vorheriger Stimmen. Severity = Maximum der haltenden Stimmen. Abbrechen,
-   sobald weitere Stimmen das Gate-Ergebnis nicht mehr ändern können — bei „hält, solange nicht alle
-   Stimmen widerlegen" also, sobald eine Stimme das Finding **als kritisch/hoch** hält (Severity dann als
-   „≥ hoch, Frühabbruch" ausweisen); hält eine Stimme nur mit Herabstufung, wird weiter abgefragt. Andere
-   Aggregationen (Mehrheit, Median) brauchen eine eigene, ebenso fail-closed formulierte Abbruchbedingung.
-   Eine ausgefallene oder ungültige Stimme (auch im Bündel, Muster 2) zählt **nie** als Widerlegung:
-   einmal wiederholen, sonst hält das Finding mit der Severity des Finders.
-4. **Linsen-Deckel erst ab Runde 5.** Ab der 5. Review-Runde derselben Prüfeinheit höchstens zwei Linsen:
-   (A) Vorrunden-Findings verifizieren und Fixes auf Regressionen prüfen, (B) vollständiger Re-Scan aller
-   Dateien und Nachbar-Bauteile mit den Leitfragen aller bisherigen Linsen als Checkliste, einschließlich
-   Gegenprüfung zitierter Fakten gegen Code bzw. Quelle. Den vollen Linsensatz fährt die nächste Runde
-   wieder, wenn eine Runde ≥ 1 kritisch oder ≥ 2 hoch bestätigt **oder** seit der Vorrunde neue
-   Akzeptanzkriterien, Dateien oder normative Klauseln hinzukamen. Eine Mutationsphase läuft zusätzlich zu
-   A/B und zählt nicht zum Deckel.

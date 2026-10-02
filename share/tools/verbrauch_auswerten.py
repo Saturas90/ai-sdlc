@@ -77,6 +77,39 @@ def requests_lesen(pfad, seit, bis):
     return list(reqs.values())
 
 
+# Rundensuffixe wie "-r3", "-runde-5", "-round2", "-v2" (Namensschema laut review-gate.md: <gegenstand>-r<N>);
+# der Rest benennt die Serie (den Prüfgegenstand). Heuristik: frei benannte Workflows bilden eigene Serien.
+RUNDENSUFFIX = re.compile(r"[-_](?:r|runde-?|round-?)\d+[a-z]?(?=$|[-_])|[-_]v\d+$", re.I)
+VERIFY_STUFE = re.compile(r"verif|widerleg|gegenpr|einzeln|b(?:u|ü|ue)ndel|bundle|\bstimme|\bvote", re.I)
+
+
+def workflow_serien(wurzel, seit, bis):
+    """Workflow-Läufe (wf_*.json) je Serie: Läufe, Agenten, davon Verify-Agenten, Tokens."""
+    serien = defaultdict(lambda: {"laeufe": 0, "agenten": 0, "verify": 0, "tokens": 0})
+    for p in wurzel.glob("*/workflows/wf_*.json"):
+        try:
+            d = json.loads(p.read_text(encoding="utf-8", errors="replace"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(d, dict):
+            continue
+        ts = d.get("timestamp")
+        ts = ts if isinstance(ts, str) else ""
+        if (seit and ts < seit) or (bis and ts >= bis):
+            continue
+        s = serien[RUNDENSUFFIX.sub("", str(d.get("workflowName") or "?").lower())]
+        s["laeufe"] += 1
+        tok = d.get("totalTokens")
+        s["tokens"] += tok if isinstance(tok, (int, float)) else 0
+        for e in d.get("workflowProgress") or []:
+            if not isinstance(e, dict) or e.get("type") != "workflow_agent":
+                continue
+            s["agenten"] += 1
+            if VERIFY_STUFE.search(str(e.get("phaseTitle") or "")) or VERIFY_STUFE.search(str(e.get("label") or "")):
+                s["verify"] += 1
+    return serien
+
+
 def einordnen(pfad, wurzel):
     teile = pfad.relative_to(wurzel).parts
     if len(teile) == 1:
@@ -174,6 +207,16 @@ def main():
         sel = [(x, c) for x, c in haupt_kontext if lo <= x < hi]
         cs = sum(c for _, c in sel)
         print(f"  {int(lo/1e3):>4}-{int(hi/1e3):>4}K: {len(sel):5} Req  ${cs:8.0f}  ({100*cs/tk:4.1f}%)")
+
+    serien = workflow_serien(wurzel, a.seit, a.bis)
+    if serien:
+        ag = sum(s["agenten"] for s in serien.values())
+        vf = sum(s["verify"] for s in serien.values())
+        print(f"\nWorkflow-Serien (Name ohne Rundensuffix; Läufe ≈ Runden): {len(serien)} Serien, "
+              f"{sum(s['laeufe'] for s in serien.values())} Läufe, {ag} Agenten, davon Verify {vf} ({100*vf/max(ag, 1):.0f} %)")
+        for name, s in sorted(serien.items(), key=lambda kv: -kv[1]["tokens"])[:15]:
+            print(f"  {s['tokens']/1e6:6.1f} MTok {s['laeufe']:3}x {s['agenten']:5} Agenten "
+                  f"({100*s['verify']/max(s['agenten'], 1):3.0f} % Verify)  {name}")
 
 
 if __name__ == "__main__":

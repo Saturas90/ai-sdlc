@@ -1,6 +1,7 @@
 # Installiert Claude-Code- und Codex-Workflow-Dateien aus diesem Repository.
 # Standard: Symlinks, bei fehlenden Rechten Kopien. -Copy erzwingt Kopien.
 # -ClaudeHome und -CodexHome erlauben eine isolierte Probeinstallation.
+#Requires -Version 7
 [CmdletBinding()]
 param(
     [switch]$Copy,
@@ -12,7 +13,9 @@ $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $MyInvocation.MyCommand.Path
 $claudeRoot = [IO.Path]::GetFullPath($ClaudeHome)
 $codexRoot = [IO.Path]::GetFullPath($CodexHome)
-$codexBackupRoot = Join-Path $codexRoot ('ai-sdlc-backups\' + [guid]::NewGuid().ToString('N'))
+$backupId = [guid]::NewGuid().ToString('N')
+$claudeBackupRoot = Join-Path $claudeRoot ('ai-sdlc-backups\' + $backupId)
+$codexBackupRoot = Join-Path $codexRoot ('ai-sdlc-backups\' + $backupId)
 
 function Assert-TargetWithinRoot {
     param([string]$Path, [string]$Root)
@@ -51,6 +54,25 @@ function Install-Item {
     if ($IsDir) { Copy-Item -LiteralPath $Source -Destination $Target -Recurse -Force }
     else { Copy-Item -LiteralPath $Source -Destination $Target -Force }
     Write-Host "  copy  $Target"
+}
+
+function Backup-ClaudeExtras {
+    # Sichert Dateien, die nur im installierten Verzeichnis liegen (z. B. eigene Baselines),
+    # bevor Install-Item es ersetzt. Symlinks zeigen ins Repo und verlieren nichts.
+    param([string]$Source, [string]$Target)
+    Assert-TargetWithinRoot $Target $claudeRoot
+    $item = Get-Item -LiteralPath $Target -Force -ErrorAction SilentlyContinue
+    if ($null -eq $item -or -not $item.PSIsContainer -or
+        ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { return }
+    foreach ($file in Get-ChildItem -LiteralPath $Target -Recurse -File -Force) {
+        $relative = [IO.Path]::GetRelativePath($Target, $file.FullName)
+        if ($relative -match '(^|[\\/])__pycache__[\\/]') { continue }
+        if (Test-Path -LiteralPath (Join-Path $Source $relative)) { continue }
+        $backup = Join-Path $claudeBackupRoot ([IO.Path]::GetRelativePath($claudeRoot, $file.FullName))
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $backup) | Out-Null
+        Copy-Item -LiteralPath $file.FullName -Destination $backup -Force
+        Write-Host "  backup  $backup"
+    }
 }
 
 function Backup-CodexFile {
@@ -150,13 +172,16 @@ New-Item -ItemType Directory -Force -Path (Join-Path $claudeRoot 'skills'), (Joi
 
 Write-Host "Claude-Skills ->  $claudeRoot\skills"
 foreach ($directory in Get-ChildItem -LiteralPath (Join-Path $repo '.claude\skills') -Directory) {
-    Install-Item $directory.FullName (Join-Path $claudeRoot "skills\$($directory.Name)") $true $claudeRoot
+    $skillTarget = Join-Path $claudeRoot "skills\$($directory.Name)"
+    Backup-ClaudeExtras $directory.FullName $skillTarget
+    Install-Item $directory.FullName $skillTarget $true $claudeRoot
 }
 Write-Host "Claude-Agenten ->  $claudeRoot\agents"
 foreach ($file in Get-ChildItem -LiteralPath (Join-Path $repo '.claude\agents') -File) {
     Install-Item $file.FullName (Join-Path $claudeRoot "agents\$($file.Name)") $false $claudeRoot
 }
 Write-Host "Claude-Wissensbasis ->  $claudeRoot\ai-sdlc"
+Backup-ClaudeExtras (Join-Path $repo 'share') (Join-Path $claudeRoot 'ai-sdlc')
 Install-Item (Join-Path $repo 'share') (Join-Path $claudeRoot 'ai-sdlc') $true $claudeRoot
 
 Write-Host "Codex-Regeln ->  $codexRoot"

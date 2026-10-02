@@ -30,6 +30,13 @@ trust_level = "trusted"
     [IO.File]::WriteAllText((Join-Path $codexTarget 'config.toml'), ($existingConfig -replace '\r?\n', "`r`n"))
     [IO.File]::WriteAllText((Join-Path $codexTarget 'AGENTS.md'), 'vorherige Nutzerregel')
     [IO.File]::WriteAllText((Join-Path $reviewTarget 'notes.txt'), 'behalten')
+    $claudeToolsTarget = Join-Path $claudeTarget 'ai-sdlc\tools'
+    New-Item -ItemType Directory -Force -Path (Join-Path $claudeToolsTarget '__pycache__') | Out-Null
+    [IO.File]::WriteAllText((Join-Path $claudeToolsTarget 'baseline-eigene.txt'), 'eigene Baseline')
+    [IO.File]::WriteAllText((Join-Path $claudeToolsTarget '__pycache__\cache.pyc'), 'cache')
+    $claudeSkillTarget = Join-Path $claudeTarget 'skills\review'
+    New-Item -ItemType Directory -Force -Path $claudeSkillTarget | Out-Null
+    [IO.File]::WriteAllText((Join-Path $claudeSkillTarget 'eigene-notiz.md'), 'eigene Notiz')
 
     & (Join-Path $repo 'install.ps1') -Copy -ClaudeHome $claudeTarget -CodexHome $codexTarget *> (Join-Path $testPath 'first.log')
     $config = Get-Content -LiteralPath (Join-Path $codexTarget 'config.toml') -Raw
@@ -42,6 +49,8 @@ trust_level = "trusted"
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\reviewer.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\reviewer-architektur.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\mutations-pruefer.md')) -or
+        -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\rechercheur.md')) -or
+        -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\vorlagen\kontext.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\konventionen.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\tools\verbrauch_auswerten.py')) -or
         -not (Test-Path -LiteralPath (Join-Path $codexTarget 'agents\architekt_kritisch.toml')) -or
@@ -53,10 +62,23 @@ trust_level = "trusted"
         -not ($backupFiles.Name -contains 'config.toml')) {
         throw 'Sicherung vorhandener Codex-Dateien fehlt'
     }
+    $claudeBackups = @(Get-ChildItem -LiteralPath (Join-Path $claudeTarget 'ai-sdlc-backups') -Recurse -File -ErrorAction SilentlyContinue)
+    $backupPaths = @($claudeBackups.FullName)
+    if (-not ($backupPaths -like '*\ai-sdlc-backups\*\ai-sdlc\tools\baseline-eigene.txt') -or
+        -not ($backupPaths -like '*\ai-sdlc-backups\*\skills\review\eigene-notiz.md') -or
+        ($claudeBackups.Name -contains 'cache.pyc') -or
+        (Test-Path -LiteralPath (Join-Path $claudeToolsTarget 'baseline-eigene.txt')) -or
+        (Test-Path -LiteralPath (Join-Path $claudeToolsTarget '__pycache__\cache.pyc')) -or
+        (Test-Path -LiteralPath (Join-Path $claudeSkillTarget 'eigene-notiz.md'))) {
+        throw 'Eigene Dateien im Claude-Installationsverzeichnis wurden nicht korrekt gesichert'
+    }
 
     & (Join-Path $repo 'install.ps1') -Copy -ClaudeHome $claudeTarget -CodexHome $codexTarget *> (Join-Path $testPath 'second.log')
     $after = @(Get-ChildItem -LiteralPath (Join-Path $codexTarget 'ai-sdlc-backups') -Recurse -File)
-    if ($backupFiles.Count -ne $after.Count) { throw 'Zweite Installation ist nicht idempotent' }
+    $claudeAfter = @(Get-ChildItem -LiteralPath (Join-Path $claudeTarget 'ai-sdlc-backups') -Recurse -File)
+    if ($backupFiles.Count -ne $after.Count -or $claudeBackups.Count -ne $claudeAfter.Count) {
+        throw 'Zweite Installation ist nicht idempotent'
+    }
     Write-Output 'Installations-Smoke-Test: OK'
 } finally {
     if (Test-Path -LiteralPath $testPath) {

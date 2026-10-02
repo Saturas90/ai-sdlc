@@ -9,7 +9,7 @@ Mit Terra/medium direkt routen, ohne parallele Rechercheagenten. Nur die gewähl
 
 1. Repository-Root bestimmen und `CLAUDE.md` als einzige normative Quelle für Phasen, Pfade, Statusmarker und Freigaben verwenden. Fehlt sie, anhalten; keine Marker oder Namensschemata aus `~/.claude` annehmen.
 2. Nur die Workflow- und Navigationsabschnitte aus `CLAUDE.md` sowie die minimale Steuerinformation des dort benannten Projektplans lesen. Große Dokumente nicht vollständig laden.
-3. Das aktive Issue und seinen Stand ausschließlich anhand der normativen Statusquelle, der erwarteten Artefakte, exakten Freigabemarker, offenen Fragen, Plan-Checkboxen und des Abschlussartefakts bestimmen.
+3. Das aktive Issue und seinen Stand ausschließlich anhand der normativen Statusquelle, der erwarteten Artefakte, exakten Freigabemarker, offenen Fragen, Plan-Checkboxen und des Abschlussartefakts bestimmen. Aus `kontext.md` des Issues höchstens den Abschnitt „Stand“ lesen bzw. die dort verwiesene projekteigene Übergabe; ein laufendes Gate dort fortsetzen; widerspricht der Stand den Markern, nachfragen.
 4. Genau eine nächste Aktion wählen:
    - fehlender oder zu aktualisierender Projektplan → `$projektplan`
    - fehlendes oder ungeklärtes Issue → `$issue`

@@ -26,12 +26,17 @@ Projektplan-Status-Spalte (Marker: `konventionen.md` → „Status- & Freigabe-M
 
 Hinweis: „offene `- [ ]`“ ist je nach Abschnitt zu unterscheiden — Akzeptanzkriterien und Impl-Schritte sind eigene Checkbox-Listen; für das Fragen-Gate zählt nur der Abschnitt „Offene Fragen“.
 
+Hat das aktive Issue eine `kontext.md`, nur deren Abschnitt „Stand“ lesen bzw. die dort verwiesene
+projekteigene Übergabe (nächster Schritt, offene Entscheidungen, ggf. laufendes Gate mit Runde). Ein laufendes Gate setzt die Phase dort fort, statt den
+Entwurf neu zu erzeugen. Widerspricht der Stand Markern, Häkchen oder git: nicht raten, sondern nachfragen.
+
 ## Regeln
 
-- An jedem menschlichen Freigabe-Gate **anhalten** und nachfragen; nicht eigenmächtig über Gates hinweg arbeiten.
+- An jedem menschlichen Freigabe-Gate **anhalten** und nachfragen; nicht eigenmächtig über Gates hinweg arbeiten (stehende Freigabe: `konventionen.md`).
 - Immer nur **einen** Schritt anstoßen, nicht mehrere Phasen auf einmal.
+- Eine Session je Phase bzw. Impl-Einheit: Ist die laufende Session schon groß, nach dem nächsten Gate eine neue vorschlagen, statt weiterzuarbeiten.
 - Konventionen: `~/.claude/ai-sdlc/konventionen.md` (nur bei Bedarf lesen).
 
 ## Modell-Hinweis (Kosten)
 
-Orchestrierung und Status-Erkennung sind leichtgewichtig → Session ruhig auf **Sonnet** laufen lassen. Teure Modelle nur dort, wo die Phase sie vorgibt (Architektur = Opus). Die Phasen delegieren die eigentliche Arbeit an spezialisierte Sub-Agenten mit passendem Modell.
+Orchestrierung und Status-Erkennung sind leichtgewichtig → Session ruhig auf **Sonnet** laufen lassen. Teure Modelle nur dort, wo die Phase sie vorgibt (Architektur = Opus). Die Phasen delegieren die eigentliche Arbeit an spezialisierte Sub-Agenten mit passendem Modell; Erhebungen an `rechercheur`, nie an `general-purpose`.
