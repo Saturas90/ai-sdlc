@@ -35,11 +35,10 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
    Stand; Bezug, `kontext.md`, Nachbarn und freigegebene Entscheidungen bleiben im Paket. Keine Rohberichte.
 2. **Bewerten** (bestätigte Findings, ohne Verify die gemeldeten; Dubletten erst nach dem Urteil
    zusammengefasst):
-   - ≥ 1 kritisch/hoch → geprüften Stand sichern (Rev plus Kopie aller uncommitteten Dateien; Basis für Fix-Diff und
-     Rücknahmen, nie HEAD), dann
-     Korrektur durch den Erzeuger: Blocker und Mittel der Runde, Niedrig nach Ermessen, als deduplizierte
-     Liste (Kategorie, Datei:Zeile, Maßnahme); Regeln: „Korrektur nach Review“ in `konventionen.md`. Dann
-     nächste Runde (Abschnitt 4). Das Artefakt **nicht** komplett neu erzeugen.
+   - ≥ 1 kritisch/hoch → geprüften Stand sichern (Punkt 5), dann Korrektur durch den Erzeuger: Blocker und
+     Mittel der Runde, Niedrig nach Ermessen, als deduplizierte Liste (Kategorie, Datei:Zeile, Maßnahme);
+     Regeln: „Korrektur nach Review“ in `konventionen.md`. Dann nächste Runde (Abschnitt 4). Das Artefakt
+     **nicht** komplett neu erzeugen.
    - nur mittel/niedrig → **Gate erfüllt** → Abschnitt 3.
    - Ein Vorrunden-Blocker mit Status unzureichend oder Regression bleibt offen und zählt für das Gate mit;
      maßgeblich ist die neu gemeldete Severity des verbleibenden Mangels (in M/L nach Verify), ohne neue Meldung
@@ -57,25 +56,36 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
    Finding hält).
 4. **Session-Wechsel mitten im Gate:** Am Ende jeder Runde und vor dem Fixcheck schreibt die Hauptsession
    „Stand“ in `kontext.md` (bzw. die dort verwiesene projekteigene Übergabe-Ablage): Gegenstand, Prüftiefe,
-   Runde, Gate-Schritt (Review / Korrektur / Fixcheck), offene Findings (als Tabelle oder Verweis auf
-   eine Datei im Issue-Ordner bzw. an einem anderen sitzungsübergreifenden Ort, nie Scratchpad/Temp), Ablage
-   des gesicherten Stands, ggf. die Stufen-Abbildung. Eine
-   neue Session setzt dort fort, statt den Entwurf neu zu erzeugen.
+   Runde, Gate-Schritt (Review / Korrektur / Fixcheck), offene Findings (als Tabelle oder Verweis auf eine
+   Datei in der Gate-Ablage), Unterordner der jüngsten Sicherung, ggf. die Stufen-Abbildung. Eine neue Session
+   setzt dort fort, statt den Entwurf neu zu erzeugen.
+5. **Gate-Ablage und Sicherung:** Sicherungen, Findings-Tabellen und Fix-Protokoll liegen in einem
+   gitignorierten Projektordner, Standard `.gate-logs/<issue>/` (ohne Issue `<gegenstand>`); eine Projektregel
+   hat Vorrang. Nie Scratchpad, Temp oder Issue-Ordner (das Sicherungsverzeichnis der Mutationsphase regelt
+   Muster 6). Fehlt der Ignore-Eintrag, ihn in der Datei aus `git rev-parse --git-path info/exclude` ergänzen;
+   erfasst ein Test-, Lint- oder Build-Werkzeug die Ablage dennoch, dem Menschen melden, statt die
+   Projektkonfiguration zu ändern. Jede Sicherung kommt in einen neuen Unterordner `<gegenstand>-r<N>/` (bei
+   Wiederholung mit Suffix, nie überschreiben): Kopie aller uncommitteten Dateien und `manifest-vor.txt`
+   (HEAD-Rev; je Datei aus `git status --porcelain -uall` Pfad, Status, mtime und Inhalts-Hash per
+   `git hash-object`, bei gelöschten Dateien `-`). Basis für Fix-Diff und Rücknahmen ist die jüngste Sicherung
+   des Gegenstands, nie HEAD.
 
 ## 3. Abschluss nach einer Mittel/Niedrig-Runde — keine Bestätigungsrunde
 
 Die Review-Schleife endet mit der Runde, die nur noch mittel/niedrig liefert:
-1. Geprüften Stand sichern (wie in Abschnitt 2) und Parallel-Check (mtimes der Dateien aus `git status`,
-   jüngster Commit); arbeitet eine andere Session im selben Arbeitsbaum, vor dem Fix-Durchgang dem Menschen
-   melden. Der Erzeuger arbeitet Mittel ein, Niedrig nach Ermessen („Korrektur nach
+1. Geprüften Stand sichern (Abschnitt 2, Punkt 5); `manifest-vor.txt` ist der Parallel-Check vor dem
+   Fix-Durchgang: Zeigt es außerhalb der Ablage-Dateien (Punkt 2 dieses Abschnitts) eine Änderung nach Beginn
+   der Runde oder einen neuen Commit, arbeitet eine andere Session im selben Arbeitsbaum — vor dem
+   Fix-Durchgang dem Menschen melden. Der Erzeuger arbeitet Mittel ein, Niedrig nach Ermessen („Korrektur nach
    Review“ in `konventionen.md`; dort steht auch, welche Fixes nicht hierher gehören — sie werden gemeldet,
-   standardmäßig vertagt und nur mit regulärer Runde umgesetzt).
-2. **Fixcheck statt Runde:** **ein** Spawn des Reviewer-Typs der Runde prüft nur den Fix-Diff — alle Änderungen
-   dieses Fix-Durchgangs gegen den gesicherten Stand, auch außerhalb des Gegenstands (Nahtstellen); nicht dazu
-   gehören Ablage-Dateien des Workflows (`kontext.md`, Fix-Protokoll, Übergaben) und Änderungen anderer
-   Sessions. Änderungen unklarer Herkunft werden nie zurückgenommen, sondern dem Menschen gemeldet. Er sucht neue Fehler, falsche Sachaussagen und Widersprüche zu
-   freigegebenen Entscheidungen oder Nachbarstellen. Kein Re-Scan, keine Linsen, kein Verify. Er gibt
-   Befunde und eine Zuordnungsliste zurück:
+   standardmäßig vertagt und nur mit regulärer Runde umgesetzt). Bei seiner Rückgabe legt die Hauptsession
+   `manifest-nach.txt` gleichen Formats in dieselbe Sicherung (Parallel-Check nach dem Fix-Durchgang).
+2. **Fixcheck statt Runde:** **ein** Spawn des Reviewer-Typs der Runde prüft nur den Fix-Diff — alle
+   Änderungen dieses Fix-Durchgangs gegen den gesicherten Stand, auch außerhalb des Gegenstands (Nahtstellen);
+   nicht dazu gehören Ablage-Dateien des Workflows (`kontext.md`, Gate-Ablage, Übergaben) und Änderungen
+   anderer Sessions. Änderungen unklarer Herkunft werden nie zurückgenommen, sondern dem Menschen gemeldet. Er
+   sucht neue Fehler, falsche Sachaussagen und Widersprüche zu freigegebenen Entscheidungen oder
+   Nachbarstellen. Kein Re-Scan, keine Linsen, kein Verify. Er gibt Befunde und eine Zuordnungsliste zurück:
    - **Zuordnung:** jede Änderung im Fix-Diff (zusammenhängende geänderte Zeilen) → Finding-ID(s) oder „ohne
      Auftrag“. Stellen, die das Fix-Protokoll nicht nennt (z. B. eine vergessene Nahtstelle), zählen zum Fix
      dieser Finding-ID, sofern das Protokoll das Finding als umgesetzt führt; eine Änderung zu einem
@@ -86,7 +96,7 @@ Die Review-Schleife endet mit der Runde, die nur noch mittel/niedrig liefert:
      verursacht hat), „ohne Auftrag“ (Befund in einer Änderung ohne Auftrag) oder „außerhalb der Fixes“ — das
      sind nur Befunde an Stellen, die keine Änderung im Fix-Diff verursacht hat.
 
-   Folgen:
+   Folgen (zurückgenommen wird nur bei klarer Herkunft, letzter Absatz dieses Punkts):
    - Änderung ohne Auftrag → der Erzeuger nimmt sie auch ohne Befund auf den gesicherten Stand zurück, nur
      diese Zeilen; lässt sie sich von einem Fix nicht trennen, geht dieser mit zurück und wird vertagt.
      Befunde darin sind damit erledigt. Protokoll: „zurückgenommen, ohne Auftrag“.
@@ -96,10 +106,20 @@ Die Review-Schleife endet mit der Runde, die nur noch mittel/niedrig liefert:
      weitere Runde. Niedrig → nur ins Fix-Protokoll.
    - Befund außerhalb der Fixes: ab hoch → Gate nicht erfüllt, der Mensch entscheidet (reguläre Runde,
      vertagen oder bewusst akzeptieren); darunter → nach `kontext.md` › Vertagt.
+
+   **Herkunft vor Rücknahmen:** Vor der ersten Rücknahme prüft die Hauptsession: HEAD unverändert,
+   `manifest-vor.txt` und `manifest-nach.txt` unterscheiden sich nur bei Dateien, die der Erzeuger gemeldet
+   hat (Rückgabe samt Fix-Protokoll), und bei Ablage-Dateien, und außer den Ablage-Dateien entspricht alles
+   noch dem zweiten Manifest. Dann ist die Herkunft klar. Sonst oder im Zweifel wird nichts zurückgenommen:
+   Jede fällige Rücknahme geht samt ihren Befunden an den Menschen, ein Befund ab hoch darin hält das Gate bis
+   zu seiner Entscheidung. Protokoll: „gemeldet, unklare Herkunft“. Fremde Änderungen in Dateien, die auch der
+   Erzeuger geändert hat, erkennt kein Manifest; deshalb kopiert die Hauptsession vor der ersten Rücknahme
+   jede betroffene Datei in ihrem aktuellen Stand unter ihrem repo-relativen Pfad nach `vor-ruecknahme/` in
+   derselben Sicherung — so bleibt jede Rücknahme umkehrbar.
 3. Bei Code laufen nach Fixes und Rücknahmen die betroffenen Tests und die Gate-Kette erneut grün.
-4. Das Fix-Protokoll (umgesetzt / abgelehnt mit Grund / gemeldet / zurückgenommen, auch „ohne Auftrag“) geht
-   in die Freigabe-Anfrage. Vertagtes steht in `kontext.md` › Vertagt (eine Zeile je Finding mit Ziel) und geht
-   beim Abschluss in die Zusammenfassung.
+4. Das Fix-Protokoll (umgesetzt / abgelehnt mit Grund / gemeldet, auch „unklare Herkunft“ / zurückgenommen,
+   auch „ohne Auftrag“) geht in die Freigabe-Anfrage. Vertagtes steht in `kontext.md` › Vertagt (eine Zeile je
+   Finding mit Ziel) und geht beim Abschluss in die Zusammenfassung.
 
 Jeder Blocker-Fix wird damit weiter von einer regulären Runde geprüft; nur Mittel/Niedrig-Fixes laufen über
 den Fixcheck.
@@ -127,7 +147,8 @@ den Fixcheck.
   nennen (offene Mittel/Niedrig und Vertagtes auflisten), dann um explizite Freigabe bitten — bei stehender
   Freigabe (`konventionen.md`) direkt freigeben. Erst danach weiter.
 - **Impl-Einheiten:** kein Human-Gate pro Einheit. Nach erfülltem Gate und abgeschlossenem Abschnitt 3
-  (Fixcheck, Rücknahmen, Tests grün) abhaken + committen (an `mechaniker` (haiku) delegieren).
+  (Fixcheck, Rücknahmen, Tests grün, keine offene Meldung „unklare Herkunft“) abhaken + committen (an
+  `mechaniker` (haiku) delegieren).
 
 ## Workflow-Muster (Prüftiefe M/L)
 
@@ -188,8 +209,9 @@ Verbrauchsauswertung gruppiert danach.
 6. **Mutationsphase** (nur Stufe L bzw. auf Wunsch; läuft zusätzlich zu den Linsen): Die Hauptsession gibt
    ein frisches, leeres Sicherungsverzeichnis und den Arbeitsbaum
    vor — committeter Gegenstand in eigenem Worktree außerhalb des Repos an kurzem Pfad; sonst vorher
-   Parallel-Check auf **jede** aktive Session im selben Arbeitsbaum (mtimes aller Dateien aus `git status`,
-   jüngster Commit), bei Aktivität oder im Zweifel erst nach ausdrücklicher Bestätigung des Menschen — und
+   Parallel-Check auf **jede** aktive Session im selben Arbeitsbaum (mtimes aller Dateien aus
+   `git status --porcelain -uall`, jüngster Commit), bei Aktivität oder im Zweifel erst nach ausdrücklicher
+   Bestätigung des Menschen — und
    das Skript protokolliert beides per `log()`. Vor dem Start legt sie eine **Offen-Markierung** an (existiert
    schon eine: keine Phase starten, Menschen fragen): Memory `mutation-offen.md` (Session-ID, Startzeit,
    Sicherungsverzeichnis, Arbeitsbaum) mit Index-Zeile `mutation-offen (Session <id>): nicht anfassen,

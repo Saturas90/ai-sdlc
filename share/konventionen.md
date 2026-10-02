@@ -99,12 +99,12 @@ issues/
 An jedem Planungs-Gate (Issue, Architektur, Impl-Plan) gibt **der Mensch** explizit frei. Der Agent fragt aktiv nach Freigabe und arbeitet nicht eigenmächtig über ein Gate hinaus.
 
 **Stehende Freigabe (opt-in):** Hat der Mensch sie erteilt (Projekt-CLAUDE.md, gespeicherte
-Nutzervorgabe/Memory oder ausdrücklich in der Session), gilt ein Planungsartefakt als freigegeben, sobald
-das Review-Gate erfüllt, der Fixcheck ohne offenen Befund durchlaufen ist und keine Entscheidung des
-Menschen aussteht (kein offener oder gemeldeter Blocker, kein Fix mit Entscheidungsbedarf, kein
-Fixcheck-Befund ab hoch außerhalb der Fixes):
-Statuszeile setzen, Prüftiefe, Runden, Ergebnis, offene Mittel/Niedrig und Vertagtes transparent nennen,
-committen. Offene Fragen beantwortet immer der Mensch.
+Nutzervorgabe/Memory oder ausdrücklich in der Session), gilt ein Planungsartefakt als freigegeben, sobald das
+Review-Gate erfüllt, der Fixcheck ohne offenen Befund durchlaufen ist und keine Entscheidung des Menschen
+aussteht (kein offener oder gemeldeter Blocker, kein Fix mit Entscheidungsbedarf, keine offene Meldung
+„unklare Herkunft“, kein Fixcheck-Befund ab hoch außerhalb der Fixes): Statuszeile setzen, Prüftiefe, Runden,
+Ergebnis, offene Mittel/Niedrig und Vertagtes transparent nennen, committen. Offene Fragen beantwortet immer
+der Mensch.
 
 ## Status- & Freigabe-Marker (maschinell prüfbar)
 

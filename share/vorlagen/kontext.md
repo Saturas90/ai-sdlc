@@ -33,6 +33,7 @@ Abschluss übernimmt die Liste in die Zusammenfassung. Wird bei vollem Budget ni
 ## Stand
 <Nur die Hauptsession, ≤ 1 KB, wird bei vollem Budget nie gekürzt. Vor jedem Commit überschreiben und
 mitcommitten: nächster Schritt, offene Entscheidungen. Mitten im Gate am Ende jeder Runde und vor dem
-Fixcheck: Gegenstand, Prüftiefe, Runde, Gate-Schritt (Review / Korrektur / Fixcheck), offene Findings (Tabelle oder
-Verweis auf eine Datei im Issue-Ordner, nie Scratchpad/Temp), Ablage des gesicherten Stands, ggf. die
-Stufen-Abbildung. Hat das Projekt eine eigene Übergabe-Ablage, steht hier nur der Verweis darauf.>
+Fixcheck: Gegenstand, Prüftiefe, Runde, Gate-Schritt (Review / Korrektur / Fixcheck), offene Findings
+(Tabelle oder Verweis auf eine Datei in der Gate-Ablage, Standard `.gate-logs/<issue>/`), Unterordner der
+jüngsten Sicherung, ggf. die Stufen-Abbildung. Hat das Projekt eine eigene Übergabe-Ablage, steht hier nur
+der Verweis darauf.>
