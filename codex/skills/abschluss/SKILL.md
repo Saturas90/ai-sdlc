@@ -5,7 +5,7 @@ description: "Schließt ein vollständig implementiertes Issue strikt nach der C
 
 # Abschluss
 
-1. Repository-Root bestimmen und `CLAUDE.md` als einzige normative Quelle für Abschlussartefakt, Scope-Abgleich und Projektplanpflege verwenden. Fehlt sie, anhalten; keine Vorlagen aus `~/.claude` verwenden.
+1. Repository-Root bestimmen und `CLAUDE.md` als normative Quelle für Abschlussartefakt, Scope-Abgleich und Projektplanpflege verwenden. Fehlt sie, anhalten; keine Vorlagen aus `~/.claude` verwenden. Für den Codex-Reviewabschluss gilt die Ausnahme in `AGENTS.md`, auch bei einem Claude-Fixcheck-Verweis.
 2. Prüfen, ob alle Implementierungsschritte, Tests und Reviews nach den Projektregeln abgeschlossen sind. Bei offenen Schritten anhalten und sie konkret nennen.
 3. Issue, gegebenenfalls Architektur, Implementierungsplan, zugehörige Änderungen sowie die von `CLAUDE.md` verlinkte Zusammenfassungsvorlage gezielt lesen.
 4. Jedes Akzeptanzkriterium, jede relevante Architekturentscheidung und jeden Planschritt gegen Implementierung und vorhandene gültige Prüfnachweise abgleichen. Bestandene Prüfungen ohne Änderungen oder neue Risiken nicht erneut ausführen. Ungeplanten Scope oder Abweichungen melden und vor dem Abschluss mit dem Nutzer klären. Neue kritische Befunde vor dem Abschluss an Astra geben; bestehende Qualitätsgates bleiben verbindlich.

@@ -5,7 +5,7 @@ description: "Erstellt oder aktualisiert den Projektplan eines Repositories stri
 
 # Projektplan
 
-1. Repository-Root bestimmen und dessen `CLAUDE.md` als einzige normative Prozessquelle verwenden. Fehlt die Datei, anhalten und den Nutzer darauf hinweisen. Keine Regeln oder Vorlagen aus `~/.claude` übernehmen.
+1. Repository-Root bestimmen und dessen `CLAUDE.md` als normative Prozessquelle verwenden. Fehlt die Datei, anhalten und den Nutzer darauf hinweisen. Keine Regeln oder Vorlagen aus `~/.claude` übernehmen. Für den Codex-Reviewabschluss gilt die Ausnahme in `AGENTS.md`, auch bei einem Claude-Fixcheck-Verweis.
 2. In `CLAUDE.md` nur die Abschnitte zu Workflow, Projektplan, Nummerierung, Dokumentation und verlinkten Vorlagen heranziehen. Verlinkte große Dokumente ausschließlich gezielt lesen.
 3. Den in `CLAUDE.md` benannten Projektplan lokalisieren. Existiert er, gezielt aktualisieren und nicht überschreiben.
 4. Ziel, Meilensteine, Issue-Liste, Abhängigkeiten und offene Entscheidungen nur im von `CLAUDE.md` verlangten Umfang klären. Fehlende wesentliche Angaben erfragen, nicht erfinden.

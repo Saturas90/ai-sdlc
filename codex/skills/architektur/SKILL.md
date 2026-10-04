@@ -5,7 +5,7 @@ description: "Führt die Architekturphase für ein freigegebenes Issue strikt na
 
 # Architektur
 
-1. Repository-Root bestimmen und `CLAUDE.md` als einzige normative Quelle für Workflow, Pfade, Vorlage und Review-Gate verwenden. Fehlt sie, anhalten; nichts aus `~/.claude` übernehmen.
+1. Repository-Root bestimmen und `CLAUDE.md` als normative Quelle für Workflow, Pfade, Vorlage und Review-Gate verwenden. Fehlt sie, anhalten; nichts aus `~/.claude` übernehmen. Für den Codex-Reviewabschluss gilt die Ausnahme in `AGENTS.md`, auch bei einem Claude-Fixcheck-Verweis.
 2. Prüfen, ob das Issue nach den Projektregeln freigegeben ist und ob eine Architekturphase nötig ist. Bei fehlender Freigabe anhalten; bei entbehrlicher Architektur knapp auf `$impl-plan` verweisen.
 3. Nur das freigegebene Issue, `kontext.md` des Issues, die einschlägigen `CLAUDE.md`-Abschnitte und die dort verlinkte Architekturvorlage lesen. Referenzen gezielt und token-sparsam ab den Ankern öffnen; neue relevante Stellen in `kontext.md` ergänzen.
 4. Normale Architekturentscheidungen mit `architekt` (Sol/high) erarbeiten; kritische Sicherheits-, Daten-, Berechtigungs-, Migrations-, Konkurrenz- oder Recovery-Entscheidungen mit `architekt_kritisch` (Astra/xhigh). Rein redaktionelle Nachzüge bereits freigegebener Entscheidungen mit Terra/medium, bei Bedarf `dokumentierer`. Scope, Pfad, Freigaben und Vorlage knapp übergeben; keine vollständige Gesprächsvererbung oder zusätzliche Autoren. Keine nicht angeforderte Produktfunktion aufnehmen.

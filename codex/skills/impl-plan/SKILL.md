@@ -5,7 +5,7 @@ description: "Erstellt den Implementierungsplan eines freigegebenen Issues strik
 
 # Implementierungsplan
 
-1. Repository-Root bestimmen und `CLAUDE.md` als einzige normative Quelle für Voraussetzungen, Pfad, Format, Testregeln und Gates verwenden. Fehlt sie, anhalten; keine Regeln aus `~/.claude` übernehmen.
+1. Repository-Root bestimmen und `CLAUDE.md` als normative Quelle für Voraussetzungen, Pfad, Format, Testregeln und Gates verwenden. Fehlt sie, anhalten; keine Regeln aus `~/.claude` übernehmen. Für den Codex-Reviewabschluss gilt die Ausnahme in `AGENTS.md`, auch bei einem Claude-Fixcheck-Verweis.
 2. Die Freigaben von Issue und gegebenenfalls Architektur anhand der in `CLAUDE.md` definierten Marker prüfen. Bei unerfüllter Voraussetzung anhalten.
 3. Issue, gegebenenfalls Architektur, `kontext.md` des Issues, die einschlägigen `CLAUDE.md`-Abschnitte und die verlinkte Planvorlage lesen. Große Nachbardokumente nur gezielt öffnen.
 4. Die Planerstellung mit Terra/high erledigen, bei Bedarf `impl_planer`; keine doppelte Autorenspur oder volle Gesprächsvererbung. Jeden Schritt einzeln prüfbar formulieren und alle von `CLAUDE.md` geforderten Angaben zu Zweck, vollständiger Dateiliste, Tests und Review aufnehmen; zusätzlich je Schritt die Kontext-Anker (Symbole und Aufrufer mit Datei:Zeile) und den gezielten Testbefehl, lange Karten in `kontext.md`. Sequenzielle Ausführung ist Standard. Kritische Einheiten mit `[K]` kennzeichnen, damit Implementierung und Review Astra/xhigh verwenden. Große Einheiten vor der Freigabe sinnvoll schneiden; freigegebenen Scope nicht nachträglich still ändern.

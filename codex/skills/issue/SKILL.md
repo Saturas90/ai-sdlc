@@ -5,7 +5,7 @@ description: "Erstellt oder vervollständigt genau ein Issue strikt nach der CLA
 
 # Issue
 
-1. Repository-Root bestimmen und `CLAUDE.md` als einzige normative Quelle für Pfade, Benennung, Statusmarker, Inhalt und Gates verwenden. Fehlt sie, anhalten. Keine Annahmen aus `~/.claude` übernehmen.
+1. Repository-Root bestimmen und `CLAUDE.md` als normative Quelle für Pfade, Benennung, Statusmarker, Inhalt und Gates verwenden. Fehlt sie, anhalten. Keine Annahmen aus `~/.claude` übernehmen. Für den Codex-Reviewabschluss gilt die Ausnahme in `AGENTS.md`, auch bei einem Claude-Fixcheck-Verweis.
 2. Den in `CLAUDE.md` benannten Projektplan und nur die für das aktive Issue nötigen Abschnitte lesen. Issue-Nummer und Ziel unmittelbar vor der Vergabe gegen HEAD, Working Tree, Projektplan und vorhandene Issue-Ordner prüfen.
 3. Die von `CLAUDE.md` verlinkte Issue-Vorlage lesen. Genau ein Issue im dort vorgeschriebenen Pfad und Format erstellen oder vervollständigen, daneben das Kontextpaket `kontext.md` (siehe `AGENTS.md`), sofern `CLAUDE.md` es nicht ausschließt (eine bloße Aufzählung der Ordnerinhalte schließt es nicht aus); keine Architektur, keinen Implementierungsplan und keinen Code erzeugen.
 4. Mit Terra/medium schreiben, lokal bei passendem aktivem Modell, sonst `issue_autor`. Nur erforderlichen Projektkontext, Pfade und Vorlage übergeben; keine vollständige Gesprächsvererbung oder doppelte Autorenspur. Neue kritische Sicherheits-/Architekturentscheidungen mit Astra klären.

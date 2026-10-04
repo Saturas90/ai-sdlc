@@ -67,7 +67,7 @@ nächste Session. Jeder Agent steigt dort ein, statt das Projekt erneut zu durch
 - **Prüftiefe** je Gegenstand: **S** = ein Reviewer (Projektplan, Issue, Plan ohne `[K]`, normale
   Einheit, Zusammenfassung), **M** = Workflow mit ≤ 2 Linsen (Architektur, `[K]`), **L** = ≤ 4 Linsen +
   Mutation (im Plan markiert). Verifiziert werden nur Blocker, Verifizierer stufen nie hoch.
-- **Keine Bestätigungsrunde:** Liefert eine Runde nur mittel/niedrig, werden diese eingearbeitet und
+- **Keine Bestätigungsrunde (Claude Code):** Liefert eine Runde nur mittel/niedrig, werden diese eingearbeitet und
   nur ihr Diff per **Fixcheck** (ein Agent) geprüft; ein fehlerhafter Fix wird zurückgenommen.
   Folgerunden: Runde 1–2 voller Kaltreview, ab Runde 3 Delta; Runde 3 mit Blockern ⇒ Entscheidung des
   Menschen (Konvergenz-Stopp).
@@ -140,7 +140,14 @@ Aufträge GPT-6 Luna/low. Issue-Texte, Dokumentationsnachzüge, Implementierungs
 normale Kaltreviews nutzen gezielt GPT-5.6 Terra. GPT-6 Astra/xhigh ist kritischen
 Architekturentscheidungen, Implementierungen und Reviews vorbehalten. Die Codex-Regeln
 halten Aufgaben sequenziell und begrenzen Kontext, Delegation und wiederholte Prüfungen,
-ohne fachliche Gates zu verkürzen.
+ohne fachliche Gates zu verkürzen. Für Codex gilt beim Reviewabschluss die eng begrenzte
+Ausnahme in [`codex/AGENTS.md`](codex/AGENTS.md): Sobald eine Reviewrunde keine offenen
+Kritisch/Hoch enthält, werden Mittel grundsätzlich minimal eingearbeitet (sonst mit Grund
+und Ziel vertagt), Niedrig nach Ermessen. Danach gibt es kein weiteres Review und keinen
+Fixcheck, auch wenn eine Projekt-`CLAUDE.md` wie in BreakMySystem.ai auf den Claude-Fixcheck
+verweist. Nötige Tests und Pflicht-Gates nach Codefixes sowie menschliche Phasenfreigaben
+gelten weiter. Reviewer- und Autor-Anweisungen stehen in [`codex/agents/`](codex/agents/),
+die Skill-Einstiege in [`codex/skills/`](codex/skills/).
 
 Änderungen an `codex/config.defaults.toml` werden beim nächsten `install.ps1` in eine
 vorhandene Codex-Konfiguration übernommen. Änderungen an verlinkten Codex-Dateien wirken
@@ -156,4 +163,6 @@ erst für neue Codex-Sitzungen und Agenten.
   `share/review-gate.md`.
 - Dokumentaufbau: `share/vorlagen/*.md`.
 - Codex-Modellrouting: `codex/AGENTS.md`, `codex/agents/` und `codex/config.defaults.toml`.
+- Codex-Reviewabschluss: `codex/AGENTS.md`, `codex/agents/reviewer*.toml`, Autor-Rollen
+  und `codex/skills/`; Claude- und geteilte Gate-Regeln bleiben davon unberührt.
 - Nach dem Ändern von Dateinamen/Struktur `install.ps1` erneut ausführen.
