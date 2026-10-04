@@ -79,6 +79,49 @@ trust_level = "trusted"
     if ($backupFiles.Count -ne $after.Count -or $claudeBackups.Count -ne $claudeAfter.Count) {
         throw 'Zweite Installation ist nicht idempotent'
     }
+
+    # Der Standardlauf darf keine SKILL.md-Dateilinks erzeugen: Codex überspringt sie.
+    $defaultClaudeTarget = Join-Path $testPath 'claude-default'
+    $defaultCodexTarget = Join-Path $testPath 'codex-default'
+    $defaultSkillSource = Join-Path $repo 'codex\skills\implementieren\SKILL.md'
+    $defaultSkillTarget = Join-Path $defaultCodexTarget 'skills\implementieren\SKILL.md'
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $defaultSkillTarget) | Out-Null
+    $seededSkillLink = $false
+    try {
+        New-Item -ItemType SymbolicLink -Path $defaultSkillTarget -Target $defaultSkillSource -ErrorAction Stop | Out-Null
+        $seededSkillLink = $true
+    } catch {
+        Write-Output 'Dateilink-Migration mangels Symlink-Rechten nicht prüfbar; Standardinstallation wird geprüft.'
+    }
+    $defaultSkillNotes = Join-Path (Split-Path -Parent $defaultSkillTarget) 'notes.txt'
+    [IO.File]::WriteAllText($defaultSkillNotes, 'behalten')
+    & (Join-Path $repo 'install.ps1') -ClaudeHome $defaultClaudeTarget -CodexHome $defaultCodexTarget *> (Join-Path $testPath 'default.log')
+    foreach ($skill in Get-ChildItem -LiteralPath (Join-Path $repo 'codex\skills') -Directory) {
+        $sourceFile = Join-Path $skill.FullName 'SKILL.md'
+        $targetFile = Join-Path $defaultCodexTarget "skills\$($skill.Name)\SKILL.md"
+        $installedFile = Get-Item -LiteralPath $targetFile -Force
+        if (($installedFile.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
+            (Get-FileHash -LiteralPath $sourceFile).Hash -ne (Get-FileHash -LiteralPath $targetFile).Hash) {
+            throw "Codex-Skill ist keine unveränderte reguläre Datei: $($skill.Name)"
+        }
+    }
+    if ((Get-Content -LiteralPath $defaultSkillNotes -Raw) -ne 'behalten') {
+        throw 'Eigene Datei im Codex-Skill-Verzeichnis wurde verändert'
+    }
+    if ($seededSkillLink -and
+        (Get-Item -LiteralPath $defaultSkillTarget -Force).LinkType -eq 'SymbolicLink') {
+        throw 'Bestehender SKILL.md-Dateilink wurde nicht migriert'
+    }
+    $defaultWriteTimes = @{}
+    foreach ($file in Get-ChildItem -LiteralPath (Join-Path $defaultCodexTarget 'skills') -Recurse -File) {
+        $defaultWriteTimes[$file.FullName] = $file.LastWriteTimeUtc
+    }
+    & (Join-Path $repo 'install.ps1') -ClaudeHome $defaultClaudeTarget -CodexHome $defaultCodexTarget *> (Join-Path $testPath 'default-second.log')
+    foreach ($filePath in $defaultWriteTimes.Keys) {
+        if ((Get-Item -LiteralPath $filePath).LastWriteTimeUtc -ne $defaultWriteTimes[$filePath]) {
+            throw "Zweite Standardinstallation hat eine unveränderte Skill-Datei neu geschrieben: $filePath"
+        }
+    }
     Write-Output 'Installations-Smoke-Test: OK'
 } finally {
     if (Test-Path -LiteralPath $testPath) {

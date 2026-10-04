@@ -53,6 +53,17 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   erhalten; breite Läufe nach Stabilisierung, Wiederholungen nur wegen neuer Änderungen, Fehler oder offener
   Risiken. Logs in Dateien, im Kontext nur Ergebnis und relevante Fehlerausschnitte. Testlaufzeit allein ist
   kein Grund für einen zusätzlichen Agenten.
+- **CI-Prüfungen vor Git-Aktionen:** Vor jedem Commit und autorisierten Push die Projekt-Gate-Kette aus
+  `CLAUDE.md` mit den vorhandenen tatsächlichen CI-Prüfungen in `.github/workflows/` und deren aufgerufenen
+  Skripten abgleichen. Alle relevanten, lokal ausführbaren CI-Validierungen am endgültigen zu committenden
+  Stand erfolgreich ausführen; dazu gehören vorhandene Format-, Lint-, Typ-, Test- und Buildprüfungen im
+  CI-Prüfmodus samt nötigen Tool-, Runtime- und Dependency-Voraussetzungen aus CI. Gezielte Tests ersetzen
+  verpflichtende umfassendere CI-Checks nicht. Gültige Nachweise auf demselben relevanten Stand wiederverwenden;
+  nach späteren relevanten Änderungen nur dadurch ungültige Checks erneut ausführen. Fehlgeschlagene oder fehlende
+  erforderliche Prüfnachweise blockieren Commit und Push. Nicht lokal ausführbare erforderliche Prüfungen
+  transparent benennen und das weitere Vorgehen mit dem Nutzer klären, ohne eine grüne CI zu behaupten.
+  Deployment-Jobs nicht automatisch lokal ausführen. Gibt es keine CI-Workflows, gelten die bestehenden
+  Projekt-Gates; diese Regel verlangt keinen Aufbau einer CI-Pipeline.
 - **Abschluss ohne Bestätigungsrunde:** Sobald eine Reviewrunde keine offenen Kritisch/Hoch enthält
   (auch keine ungeklärten bestrittenen oder gemeldeten Blocker), endet die Reviewschleife. Mittel
   grundsätzlich minimal einarbeiten; nur mit konkretem Grund und Ziel vertagen, wenn ein Fix nicht

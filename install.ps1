@@ -1,5 +1,6 @@
 # Installiert Claude-Code- und Codex-Workflow-Dateien aus diesem Repository.
-# Standard: Symlinks, bei fehlenden Rechten Kopien. -Copy erzwingt Kopien.
+# Standard: Symlinks, bei fehlenden Rechten Kopien. Codex-Skills immer als Dateien.
+# -Copy erzwingt Kopien für alle Dateien.
 # -ClaudeHome und -CodexHome erlauben eine isolierte Probeinstallation.
 #Requires -Version 7
 [CmdletBinding()]
@@ -40,9 +41,9 @@ function Remove-Target {
 }
 
 function Install-Item {
-    param([string]$Source, [string]$Target, [bool]$IsDir, [string]$Root)
+    param([string]$Source, [string]$Target, [bool]$IsDir, [string]$Root, [switch]$ForceCopy)
     Remove-Target $Target $Root
-    if (-not $Copy) {
+    if (-not ($Copy -or $ForceCopy)) {
         try {
             New-Item -ItemType SymbolicLink -Path $Target -Target $Source -ErrorAction Stop | Out-Null
             Write-Host "  link  $Target"
@@ -87,13 +88,13 @@ function Backup-CodexFile {
 }
 
 function Install-CodexFile {
-    param([string]$Source, [string]$Target)
+    param([string]$Source, [string]$Target, [switch]$ForceCopy)
     Assert-TargetWithinRoot $Target $codexRoot
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Target) | Out-Null
     if (Test-Path -LiteralPath $Target) {
         $existing = Get-Item -LiteralPath $Target -Force
         if ((Get-FileHash -LiteralPath $Source).Hash -eq (Get-FileHash -LiteralPath $Target).Hash) {
-            if ($Copy -and (($existing.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)) {
+            if (($Copy -or $ForceCopy) -and (($existing.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)) {
                 Remove-Target $Target $codexRoot
             } else { return }
         } else {
@@ -101,7 +102,7 @@ function Install-CodexFile {
             Remove-Target $Target $codexRoot
         }
     }
-    Install-Item $Source $Target $false $codexRoot
+    Install-Item $Source $Target $false $codexRoot -ForceCopy:$ForceCopy
 }
 
 function Set-ConfigValue {
@@ -190,7 +191,8 @@ foreach ($file in Get-ChildItem -LiteralPath (Join-Path $repo 'codex\agents') -F
     Install-CodexFile $file.FullName (Join-Path $codexRoot "agents\$($file.Name)")
 }
 foreach ($directory in Get-ChildItem -LiteralPath (Join-Path $repo 'codex\skills') -Directory) {
-    Install-CodexFile (Join-Path $directory.FullName 'SKILL.md') (Join-Path $codexRoot "skills\$($directory.Name)\SKILL.md")
+    # Codex erkennt verlinkte Skill-Verzeichnisse, überspringt aber SKILL.md-Dateilinks.
+    Install-CodexFile (Join-Path $directory.FullName 'SKILL.md') (Join-Path $codexRoot "skills\$($directory.Name)\SKILL.md") -ForceCopy
 }
 Install-CodexConfig
 

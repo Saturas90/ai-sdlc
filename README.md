@@ -12,7 +12,10 @@ cd <pfad-zu-diesem-repo>    # dorthin, wo du ai-sdlc abgelegt/geklont hast
 ./install.ps1              # Claude nach ~/.claude, Codex nach ~/.codex; -Copy erzwingt Kopien
 ```
 
-Danach sind die Skills in **jedem** Projekt verfügbar. Symlinks brauchen Admin-Rechte
+Danach sind die Skills in **jedem** Projekt verfügbar. Codex-`SKILL.md`-Dateien werden immer
+kopiert, weil Codex einzelne Dateisymlinks bei der Skill-Erkennung überspringt. Vorhandene
+Skill-Dateilinks werden beim erneuten Installieren durch Kopien ersetzt. Symlinks für die
+übrigen Dateien brauchen Admin-Rechte
 _oder_ den Windows-Entwicklermodus (Einstellungen → System → Für Entwickler).
 Bei fehlenden Rechten kopiert der Installer. Eine bestehende Codex-`config.toml` behält alle
 anderen Einstellungen; der Installer aktualisiert nur `model`, `model_reasoning_effort` und
@@ -146,12 +149,14 @@ Kritisch/Hoch enthält, werden Mittel grundsätzlich minimal eingearbeitet (sons
 und Ziel vertagt), Niedrig nach Ermessen. Danach gibt es kein weiteres Review und keinen
 Fixcheck, auch wenn eine Projekt-`CLAUDE.md` wie in BreakMySystem.ai auf den Claude-Fixcheck
 verweist. Nötige Tests und Pflicht-Gates nach Codefixes sowie menschliche Phasenfreigaben
-gelten weiter. Reviewer- und Autor-Anweisungen stehen in [`codex/agents/`](codex/agents/),
+gelten weiter. Vor Commit und autorisiertem Push gleicht Codex die Projekt-Gates mit vorhandenen
+CI-Workflows ab und verlangt gültige Nachweise für alle relevanten lokal ausführbaren Prüfungen
+am endgültigen Stand. Reviewer- und Autor-Anweisungen stehen in [`codex/agents/`](codex/agents/),
 die Skill-Einstiege in [`codex/skills/`](codex/skills/).
 
 Änderungen an `codex/config.defaults.toml` werden beim nächsten `install.ps1` in eine
 vorhandene Codex-Konfiguration übernommen. Änderungen an verlinkten Codex-Dateien wirken
-direkt; bei Kopien den Installer erneut ausführen. Neue Modell- und Rollenwerte gelten
+direkt; bei Kopien und nach Änderungen an Codex-Skills den Installer erneut ausführen. Neue Modell- und Rollenwerte gelten
 erst für neue Codex-Sitzungen und Agenten.
 
 ## Anpassen
