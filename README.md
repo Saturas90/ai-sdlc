@@ -83,6 +83,31 @@ nächste Session. Jeder Agent steigt dort ein, statt das Projekt erneut zu durch
 
 Vollständige Regeln: [`share/konventionen.md`](share/konventionen.md) · Gate: [`share/review-gate.md`](share/review-gate.md).
 
+### Parallele Sessions: Arbeitsbaum-Modus (opt-in)
+
+Wer mit mehreren Sessions gleichzeitig am selben Repo arbeitet, kann je Projekt den Arbeitsbaum-Modus
+einschalten ([`share/arbeitsbaeume.md`](share/arbeitsbaeume.md)): Planung, Abschluss und kleine Bugfixes
+bleiben im Hauptcheckout auf `main`; jede Implementierung läuft in einem eigenen Git-Worktree auf einem
+kurzlebigen Branch und wird **je Einheit** integriert — Rebase auf `main`, genau eine Gate-Kette am
+rebasten Stand, Fast-Forward (per Plan-Zeile `**Integration:** am Ende` je Issue auch erst nach der letzten
+Einheit). Integrationen laufen nacheinander; Konflikte löst die Session im Worktree, ihre
+Auflösung wird reviewt; im VS-Code-Merge-Editor landet nichts. Die Mechanik steckt in
+[`share/tools/wt.ps1`](share/tools/wt.ps1) (`start`, `sync`, `integrate`, `commit`, `finish`, `status`),
+Aufruf `pwsh -NoProfile -File "$HOME/.claude/ai-sdlc/tools/wt.ps1" <befehl>` — nicht das Programm `wt`
+(Windows Terminal).
+
+Einschalten im Zielprojekt: Abschnitt `## Arbeitsbäume (ai-sdlc)` in der Projekt-CLAUDE.md (mit dem
+Pflichtsatz aus `arbeitsbaeume.md`: wann `EnterWorktree`/`ExitWorktree`, beim Beenden einer Session im
+Worktree immer „keep“, Verweis auf die Regeln, Commits im Hauptcheckout nur per `wt commit`), Projektwerte in
+`.ai-sdlc/arbeitsbaeume.json` — committet, `wt` liest sie aus HEAD — (Gate-Kette, schnelle Gates, Setup,
+Gate-Ablage, Dateien nur auf `main`, belegt gate-irrelevante Pfade, Nummernprüfung), gitignorierte
+Pflichtdateien in `.worktreeinclude`, `.claude/worktrees/` (keine Junction, kein Symlink) in der versionierten
+`.gitignore`, Git-Hooks ohne Dateiänderungen (den Formatter fahren die schnellen Gates), einmalig
+`git config rerere.enabled true` und `git config merge.conflictStyle zdiff3`. In Claude Code arbeitet jede
+Implementierung in einem Tab des Projektfensters (`EnterWorktree`); in der Codex-App öffnest du den
+Worktree-Ordner als eigenes Projekt — App-Worktree-Modus, „Hand off“ und die Git-Knöpfe der App bleiben
+dort tabu. Prüfen ohne Änderungen am Benutzerprofil: `pwsh -File tests/wt-smoke.ps1`.
+
 **Gate-Absicherung:** Freigabe, offene Fragen und Projektfortschritt hängen an maschinell
 prüfbaren Markern (`**Status:** Freigegeben`, `- [ ]`-Checkboxen, Projektplan-Status `erledigt`) —
 siehe „Status- & Freigabe-Marker“ in den Konventionen. So kann der Orchestrator ein Gate nicht
@@ -170,4 +195,6 @@ erst für neue Codex-Sitzungen und Agenten.
 - Codex-Modellrouting: `codex/AGENTS.md`, `codex/agents/` und `codex/config.defaults.toml`.
 - Codex-Reviewabschluss: `codex/AGENTS.md`, `codex/agents/reviewer*.toml`, Autor-Rollen
   und `codex/skills/`; Claude- und geteilte Gate-Regeln bleiben davon unberührt.
+- Arbeitsbaum-Modus: `share/arbeitsbaeume.md` (Claude), `codex/arbeitsbaeume.md` (Codex) und
+  `share/tools/wt.ps1` gleich halten; nach Änderungen am Skript `pwsh -File tests/wt-smoke.ps1`.
 - Nach dem Ändern von Dateinamen/Struktur `install.ps1` erneut ausführen.

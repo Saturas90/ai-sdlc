@@ -10,7 +10,8 @@ vorgeschriebene Tests und menschliche Phasenfreigaben bleiben projektbestimmt. H
 Severity-Schema, vor der ersten Runde die hier verwendeten Stufen (blockierend, mittel, niedrig) darauf
 abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag und in „Stand“ festhalten.
 
-- **Sequenziell als Standard.** Umsetzung, Prüfung, Korrektur und Commit nacheinander.
+- **Sequenziell als Standard.** Umsetzung, Prüfung, Korrektur und Commit nacheinander, im Arbeitsbaum-Modus
+  Commit auf dem Issue-Branch und danach Integration (siehe `~/.codex/ai-sdlc/arbeitsbaeume.md`).
   Parallelisierung nur auf ausdrücklichen Nutzerwunsch, nicht allein wegen verfügbarer Agenten.
   Eine Parallelgruppe im Plan ist eine Möglichkeit, keine Pflicht. Unteragenten delegieren nicht weiter.
 - **Modelle nach Verantwortung:** GPT-6 Sol/high als Standard des Hauptagenten für Koordination, normale
@@ -63,19 +64,27 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   erforderliche Prüfnachweise blockieren Commit und Push. Nicht lokal ausführbare erforderliche Prüfungen
   transparent benennen und das weitere Vorgehen mit dem Nutzer klären, ohne eine grüne CI zu behaupten.
   Deployment-Jobs nicht automatisch lokal ausführen. Gibt es keine CI-Workflows, gelten die bestehenden
-  Projekt-Gates; diese Regel verlangt keinen Aufbau einer CI-Pipeline.
+  Projekt-Gates; diese Regel verlangt keinen Aufbau einer CI-Pipeline. Im Arbeitsbaum-Modus regeln Auslöser und
+  Gate-Abgleich `~/.codex/ai-sdlc/arbeitsbaeume.md`.
 - **Abschluss ohne Bestätigungsrunde:** Sobald eine Reviewrunde keine offenen Kritisch/Hoch enthält
   (auch keine ungeklärten bestrittenen oder gemeldeten Blocker), endet die Reviewschleife. Mittel
   grundsätzlich minimal einarbeiten; nur mit konkretem Grund und Ziel vertagen, wenn ein Fix nicht
   gefahrlos und lokal möglich ist. Niedrig nach Ermessen einarbeiten oder begründet vertagen. Danach
   weder weitere Reviewrunde noch Fixcheck, neuer Reviewer oder unabhängige Verify-Stimme. Erforderliche
-  Tests und Pflicht-Gates nach Codeänderungen ausführen; Testergebnisse nicht als Review ausgeben.
+  Tests und Pflicht-Gates nach Codeänderungen ausführen (im Arbeitsbaum-Modus gezielte Tests und schnelle
+  Gates, die volle Kette läuft in der Integration); Testergebnisse nicht als Review ausgeben.
   Unmittelbar vor dem Fix-Durchgang HEAD, `git status --porcelain -uall` und Inhalts-Hashes mit
-  `manifest-vor.txt` abgleichen; bei fremden Änderungen oder unklarer Herkunft melden und nichts davon
-  zurücknehmen. Die Autor-Ergebnisse je Finding knapp mit Fundstellen bzw. Vertagungsgrund und Ziel
-  protokollieren; Vertagtes in `kontext.md` › Vertagt und beim Abschluss in der Zusammenfassung führen.
-  Neu erkannte Blocker oder Entscheidungsbedarf stoppen den Abschluss und gehen an den Nutzer; niemals
-  als Mittel vertagen. Menschliche Phasenfreigaben bleiben erforderlich.
+  `manifest-vor.txt` der jüngsten Sicherung abgleichen; bei fremden Änderungen oder unklarer Herkunft melden
+  und nichts davon zurücknehmen. Kein Meldegrund ist ein neuer Commit, wenn der HEAD dieses Manifests (Basis)
+  Vorfahr des aktuellen HEAD ist und die neuen Commits keine eigenen Pfade berühren (Gegenstand, zu ihm
+  gehörende gesicherte und vom Autor gemeldete Dateien, keine fremden Entwürfe):
+  `git merge-base --is-ancestor <Basis> HEAD` und `git diff --quiet <Basis> HEAD -- <eigene Pfade>`. Dateien
+  dieser Commits gleicht der Hauptagent statt mit dem Manifest mit ihrem Stand im aktuellen HEAD ab
+  (unverändert, sonst melden); als Korrektur-Diff zählt für sie nur, was über diesen Stand hinausgeht. Die
+  Autor-Ergebnisse je Finding knapp mit Fundstellen bzw. Vertagungsgrund und Ziel protokollieren; Vertagtes
+  in `kontext.md` › Vertagt und beim Abschluss in der Zusammenfassung führen. Neu erkannte Blocker oder
+  Entscheidungsbedarf stoppen den Abschluss und gehen an den Nutzer; niemals als Mittel vertagen.
+  Menschliche Phasenfreigaben bleiben erforderlich.
 - **Konvergenz:** Bestätigt Runde 3 oder eine spätere Runde noch Blocker, anhalten und dem Nutzer Verlauf
   und Optionen vorlegen (Grundsatzentscheidung, Variante streichen, Scope schneiden, weitere Runden mit
   Anzahl); nach den gewählten Runden gilt der Stopp erneut. Mehr als 10 Blocker oder mehr als 40 Findings in
@@ -113,7 +122,9 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Unterordner `<gegenstand>-r<N>/` (bei Wiederholung mit Suffix, nie überschreiben): Kopie aller
   uncommitteten Dateien und `manifest-vor.txt` (HEAD-Rev; je Datei aus `git status --porcelain -uall` Pfad,
   Status, mtime und Inhalts-Hash per `git hash-object`, bei gelöschten Dateien `-`). Basis für den
-  Korrektur-Diff ist die jüngste Sicherung des Gegenstands. Artefaktbudgets ohne Projektwerte: Issue ≤ 12 KB,
+  Korrektur-Diff ist die jüngste Sicherung des Gegenstands. Im Arbeitsbaum-Modus liegt die Ablage eines Issues
+  mit Worktree dort (`wt finish` übernimmt sie nach dem Abschluss); nach jedem Rebase eine neue Sicherung mit
+  dem rebasten HEAD als Basis für Korrektur-Diffs. Artefaktbudgets ohne Projektwerte: Issue ≤ 12 KB,
   Architektur und Plan ≤ 20 KB, Zusammenfassung ≤ 6 KB, jedes weitere geprüfte Dokument ≤ 25 KB; gesprengt
   heißt schneiden, in `kontext.md` zuerst Anker kürzen, nie „Vertagt“ oder „Stand“. Entscheidungen und
   offenen Stand in vorhandenen Artefakten pflegen. Kein Neustart ohne gesicherten Stand. Wiederkehrende
@@ -122,6 +133,10 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   mit Pfaden, Scope und Prüfkriterien statt voller Gesprächshistorie übergeben. Erst gezielte Tests, breite
   Pflicht-Gates einmal am stabilen Stand; erneute Läufe nur bei Änderung, Fehler oder offenem Risiko.
   Reasoning nur für konkrete schwierige Arbeit erhöhen.
+- **Arbeitsbäume (opt-in):** Enthält die Projekt-CLAUDE.md einen Abschnitt `## Arbeitsbäume (ai-sdlc)` (bei
+  vorhandener CLAUDE.md zu Beginn jeder Aufgabe prüfen), vor der ersten Änderung, Git-, Worktree- oder
+  Handoff-Aktion `~/.codex/ai-sdlc/arbeitsbaeume.md` lesen und befolgen: Implementierung je Issue im eigenen
+  Worktree, Integration per `wt integrate`, Verbote für Git und die Codex-App. Sonst bleibt alles wie oben.
 
 Die Modelleinstellungen gelten für neue Sitzungen/Agenten; ein laufender Hauptagent wechselt
 sein Modell nicht durch eine Dateieditierung. Falls eine nötige Rolle oder ihr Modell nicht verfügbar

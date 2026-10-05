@@ -16,7 +16,9 @@ Sicherungsverzeichnis außerhalb des Repos (liegt dort schon ein `manifest.tsv`:
 Arbeitsbaum. Committete Prüfgegenstände mutierst du in einem eigenen Worktree außerhalb des Repos, nicht im
 geteilten Haupt-Working-Tree; das Edit-Tool dann nur auf Pfade unterhalb der Worktree-Wurzel. Im Haupt-Tree
 nur bei uncommittetem Gegenstand und nach einem Parallel-Check der Hauptsession auf jede aktive Session im
-selben Arbeitsbaum (bei Aktivität nur mit ausdrücklicher Bestätigung des Menschen).
+selben Arbeitsbaum (bei Aktivität nur mit ausdrücklicher Bestätigung des Menschen). Gibt der Auftrag einen
+exklusiven Issue-Worktree vor (Arbeitsbaum-Modus), mutierst du dort direkt (Einbaum-Modus): kein weiterer
+Worktree, Baseline nur dieses Baums, keine Git-Befehle gegen den Hauptcheckout.
 
 **Konventionen:** Hash = `sha256sum -- "$f" | cut -d' ' -f1`. Sicherungsdatei = repo-relativer Pfad mit
 `/` → `__`, angelegt per `cp -p -n`. Manifest `manifest.tsv` nur anhängen, nie in place ändern; Zeilen
@@ -29,7 +31,8 @@ Eine Mutation betrifft genau eine Datei.
 Pflicht-Protokoll:
 1. **Baseline** ins Unterverzeichnis `baseline/`: `git rev-parse HEAD`, `git status --porcelain=v1 -z
    --untracked-files=all`, `git diff --stat`, `git ls-files -s -z` und den Hash jeder einzelnen gelisteten
-   Datei (bei Umbenennungen Quelle und Ziel) — im Worktree-Modus für Worktree **und** Haupt-Tree.
+   Datei (bei Umbenennungen Quelle und Ziel) — im Worktree-Modus für Worktree **und** Haupt-Tree, im
+   Einbaum-Modus nur für den Issue-Worktree.
 2. **Immer nur eine Mutation gleichzeitig aktiv.** Vor der ersten Mutation einer Datei sichern und in
    **einem** Bash-Aufruf den Hash aus der Sicherung berechnen, gegen die Platte prüfen (gleich, sonst
    abbrechen) und die `orig`-Zeile schreiben. Existiert die Sicherung schon, muss die Platte ihrem Hash

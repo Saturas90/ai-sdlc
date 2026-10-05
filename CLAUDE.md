@@ -16,6 +16,16 @@ Wird nach `~/.claude/` und `~/.codex/` installiert und dann in **anderen** Proje
   der Konventionen); `architekt`, `impl-planer` und `issue-autor` lesen `konventionen.md` als Grundlage —
   bei Änderungen dort mitziehen. Auf der Codex-Seite tragen die Autor-Rollen die Kurzfassung von
   „Korrekturen minimal“ aus `codex/AGENTS.md`.
+- **Arbeitsbaum-Modus (opt-in):** Claude-Regeln in `share/arbeitsbaeume.md`, Codex-Regeln vollständig in
+  `codex/arbeitsbaeume.md` (Codex liest `~/.claude` nicht), Mechanik in `share/tools/wt.ps1` für beide (Test:
+  `tests/wt-smoke.ps1`). Exitcodes, Befehle und Projektwerte in allen drei gleich halten. Kurzfassungen der
+  Modus-Regeln tragen `implementierer`, `mechaniker`, `mutations-pruefer`, die Skills `implementieren`,
+  `naechster-schritt`, `abschluss`, `issue`, `projektplan`, `architektur` und `impl-plan`, `konventionen.md`
+  (Tests & Gates, Sessions, Arbeitsbäume, Commit-Konvention), `review-gate.md` (Einleitung, 2.4, 2.5, 3.3, 5,
+  6, Muster 6), die Vorlagen `kontext.md` (Zeile „Schnelle Gates“) und `impl-plan.md` (Zeile
+  `**Integration:**`), in `codex/AGENTS.md` die Punkte „Sequenziell als Standard“, „CI-Prüfungen vor
+  Git-Aktionen“ (nur der Verweis), „Abschluss ohne Bestätigungsrunde“, „Kontext klein halten“ und „Arbeitsbäume
+  (opt-in)“ sowie die Codex-Rollen und -Skills — bei Änderungen an den Modus-Regeln alle mitziehen.
 - Nach Änderungen: `install.ps1` erneut ausführen. Codex-Dateien mit abweichendem Inhalt
   werden vorher unter `~/.codex/ai-sdlc-backups/` gesichert, eigene Dateien in kopierten
   Claude-Verzeichnissen unter `~/.claude/ai-sdlc-backups/`.

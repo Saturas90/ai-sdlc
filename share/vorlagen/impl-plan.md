@@ -4,6 +4,11 @@
 
 **Status:** Entwurf
 <!-- Erst nach menschlicher Freigabe zu "**Status:** Freigegeben" ändern. -->
+**Integration:** je Einheit
+<!-- Nur im Arbeitsbaum-Modus; ohne Arbeitsbaum-Modus diese Zeile löschen (samt Kommentar). „am Ende (<Grund>)“
+     nur, wenn Zwischenstände nicht auf main dürfen oder die Einheiten sehr klein sind (höheres Konfliktrisiko,
+     Gate-Fehler erst am Ende). -->
+
 
 ## Voraussetzungen
 <Was muss vorliegen (Freigaben, Abhängigkeiten).>

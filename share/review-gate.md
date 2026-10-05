@@ -6,8 +6,9 @@ verwendeten Stufen darauf ab (Blocker = „blockierend“ des Projekts, mittel, 
 Abbildung den Menschen; die Abbildung gehört ins Prüfpaket und in den „Stand“, Reviewer melden in den
 Stufen des Projekts. Regelt die Projekt-CLAUDE.md
 Teile des Ablaufs selbst (z. B. Rundenumfang, Kaltreview, Freigabe vor Korrekturen), gilt jeweils diese
-Teilregel; alles Übrige hier gilt weiter. Abschnitte 1–5 gelten immer; die Workflow-Muster nur bei
-Prüftiefe M/L lesen — bei einem bestrittenen Blocker in Stufe S auch Muster 1 und 3.
+Teilregel; alles Übrige hier gilt weiter. Abschnitte 1–5 gelten immer, Abschnitt 6 nach einem
+Rebase-Konflikt im Arbeitsbaum-Modus (`arbeitsbaeume.md`); die Workflow-Muster nur bei Prüftiefe M/L lesen —
+bei einem bestrittenen Blocker in Stufe S auch Muster 1 und 3.
 
 ## 1. Prüftiefe (vor Runde 1 festlegen)
 
@@ -26,10 +27,10 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
 
 ## 2. Runde
 
-1. **Prüfpaket** übergeben statt Gesprächsverlauf: Gegenstand (Pfade bzw. Diff-Bereich mit Rev), Runde,
-   Bezug (Issue mit AK-IDs, ggf. Architektur/Plan-Schritte), `kontext.md`, Nachbarn, gegen die der
-   Gegenstand Annahmen trifft, freigegebene Entscheidungen (nicht neu verhandeln); ab Runde 2 die offenen
-   Findings der Vorrunde als Tabelle (ID, Datei:Zeile, ein Satz, Status) und den Fix-Diff gegen den
+1. **Prüfpaket** übergeben statt Gesprächsverlauf: Gegenstand (Pfade bzw. Diff-Bereich) mit Rev (HEAD bei
+   Rundenbeginn), Runde, Bezug (Issue mit AK-IDs, ggf. Architektur/Plan-Schritte), `kontext.md`, Nachbarn,
+   gegen die der Gegenstand Annahmen trifft, freigegebene Entscheidungen (nicht neu verhandeln); ab Runde 2
+   die offenen Findings der Vorrunde als Tabelle (ID, Datei:Zeile, ein Satz, Status) und den Fix-Diff gegen den
    gesicherten Stand der Vorrunde. Für den Fixcheck statt Vorrunden-Tabelle und Vorrunden-Fix-Diff: die eingearbeiteten
    Findings der Runde mit ID, das Fix-Protokoll mit Fundstellen je ID und den Fix-Diff gegen den gesicherten
    Stand; Bezug, `kontext.md`, Nachbarn und freigegebene Entscheidungen bleiben im Paket. Keine Rohberichte.
@@ -58,7 +59,8 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
    „Stand“ in `kontext.md` (bzw. die dort verwiesene projekteigene Übergabe-Ablage): Gegenstand, Prüftiefe,
    Runde, Gate-Schritt (Review / Korrektur / Fixcheck), offene Findings (als Tabelle oder Verweis auf eine
    Datei in der Gate-Ablage), Unterordner der jüngsten Sicherung, ggf. die Stufen-Abbildung. Eine neue Session
-   setzt dort fort, statt den Entwurf neu zu erzeugen.
+   setzt dort fort, statt den Entwurf neu zu erzeugen (im Arbeitsbaum-Modus: Fortsetzung nach
+   `arbeitsbaeume.md` Abschnitt 2).
 5. **Gate-Ablage und Sicherung:** Sicherungen, Findings-Tabellen und Fix-Protokoll liegen in einem
    gitignorierten Projektordner, Standard `.gate-logs/<issue>/` (ohne Issue `<gegenstand>`); eine Projektregel
    hat Vorrang. Nie Scratchpad, Temp oder Issue-Ordner (das Sicherungsverzeichnis der Mutationsphase regelt
@@ -68,7 +70,11 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
    Wiederholung mit Suffix, nie überschreiben): Kopie aller uncommitteten Dateien und `manifest-vor.txt`
    (HEAD-Rev; je Datei aus `git status --porcelain -uall` Pfad, Status, mtime und Inhalts-Hash per
    `git hash-object`, bei gelöschten Dateien `-`). Basis für Fix-Diff und Rücknahmen ist die jüngste Sicherung
-   des Gegenstands, nie HEAD.
+   des Gegenstands, nie HEAD. Im Arbeitsbaum-Modus gibt der Projektwert `gateAblage` den Ordner vor (Standard
+   `.gate-logs`); die Ablage liegt im Issue-Worktree (`wt start` legt sie an und ignoriert sie), `wt finish`
+   übernimmt sie nach dem Abschluss in den Hauptcheckout. Nach einem Rebase im Worktree (auch durch
+   `wt integrate` vor einem roten Gate) beginnt eine neue Sicherung mit dem rebasten HEAD; Fix-Diffs nur gegen
+   sie.
 
 ## 3. Abschluss nach einer Mittel/Niedrig-Runde — keine Bestätigungsrunde
 
@@ -76,7 +82,14 @@ Die Review-Schleife endet mit der Runde, die nur noch mittel/niedrig liefert:
 1. Geprüften Stand sichern (Abschnitt 2, Punkt 5); `manifest-vor.txt` ist der Parallel-Check vor dem
    Fix-Durchgang: Zeigt es außerhalb der Ablage-Dateien (Punkt 2 dieses Abschnitts) eine Änderung nach Beginn
    der Runde oder einen neuen Commit, arbeitet eine andere Session im selben Arbeitsbaum — vor dem
-   Fix-Durchgang dem Menschen melden. Der Erzeuger arbeitet Mittel ein, Niedrig nach Ermessen („Korrektur nach
+   Fix-Durchgang dem Menschen melden. Kein Meldegrund ist ein neuer Commit, wenn die Basis (HEAD bei
+   Rundenbeginn, im Prüfpaket als Rev festgehalten; beim Fixcheck nach rotem Gate der HEAD der neuen
+   Sicherung) Vorfahr des HEAD in `manifest-vor.txt` ist und die neuen Commits keine eigenen Pfade berühren
+   (Gegenstand, die zum Gegenstand gehörenden gesicherten Dateien und vom Erzeuger gemeldete Dateien — nicht
+   Entwürfe anderer Sessions): `git merge-base --is-ancestor <Basis> <manifest-vor-HEAD>` und
+   `git diff --quiet <Basis> <manifest-vor-HEAD> -- <eigene Pfade>`. Für Dateien, die diese Commits geändert
+   haben, zählt als Fix-Diff nur, was über ihren Stand im neuen HEAD hinausgeht. Der
+   Erzeuger arbeitet Mittel ein, Niedrig nach Ermessen („Korrektur nach
    Review“ in `konventionen.md`; dort steht auch, welche Fixes nicht hierher gehören — sie werden gemeldet,
    standardmäßig vertagt und nur mit regulärer Runde umgesetzt). Bei seiner Rückgabe legt die Hauptsession
    `manifest-nach.txt` gleichen Formats in dieselbe Sicherung (Parallel-Check nach dem Fix-Durchgang).
@@ -107,16 +120,20 @@ Die Review-Schleife endet mit der Runde, die nur noch mittel/niedrig liefert:
    - Befund außerhalb der Fixes: ab hoch → Gate nicht erfüllt, der Mensch entscheidet (reguläre Runde,
      vertagen oder bewusst akzeptieren); darunter → nach `kontext.md` › Vertagt.
 
-   **Herkunft vor Rücknahmen:** Vor der ersten Rücknahme prüft die Hauptsession: HEAD unverändert,
-   `manifest-vor.txt` und `manifest-nach.txt` unterscheiden sich nur bei Dateien, die der Erzeuger gemeldet
-   hat (Rückgabe samt Fix-Protokoll), und bei Ablage-Dateien, und außer den Ablage-Dateien entspricht alles
-   noch dem zweiten Manifest. Dann ist die Herkunft klar. Sonst oder im Zweifel wird nichts zurückgenommen:
+   **Herkunft vor Rücknahmen:** Vor der ersten Rücknahme prüft die Hauptsession: HEAD unverändert oder nur um
+   Commits vorgerückt, die nach Punkt 1 kein Meldegrund sind (Prüfung wie dort, mit `<manifest-vor-HEAD>` als
+   Basis gegen den aktuellen HEAD); Dateien dieser Commits gleicht die Hauptsession statt zwischen den
+   Manifesten mit ihrem Stand im aktuellen HEAD ab: unverändert oder nur vom Erzeuger gemeldete Änderungen.
+   Im Übrigen unterscheiden sich `manifest-vor.txt` und `manifest-nach.txt` nur bei Dateien, die der
+   Erzeuger gemeldet hat (Rückgabe samt Fix-Protokoll), und bei Ablage-Dateien, und außer den Ablage-Dateien
+   entspricht alles noch dem zweiten Manifest. Dann ist die Herkunft klar. Sonst oder im Zweifel wird nichts zurückgenommen:
    Jede fällige Rücknahme geht samt ihren Befunden an den Menschen, ein Befund ab hoch darin hält das Gate bis
    zu seiner Entscheidung. Protokoll: „gemeldet, unklare Herkunft“. Fremde Änderungen in Dateien, die auch der
    Erzeuger geändert hat, erkennt kein Manifest; deshalb kopiert die Hauptsession vor der ersten Rücknahme
    jede betroffene Datei in ihrem aktuellen Stand unter ihrem repo-relativen Pfad nach `vor-ruecknahme/` in
    derselben Sicherung — so bleibt jede Rücknahme umkehrbar.
-3. Bei Code laufen nach Fixes und Rücknahmen die betroffenen Tests und die Gate-Kette erneut grün.
+3. Bei Code laufen nach Fixes und Rücknahmen die betroffenen Tests und die Gate-Kette erneut grün (im
+   Arbeitsbaum-Modus die betroffenen Tests und die schnellen Gates; die volle Kette läuft in der Integration).
 4. Das Fix-Protokoll (umgesetzt / abgelehnt mit Grund / gemeldet, auch „unklare Herkunft“ / zurückgenommen,
    auch „ohne Auftrag“) geht in die Freigabe-Anfrage. Vertagtes steht in `kontext.md` › Vertagt (eine Zeile je
    Finding mit Ziel) und geht beim Abschluss in die Zusammenfassung.
@@ -148,7 +165,22 @@ den Fixcheck.
   Freigabe (`konventionen.md`) direkt freigeben. Erst danach weiter.
 - **Impl-Einheiten:** kein Human-Gate pro Einheit. Nach erfülltem Gate und abgeschlossenem Abschnitt 3
   (Fixcheck, Rücknahmen, Tests grün, keine offene Meldung „unklare Herkunft“) abhaken + committen (an
-  `mechaniker` (haiku) delegieren).
+  `mechaniker` (haiku) delegieren); im Arbeitsbaum-Modus auf dem Issue-Branch, danach Integration nach
+  `arbeitsbaeume.md` Abschnitt 2 (bei „am Ende“ erst nach der letzten Einheit).
+
+## 6. Rebase-Konflikte (Arbeitsbaum-Modus)
+
+Hält ein Rebase mit Konflikt an — auch wenn rerere eine frühere Auflösung eingespielt hat —, ist die
+Auflösung neuer, ungeprüfter Inhalt. Nach `rebase --continue` prüft **ein** Spawn des Reviewer-Typs der
+Einheit (Abschnitt 1; bei mehreren Einheiten auf dem Branch der stärkste der betroffenen) nur das
+Rebase-Delta: `git range-diff --creation-factor=100 <ALTE_BASIS>..<ALTER_TIP> <neue Basis>..HEAD` samt den
+Konfliktdateien (`ALTE_BASIS`, `ALTER_TIP` aus der Ausgabe von `wt integrate`, `wt start` bzw. `wt sync`).
+Fragen: Ist eine Änderung des Hauptbranchs verloren gegangen oder verfälscht? Widerspricht die Auflösung
+Issue, Plan oder der erkennbaren Absicht der fremden Änderung? Befund ab mittel → Auflösung korrigieren (die
+Hauptsession committet per `git commit --amend --no-edit -- <Dateien>`, bei mehreren Commits auf dem Branch
+`mechaniker` als eigenen Commit `<KEY>: Konfliktkorrektur`), erneut prüfen; Sachkonflikt (zwei unvereinbare
+Absichten) → Mensch. Ergebnis ins Fix-Protokoll.
+Ein Rebase ohne Konflikt braucht kein Review.
 
 ## Workflow-Muster (Prüftiefe M/L)
 
@@ -211,9 +243,11 @@ Verbrauchsauswertung gruppiert danach.
    vor — committeter Gegenstand in eigenem Worktree außerhalb des Repos an kurzem Pfad; sonst vorher
    Parallel-Check auf **jede** aktive Session im selben Arbeitsbaum (mtimes aller Dateien aus
    `git status --porcelain -uall`, jüngster Commit), bei Aktivität oder im Zweifel erst nach ausdrücklicher
-   Bestätigung des Menschen — und
+   Bestätigung des Menschen; im Arbeitsbaum-Modus ist der Issue-Worktree exklusiv und gilt selbst als
+   Arbeitsbaum (Einbaum-Modus: kein zusätzlicher Worktree, kein Parallel-Check, Baseline nur dieses Baums) — und
    das Skript protokolliert beides per `log()`. Vor dem Start legt sie eine **Offen-Markierung** an (existiert
-   schon eine: keine Phase starten, Menschen fragen): Memory `mutation-offen.md` (Session-ID, Startzeit,
+   schon eine: keine Phase starten, Menschen fragen): Memory `mutation-offen.md`, im Arbeitsbaum-Modus
+   `mutation-offen-<key>.md`, weil das Auto-Memory über alle Worktrees geteilt wird (Session-ID, Startzeit,
    Sicherungsverzeichnis, Arbeitsbaum) mit Index-Zeile `mutation-offen (Session <id>): nicht anfassen,
    Menschen fragen`. Die Markierung sehen nur Sessions, die danach starten; laufende schützt allein der
    Parallel-Check. Den Abgleich fährt nur die anlegende Hauptsession, Subagenten nie. Findet eine andere

@@ -12,6 +12,6 @@ Voraussetzung: `issue.md` ist freigegeben und mit „Architekturplan nötig: ja�
 3. Offene Fragen aus dem Entwurf **vor** dem Review klären (`- [x]` + Antwort).
 4. Review-Gate anwenden (`~/.claude/ai-sdlc/review-gate.md`) — Prüftiefe M, Reviewer **`reviewer-architektur`** (opus, xhigh). Runde mit nur mittel/niedrig → einarbeiten + Fixcheck, keine weitere Runde; Konvergenz-Stopp ab Runde 3.
 5. Keine offene `- [ ]` mehr, dann menschliche Freigabe (bzw. stehende Freigabe); Statuszeile → `**Status:** Freigegeben`.
-6. „Stand“ in `kontext.md` (bzw. die dort verwiesene projekteigene Übergabe) überschreiben (nächster Schritt, offene Entscheidungen), dann Commit (via `mechaniker`): `IS-<NNN>: Architekturplan erstellt` (mit `kontext.md` bzw. der projekteigenen Übergabe, sofern versioniert).
+6. „Stand“ in `kontext.md` (bzw. die dort verwiesene projekteigene Übergabe) überschreiben (nächster Schritt, offene Entscheidungen), dann Commit (via `mechaniker`): `IS-<NNN>: Architekturplan erstellt` (mit `kontext.md` bzw. der projekteigenen Übergabe, sofern versioniert). Im Arbeitsbaum-Modus (`~/.claude/ai-sdlc/arbeitsbaeume.md` Abschnitt 5): vorher die zugehörigen Tests, wenn ein Test oder Gate die committeten Dateien liest; neue ADR-Nummern brauchen keine Reservierung — meldet der Commit eine doppelte Nummer (12), umnummerieren und erneut committen.
 
 Danach: `/impl-plan`.

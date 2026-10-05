@@ -53,6 +53,15 @@ trust_level = "trusted"
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\vorlagen\kontext.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\konventionen.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\tools\verbrauch_auswerten.py')) -or
+        -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\tools\wt.ps1')) -or
+        -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\arbeitsbaeume.md')) -or
+        -not (Test-Path -LiteralPath (Join-Path $codexTarget 'ai-sdlc\tools\wt.ps1')) -or
+        -not (Test-Path -LiteralPath (Join-Path $codexTarget 'ai-sdlc\arbeitsbaeume.md')) -or
+        (Get-FileHash -LiteralPath (Join-Path $repo 'share\tools\wt.ps1')).Hash -ne
+            (Get-FileHash -LiteralPath (Join-Path $codexTarget 'ai-sdlc\tools\wt.ps1')).Hash -or
+        (Get-FileHash -LiteralPath (Join-Path $repo 'codex\arbeitsbaeume.md')).Hash -ne
+            (Get-FileHash -LiteralPath (Join-Path $codexTarget 'ai-sdlc\arbeitsbaeume.md')).Hash -or
+        -not ((Get-Content -LiteralPath (Join-Path $codexTarget 'AGENTS.md') -Raw).Contains('~/.codex/ai-sdlc/arbeitsbaeume.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $codexTarget 'agents\architekt_kritisch.toml')) -or
         -not (Test-Path -LiteralPath (Join-Path $reviewTarget 'notes.txt'))) {
         throw 'Installationsinhalt ist falsch'

@@ -194,6 +194,9 @@ foreach ($directory in Get-ChildItem -LiteralPath (Join-Path $repo 'codex\skills
     # Codex erkennt verlinkte Skill-Verzeichnisse, überspringt aber SKILL.md-Dateilinks.
     Install-CodexFile (Join-Path $directory.FullName 'SKILL.md') (Join-Path $codexRoot "skills\$($directory.Name)\SKILL.md") -ForceCopy
 }
+# Codex liest ~/.claude nicht; Arbeitsbaum-Regel und -Werkzeug brauchen deshalb eigene Kopien bzw. Links.
+Install-CodexFile (Join-Path $repo 'codex\arbeitsbaeume.md') (Join-Path $codexRoot 'ai-sdlc\arbeitsbaeume.md')
+Install-CodexFile (Join-Path $repo 'share\tools\wt.ps1') (Join-Path $codexRoot 'ai-sdlc\tools\wt.ps1')
 Install-CodexConfig
 
 Write-Host "`nFertig. Claude Code und Codex verwenden den installierten SDLC-Workflow."

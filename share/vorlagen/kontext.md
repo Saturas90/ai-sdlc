@@ -20,7 +20,8 @@
 
 ## Tests & Prüfbefehle
 - Gezielt: `<befehl für die betroffenen Tests>`
-- Gate-Kette (einmal je Einheit vor dem Commit): `<befehl>`
+- Schnelle Gates (Arbeitsbaum-Modus): `<befehl>` <!-- ohne Arbeitsbaum-Modus diese Zeile löschen -->
+- Gate-Kette (einmal je Einheit vor dem Commit; im Arbeitsbaum-Modus einmal je Integration): `<befehl>`
 
 ## Bewusst nicht relevant
 - <Bereich/Dokument> — <warum nicht lesen>

@@ -80,8 +80,10 @@ issues/
   Review-Historie gehört nicht ins Artefakt, sondern als Ergebniszeile in die Zusammenfassung.
 - **Tests & Gates:** gezielt (Plan-Feld `Tests:`), im Vordergrund mit Zeitlimit; Ausgabe in eine Datei, im
   Kontext nur Status und bei Fehler der Tail (≤ 40 Zeilen). Die Gate-Kette des Projekts einmal je Einheit
-  vor dem Commit, in einem Aufruf, Formatter anwenden statt prüfen. Keine eigenen Mutationsläufe der
-  Implementierer — Testwirksamkeit belegt die Mutationsphase (`review-gate.md`).
+  vor dem Commit, in einem Aufruf, Formatter anwenden statt prüfen; im Arbeitsbaum-Modus stattdessen einmal
+  je Integration und nur prüfend (`arbeitsbaeume.md` Abschnitt 4), vorher nur gezielte Tests und die
+  schnellen Gates, die den Formatter anwenden. Keine eigenen Mutationsläufe der Implementierer —
+  Testwirksamkeit belegt die Mutationsphase (`review-gate.md`).
 - **Agenten:** immer typisiert aufrufen (`subagent_type` bzw. `agentType`), nie `general-purpose` für
   SDLC-Arbeit; Erhebung und Recherche → `rechercheur`. Je Plan-Einheit ein frischer `implementierer`;
   triviale Einheiten (eine Datei, keine Logikänderung) erledigt die Hauptsession selbst. Einen
@@ -90,9 +92,10 @@ issues/
 - **Übergaben kompakt:** Findings an Autoren dedupliziert, je Zeile Kategorie, Datei:Zeile, Maßnahme —
   keine Linsen-Rohberichte, keine Verify-Protokolle. Agenten- und Workflow-Rückgaben knapp, Details in Dateien.
 - **Sessions:** eine Session je Phase bzw. Impl-Einheit; der Zustand liegt in Dateien (Statuszeilen,
-  Häkchen, „Stand“ in `kontext.md`; mitten im Gate zusätzlich die Angaben aus `review-gate.md` 2.4). Ab
-  geschätzt ~200K Kontext am nächsten Einheits- bzw. Rundenende übergeben und eine neue Session
-  vorschlagen; über ~300K keine neue Einheit beginnen.
+  Häkchen, „Stand“ in `kontext.md`; mitten im Gate zusätzlich die Angaben aus `review-gate.md` 2.4; im
+  Arbeitsbaum-Modus liegt beides für ein Issue mit Worktree dort, siehe `wt status`). Ab geschätzt ~200K
+  Kontext am nächsten Einheits- bzw. Rundenende übergeben und eine neue Session vorschlagen; über ~300K
+  keine neue Einheit beginnen.
 
 ## Freigabe-Prinzip
 
@@ -119,13 +122,32 @@ Projektfortschritt an eindeutigen Textmarkern statt an Interpretation:
   Der Abschluss-Skill setzt sie auf `erledigt`. „Nächstes offenes Issue“ = erste Zeile mit Status ≠ `erledigt`.
   Sind **alle** Issues `erledigt`, ist das Projekt fertig — der Orchestrator terminiert.
 
+## Arbeitsbäume (opt-in)
+
+Enthält die Projekt-CLAUDE.md den Abschnitt `## Arbeitsbäume (ai-sdlc)`, gilt `arbeitsbaeume.md`
+(Arbeitsbaum-Modus): Implementierung je Issue im eigenen Worktree auf einem kurzlebigen Branch, Integration
+je Einheit (per Plan-Zeile auch erst am Ende) per `wt integrate` (Rebase, eine Gate-Kette, Fast-Forward nach
+main); Planung, Abschluss und S-Bugfixes bleiben im Hauptcheckout. Planungs-Commits auf Dateien, die Tests
+oder Gates lesen, fahren vorher die zugehörigen Tests. Ohne den Abschnitt bleibt alles wie hier beschrieben.
+
 ## Commit-Konvention
 
 - Format: `IS-<NNN>: <kurz, was getan wurde>`
 - Ein Commit je freigegebenem Planungsartefakt (Issue / Architektur / Impl-Plan), jeweils mit `kontext.md`.
-- Ein Commit je review-gesichertem (Bündel von) Implementierungsschritt(en).
+- Ein Commit je review-gesichertem (Bündel von) Implementierungsschritt(en); im Arbeitsbaum-Modus auf dem
+  Issue-Branch, eine Einheit bleibt ein Commit (Nachbesserung per `--amend` vor der Integration). Ausnahme bei
+  mehreren Commits auf dem Branch (Integration am Ende): Korrekturen aus einem Konflikt-Review als eigener
+  Commit `IS-<NNN>: Konfliktkorrektur`, ein Fix nach rotem Gate als eigener Commit `IS-<NNN>: Gate-Fix`
+  (`arbeitsbaeume.md` Abschnitt 2).
 - Projektweite Artefakte ohne Issue-Bezug: `PROJEKT: <kurz>`.
+- Nur mit expliziter Dateiliste committen (`git commit -m … -- <dateien>`; neue Dateien vorher
+  `git add -N -- <datei>`, bei Umbenennung alter und neuer Pfad, keine Verzeichnisse), nie `git add -A` oder
+  `commit -a` — in einem geteilten Arbeitsbaum nähmen sie fremde Arbeit mit. Im Arbeitsbaum-Modus über
+  `wt commit`; dort zusätzlich Reservierungs-Commits für neue Issue-Nummern (`IS-<NNN>: registriert`).
 - **Alle** Commits und das Abhaken im Impl-Plan werden an den `mechaniker`-Sub-Agenten (haiku) delegiert — reine Mechanik, kein teures Modell.
+  Im Arbeitsbaum-Modus führt die Hauptsession `git rebase <hauptbranch>`, `rebase --continue`,
+  `rebase --abort`, `commit --amend`, `wt integrate` und `wt commit -Gate` selbst aus (`arbeitsbaeume.md`
+  Abschnitt 1).
 
 ## Abschluss
 
