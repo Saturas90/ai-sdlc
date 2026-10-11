@@ -91,8 +91,10 @@ issues/
     (Formatter im Prüfmodus; verändert sie Dateien, gilt sie als rot), von der Hauptsession im Hintergrund
     gestartet (nicht `mechaniker`). Zeigt `git status --porcelain -uall` uncommittete Dateien außerhalb der
     eigenen Pfade, läuft sie auf HEAD plus den eigenen Dateien in einem eigenen Worktree — außerhalb des Repos an
-    kurzem Pfad oder in einem Ordner, den die versionierte `.gitignore` ausschließt (eine Projektregel hat
-    Vorrang); gitignorierte Laufzeitvoraussetzungen dort bereitstellen (fehlen sie: melden); Abbau wie bei den
+    kurzem Pfad oder im Repo unter einem eigenen Ordner mit Punkt, den die versionierte `.gitignore` ausschließt
+    (z. B. `.claude/worktrees/`; nie in Build-, Abhängigkeits- oder Ausgabeordnern; erfasst ein Test-, Lint- oder
+    Build-Werkzeug ihn dennoch: melden; eine Projektregel hat Vorrang); gitignorierte Laufzeitvoraussetzungen dort
+    bereitstellen (fehlen sie: melden); Abbau wie bei den
     Gate-Worktrees von `wt`: Junctions und Symlinks darin zuerst als Links entfernen, nie ihre Ziele (scheitert
     das bei einem Link oder ist der Worktree nicht vollständig lesbar: stehen lassen, nichts weiter löschen,
     melden), dann `git worktree remove --force`. Ebenso die Nachprüfung der Drift-Prüfung; die Gegenprobe auf HEAD ohne die
@@ -123,7 +125,8 @@ issues/
   Solange main bekannt rot ist, keine Commits per Drift-Prüfung. Markierung: `main-rot.md` direkt in der Wurzel
   der Gate-Ablage des Hauptcheckouts (Standard `.gate-logs/main-rot.md`, nicht im Issue-Unterordner; Rev, rote
   Tests, Verursacher); an legt sie, wer die Kette auch auf HEAD ohne die eigenen Dateien rot sieht, entfernt, wer
-  sie dort wieder grün sieht, oder der Mensch.
+  sie dort wieder grün sieht oder den Fix der roten Tests mit grüner Kette committet hat — nur, wenn sie seit dem
+  Start dieser Kette unverändert ist, sonst melden —, oder der Mensch.
 - **Agenten:** immer typisiert aufrufen (`subagent_type` bzw. `agentType`), nie `general-purpose` für
   SDLC-Arbeit; Erhebung und Recherche → `rechercheur`. Je Plan-Einheit ein frischer `implementierer`;
   triviale Einheiten (eine Datei, keine Logikänderung) erledigt die Hauptsession selbst. Einen

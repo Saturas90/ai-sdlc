@@ -63,10 +63,13 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Dependency-Voraussetzungen aus CI; die Kette läuft nur prüfend (verändert sie Dateien, gilt sie als rot). Zeigt
   `git status --porcelain -uall` uncommittete Dateien außerhalb der eigenen Pfade (weitere Sitzung im selben
   Checkout), läuft sie auf HEAD plus den eigenen Dateien in einem eigenen Worktree, den der Hauptagent anlegt und
-  entfernt — außerhalb des Repos an kurzem Pfad oder in einem Ordner, den die versionierte `.gitignore`
-  ausschließt (eine Projektregel hat Vorrang); gitignorierte Laufzeitvoraussetzungen dort bereitstellen (fehlen
-  sie: melden); Abbau: Junctions und Symlinks darin zuerst als Links entfernen, nie ihre Ziele (scheitert das bei
-  einem Link oder ist der Worktree nicht vollständig lesbar: stehen lassen, nichts weiter löschen, melden), dann
+  entfernt — im Repo unter einem eigenen Ordner mit Punkt, den die versionierte `.gitignore` ausschließt (z. B.
+  `.claude/worktrees/`; er darf neu entstehen; nie in Build-, Abhängigkeits- oder Ausgabeordnern), weil die Sandbox
+  `workspace-write` (z. B. des `mechaniker`) nur im Workspace schreibt (eine Projektregel hat Vorrang; verlangt sie
+  einen Ort, an dem die Sandbox nicht schreiben darf, fehlt ein solcher Ordner oder erfasst ein Test-, Lint- oder
+  Build-Werkzeug ihn dennoch: melden); gitignorierte Laufzeitvoraussetzungen dort bereitstellen (fehlen sie:
+  melden); Abbau: Junctions und Symlinks darin zuerst als Links entfernen, nie ihre Ziele (scheitert das bei einem
+  Link oder ist der Worktree nicht vollständig lesbar: stehen lassen, nichts weiter löschen, melden), dann
   `git worktree remove --force`. Ebenso die Nachprüfung der Drift-Prüfung; die Gegenprobe auf HEAD ohne die
   eigenen Dateien läuft immer in einem solchen Worktree. Den geprüften HEAD (Gate-Basis bzw. Stand der letzten
   grünen Drift-Prüfung) gibt der Hauptagent dem `mechaniker` stets mit. Autoren und Korrekturdurchgänge fahren
@@ -96,8 +99,9 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Issue dieses Commits sie vorrangig (Bug-Issue). Solange der Hauptbranch bekannt rot ist, keine Commits per
   Drift-Prüfung. Markierung: `main-rot.md` direkt in der Wurzel der Gate-Ablage des Hauptcheckouts (Standard
   `.gate-logs/main-rot.md`, nicht im Issue-Unterordner; Rev, rote Tests, Verursacher); an legt sie, wer die
-  Kette auch auf HEAD ohne die eigenen Dateien rot sieht, entfernt, wer sie dort wieder grün sieht, oder der
-  Nutzer.
+  Kette auch auf HEAD ohne die eigenen Dateien rot sieht, entfernt, wer sie dort wieder grün sieht oder den Fix
+  der roten Tests mit grüner Kette committet hat — nur, wenn sie seit dem Start dieser Kette unverändert ist,
+  sonst melden —, oder der Nutzer.
   Fehlgeschlagene oder fehlende erforderliche Prüfnachweise blockieren Commit und Push. Nicht lokal ausführbare erforderliche Prüfungen
   transparent benennen und das weitere Vorgehen mit dem Nutzer klären, ohne eine grüne CI zu behaupten.
   Deployment-Jobs nicht automatisch lokal ausführen. Gibt es keine CI-Workflows, gelten die bestehenden
@@ -176,9 +180,10 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Wartezeit der `exec`-Zelle und von `wait`), je Zyklus mindestens etwa 2 min, ab etwa 15 min Laufzeit etwa
   5 min; ein festes `sleep` endet nicht mit dem Lauf und dauert höchstens einen solchen Zyklus. Ausgaben in
   Logdateien, abgefragt wird nur Status bzw. Exitcode; Unteragenten melden nur Ergebnis oder Blocker, keine
-  Zwischenstände. Endet ein Lauf nach etwa der doppelten Dauer des letzten gleichen Laufs nicht oder ist seine
-  Sitzung verloren: einmal Log-Ende und Prozess prüfen und melden, nicht abbrechen (auch keinen Unteragenten,
-  der ihn fährt); solange er läuft, keinen zweiten Lauf starten und seinen Worktree nicht abbauen.
+  Zwischenstände. Endet ein Lauf nach etwa der doppelten erwarteten Dauer (letzter gleicher Lauf, sonst
+  Schätzung) nicht oder ist seine Sitzung verloren: einmal Log-Ende und Prozess bzw. Status des Unteragenten
+  prüfen, melden und im selben Takt weiter abwarten, bis der Nutzer entscheidet; nicht abbrechen (auch keinen
+  Unteragenten, der ihn fährt), solange er läuft keinen zweiten Lauf starten und seinen Worktree nicht abbauen.
 - **Arbeitsbäume (opt-in):** Enthält die Projekt-CLAUDE.md einen Abschnitt `## Arbeitsbäume (ai-sdlc)` (bei
   vorhandener CLAUDE.md zu Beginn jeder Aufgabe prüfen), vor der ersten Änderung, Git-, Worktree- oder
   Handoff-Aktion `~/.codex/ai-sdlc/arbeitsbaeume.md` lesen und befolgen: Implementierung je Issue im eigenen

@@ -47,8 +47,9 @@ und mit `nummernPruefung`, nur dort `-Gate`. `finish -Key K`, `status`: siehe �
   einschließlich `wt commit` führt der Hauptagent selbst aus; `mechaniker` übernimmt hier nur Prüfkommandos,
   Checkboxen und Statuswörter. `wt integrate` und `wt commit -Gate` laufen lange (die Sperre wartet bis
   `sperreWartenMinuten`): Ausgabe per Umleitung in eine Log-Datei der Gate-Ablage, Shell-Timeout mindestens
-  `sperreWartenMinuten` plus Gate-Laufzeit oder eine Hintergrundsitzung bis zur Zeile `WT: …` pollen; der
-  Status gilt aus dieser Zeile. Nie abbrechen.
+  `sperreWartenMinuten` plus Gate-Laufzeit oder eine Hintergrundsitzung bis zur Zeile `WT: …` abwarten
+  (Wartezyklen nach `AGENTS.md` „Lange Läufe abwarten statt pollen“); der Status gilt aus dieser Zeile. Nie
+  abbrechen.
 - **Wer wo:** Planung (Projektplan, Issue, Architektur, Impl-Plan), Abschluss und Registrierungen im
   Hauptcheckout auf dem Hauptbranch per `wt commit` (Grenze bei Issue-Ordnern: „Konflikte vermeiden“); dort
   auch ein Bugfix der Prüftiefe S (kein `[K]`, nichts Sicherheits- oder Datenkritisches, keine Migration) per
