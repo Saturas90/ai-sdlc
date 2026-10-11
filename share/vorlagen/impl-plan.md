@@ -27,8 +27,10 @@ Aufrufer/Fakes mit Datei:Zeile; lange Karten stehen in `kontext.md` › Schrittk
 - [ ] S3 [K] · Prüftiefe: L (<Grund>): <…>
 
 ## Test-/Verifikationsstrategie
-<Wie wird jeder Schritt / das Ganze verifiziert. Schnell-Gate je Einheit als ein Aufruf mit begrenzter
-Ausgabe, z. B. `<formatter> <dateien> && <linter> <dateien> && <typecheck> <dateien> && <tests> | tail -n 30`.>
+<Wie wird jeder Schritt / das Ganze verifiziert. Schnelle Gates je Einheit als ein Aufruf mit Ausgabe in
+eine Datei, z. B. `{ <formatter> <eigene dateien> && <linter> && <typecheck>; } > <log> 2>&1` (Status aus dem
+Exitcode, bei Fehler `tail -n 30 <log>`); gezielte Tests stehen je Schritt unter `Tests:`. Lint und Typcheck
+über das ganze Projekt, ohne Arbeitsbaum-Modus nur prüfend — Teilmengen verfehlen Fehler.>
 
 ## Offene Fragen
 <Nur falls vorhanden; sonst diesen Abschnitt löschen. Jede Frage als Checkbox; vor der nächsten Phase beantwortet (`- [x]` + Antwort).>

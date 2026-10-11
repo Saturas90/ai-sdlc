@@ -132,8 +132,9 @@ Die Review-Schleife endet mit der Runde, die nur noch mittel/niedrig liefert:
    Erzeuger geändert hat, erkennt kein Manifest; deshalb kopiert die Hauptsession vor der ersten Rücknahme
    jede betroffene Datei in ihrem aktuellen Stand unter ihrem repo-relativen Pfad nach `vor-ruecknahme/` in
    derselben Sicherung — so bleibt jede Rücknahme umkehrbar.
-3. Bei Code laufen nach Fixes und Rücknahmen die betroffenen Tests und die Gate-Kette erneut grün (im
-   Arbeitsbaum-Modus die betroffenen Tests und die schnellen Gates; die volle Kette läuft in der Integration).
+3. Bei Code laufen nach Fixes und Rücknahmen die betroffenen Tests und die schnellen Gates erneut grün; die
+   Gate-Kette läuft danach einmal vor dem Commit (`konventionen.md` › Tests & Gates; im Arbeitsbaum-Modus in
+   der Integration).
 4. Das Fix-Protokoll (umgesetzt / abgelehnt mit Grund / gemeldet, auch „unklare Herkunft“ / zurückgenommen,
    auch „ohne Auftrag“) geht in die Freigabe-Anfrage. Vertagtes steht in `kontext.md` › Vertagt (eine Zeile je
    Finding mit Ziel) und geht beim Abschluss in die Zusammenfassung.
@@ -164,9 +165,10 @@ den Fixcheck.
   nennen (offene Mittel/Niedrig und Vertagtes auflisten), dann um explizite Freigabe bitten — bei stehender
   Freigabe (`konventionen.md`) direkt freigeben. Erst danach weiter.
 - **Impl-Einheiten:** kein Human-Gate pro Einheit. Nach erfülltem Gate und abgeschlossenem Abschnitt 3
-  (Fixcheck, Rücknahmen, Tests grün, keine offene Meldung „unklare Herkunft“) abhaken + committen (an
-  `mechaniker` (haiku) delegieren); im Arbeitsbaum-Modus auf dem Issue-Branch, danach Integration nach
-  `arbeitsbaeume.md` Abschnitt 2 (bei „am Ende“ erst nach der letzten Einheit).
+  (Fixcheck, Rücknahmen, Tests grün, keine offene Meldung „unklare Herkunft“) und grüner Gate-Kette (ggf.
+  Drift-Prüfung, `konventionen.md` › Drift-Prüfung) abhaken + committen (an `mechaniker` (haiku) delegieren);
+  im Arbeitsbaum-Modus ohne Kette auf dem Issue-Branch, danach Integration nach `arbeitsbaeume.md` Abschnitt 2
+  (bei „am Ende“ erst nach der letzten Einheit).
 
 ## 6. Rebase-Konflikte (Arbeitsbaum-Modus)
 

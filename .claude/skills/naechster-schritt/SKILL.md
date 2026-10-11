@@ -22,7 +22,7 @@ Projektplan-Status-Spalte (Marker: `konventionen.md` → „Status- & Freigabe-M
    4. `impl-plan.md` fehlt bzw. ohne `**Status:** Freigegeben` bzw. mit offenen „Offene Fragen“ → **Impl-Plan** → `/impl-plan`.
    5. `impl-plan.md` freigegeben mit offenen `[ ]`-**Schritten** → **Implementierung** → `/implementieren`.
    6. alle Impl-Schritte `[x]`, keine `zusammenfassung.md` → **Abschluss** → `/abschluss`.
-   7. `zusammenfassung.md` vorhanden, aber Projektplan-Status noch ≠ `erledigt` → Status via `mechaniker` auf `erledigt` setzen (im Arbeitsbaum-Modus vorher `git diff --quiet -- projektplan.md` — zeigt es fremde Änderungen, anhalten und den Menschen fragen — und sofort per `wt commit` festschreiben), dann zurück zu 2.
+   7. `zusammenfassung.md` vorhanden, aber Projektplan-Status noch ≠ `erledigt` → Status via `mechaniker` auf `erledigt` setzen (im Arbeitsbaum-Modus vorher `git diff --quiet -- projektplan.md` — zeigt es fremde Änderungen, anhalten und den Menschen fragen), danach die Tests und Gate-Schritte, die `projektplan.md` lesen (`~/.claude/ai-sdlc/konventionen.md` › Tests & Gates), dann sofort committen (via `mechaniker`, im Arbeitsbaum-Modus per `wt commit`), dann zurück zu 2.
 
 Hinweis: „offene `- [ ]`“ ist je nach Abschnitt zu unterscheiden — Akzeptanzkriterien und Impl-Schritte sind eigene Checkbox-Listen; für das Fragen-Gate zählt nur der Abschnitt „Offene Fragen“.
 

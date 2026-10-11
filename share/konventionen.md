@@ -79,11 +79,51 @@ issues/
   beim Kontextpaket zuerst Anker und Schrittkarten kürzen — „Vertagt“ und „Stand“ werden nie gekürzt.
   Review-Historie gehört nicht ins Artefakt, sondern als Ergebniszeile in die Zusammenfassung.
 - **Tests & Gates:** gezielt (Plan-Feld `Tests:`), im Vordergrund mit Zeitlimit; Ausgabe in eine Datei, im
-  Kontext nur Status und bei Fehler der Tail (≤ 40 Zeilen). Die Gate-Kette des Projekts einmal je Einheit
-  vor dem Commit, in einem Aufruf, Formatter anwenden statt prüfen; im Arbeitsbaum-Modus stattdessen einmal
-  je Integration und nur prüfend (`arbeitsbaeume.md` Abschnitt 4), vorher nur gezielte Tests und die
-  schnellen Gates, die den Formatter anwenden. Keine eigenen Mutationsläufe der Implementierer —
+  Kontext nur Status und bei Fehler der Tail (≤ 40 Zeilen). Keine eigenen Mutationsläufe der Implementierer —
   Testwirksamkeit belegt die Mutationsphase (`review-gate.md`).
+  - *Schnelle Gates* fahren Implementierer, Fix-Durchgänge und die Hauptsession bei trivialen Einheiten, dazu
+    gezielte Tests. Befehl: im Arbeitsbaum-Modus der Projektwert `schnelleGates`; fehlt er, ist er leer oder
+    ohne Modus die Zeile in `kontext.md` › Tests & Prüfbefehle bzw. die Verifikationsstrategie des Impl-Plans.
+    Den Formatter anwenden — ohne Arbeitsbaum-Modus nur auf die eigenen Dateien; Lint und Typcheck über das
+    ganze Projekt, ohne Arbeitsbaum-Modus nur prüfend. Befunde allein in fremden uncommitteten Dateien oder auch
+    auf HEAD ohne die eigenen Dateien (fremde Ursache) nicht beheben, sondern dem Menschen melden.
+  - *Gate-Kette:* einmal je Einheit nach Review-Gate und Fixes vor dem Commit, in einem Aufruf und nur prüfend
+    (Formatter im Prüfmodus; verändert sie Dateien, gilt sie als rot), von der Hauptsession im Hintergrund
+    gestartet (nicht `mechaniker`). Zeigt `git status --porcelain -uall` uncommittete Dateien außerhalb der
+    eigenen Pfade, läuft sie auf HEAD plus den eigenen Dateien in einem eigenen Worktree — außerhalb des Repos an
+    kurzem Pfad oder in einem Ordner, den die versionierte `.gitignore` ausschließt (eine Projektregel hat
+    Vorrang); gitignorierte Laufzeitvoraussetzungen dort bereitstellen (fehlen sie: melden); Abbau wie bei den
+    Gate-Worktrees von `wt`: Junctions und Symlinks darin zuerst als Links entfernen, nie ihre Ziele (scheitert
+    das bei einem Link oder ist der Worktree nicht vollständig lesbar: stehen lassen, nichts weiter löschen,
+    melden), dann `git worktree remove --force`. Ebenso die Nachprüfung der Drift-Prüfung; die Gegenprobe auf HEAD ohne die
+    eigenen Dateien läuft immer in einem solchen Worktree. Den geprüften HEAD (Gate-Basis bzw. Stand der letzten
+    grünen Drift-Prüfung) gibt die Hauptsession dem `mechaniker` mit. Im Arbeitsbaum-Modus läuft die Kette
+    stattdessen einmal je Integration (`arbeitsbaeume.md` Abschnitt 4).
+  - *Planungs-, Doku- und Abschluss-Commits* außerhalb einer Impl-Einheit, die weder Code noch Tests noch
+    Konfiguration ändern, fahren statt der Kette die Tests und Gate-Schritte, die die committeten Dateien lesen —
+    auch über Ordner oder Glob und bei Umbenennung für den alten Pfad (z. B. die Doku-Leser des Wächter-Sets).
+    Rot allein durch fremde uncommittete Dateien oder schon auf HEAD (fremde Ursache): nicht beheben, sondern dem
+    Menschen melden.
+- **Wächter-Set:** Tests, die Quellbaum, Repository oder Doku als Daten lesen (Architektur- und
+  Import-Scanner, Repo-Scanner, Doku- und Verzeichnisleser), ohne Tests mit Docker, Datenbank oder geteilten
+  Sperren. Den Befehl führt die Projekt-CLAUDE.md, `kontext.md` übernimmt ihn; ein neuer solcher Test gehört
+  ins Set.
+- **Drift-Prüfung** (vor dem Commit einer Impl-Einheit, ohne Arbeitsbaum-Modus): Steht HEAD unmittelbar vor dem
+  Commit nicht mehr auf der Gate-Basis (HEAD beim Start der grünen Kette), weil fremde Commits hinzukamen — auch
+  während einer Drift-Prüfung —, läuft die Kette nicht erneut, wenn (1) die fremden Commits keine eigenen Pfade
+  berühren (sonst anhalten und dem Menschen melden, wie in `review-gate.md` 3.1), (2) weder sie noch die eigene
+  Änderung Infrastruktur berühren — Testkonfiguration und -hilfen (z. B. conftest), per Konfiguration geladene
+  Test-Plugins, Abhängigkeits-Manifeste und Lockfiles, Migrationen samt neuer Nummern, CI-Workflows,
+  Gate-Skripte, Build- und Formatter-Konfiguration, Container-Konfiguration der Tests; eine Pfadliste der
+  Projekt-CLAUDE.md hat Vorrang — und (3) auf dem neuen HEAD plus den eigenen Dateien grün laufen (Nachprüfung):
+  die schnellen Gates (Formatter nur prüfend), die gezielten Tests der Einheit, die von den fremden Commits
+  geänderten oder neuen Tests und das Wächter-Set. Sonst die Kette auf dem neuen Stand erneut; ohne Wächter-Set
+  immer. Der Commit nennt im Text `Gate-Basis: <rev>`, `Drift-über: <revs>` und `Drift-Prüfung: grün`. Zeigt eine
+  spätere Kette rote Tests, die zu einem solchen Commit passen, behebt dessen Issue sie vorrangig (Bug-Issue).
+  Solange main bekannt rot ist, keine Commits per Drift-Prüfung. Markierung: `main-rot.md` direkt in der Wurzel
+  der Gate-Ablage des Hauptcheckouts (Standard `.gate-logs/main-rot.md`, nicht im Issue-Unterordner; Rev, rote
+  Tests, Verursacher); an legt sie, wer die Kette auch auf HEAD ohne die eigenen Dateien rot sieht, entfernt, wer
+  sie dort wieder grün sieht, oder der Mensch.
 - **Agenten:** immer typisiert aufrufen (`subagent_type` bzw. `agentType`), nie `general-purpose` für
   SDLC-Arbeit; Erhebung und Recherche → `rechercheur`. Je Plan-Einheit ein frischer `implementierer`;
   triviale Einheiten (eine Datei, keine Logikänderung) erledigt die Hauptsession selbst. Einen
@@ -127,8 +167,8 @@ Projektfortschritt an eindeutigen Textmarkern statt an Interpretation:
 Enthält die Projekt-CLAUDE.md den Abschnitt `## Arbeitsbäume (ai-sdlc)`, gilt `arbeitsbaeume.md`
 (Arbeitsbaum-Modus): Implementierung je Issue im eigenen Worktree auf einem kurzlebigen Branch, Integration
 je Einheit (per Plan-Zeile auch erst am Ende) per `wt integrate` (Rebase, eine Gate-Kette, Fast-Forward nach
-main); Planung, Abschluss und S-Bugfixes bleiben im Hauptcheckout. Planungs-Commits auf Dateien, die Tests
-oder Gates lesen, fahren vorher die zugehörigen Tests. Ohne den Abschnitt bleibt alles wie hier beschrieben.
+main); Planung, Abschluss und S-Bugfixes bleiben im Hauptcheckout. Ohne den Abschnitt bleibt alles wie
+hier beschrieben.
 
 ## Commit-Konvention
 

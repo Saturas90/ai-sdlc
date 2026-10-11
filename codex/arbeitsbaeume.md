@@ -71,7 +71,7 @@ und mit `nummernPruefung`, nur dort `-Gate`. `finish -Key K`, `status`: siehe �
   bestätigt der Nutzer, dass keine Sitzung mehr daran arbeitet, ohne `start`/`sync` in einer Sitzung im
   Worktree laut „Stand“ fortsetzen; vor einer geplanten Übergabe mitten im Gate „Stand“ schreiben. Umsetzung
   und Reviewschleife wie ohne Modus, vorher nur gezielte Tests und schnelle Gates (Befehl: Projektwert
-  `schnelleGates`, sonst Plan-Feld; in `kontext.md` als „Schnelle Gates (Arbeitsbaum-Modus)“, der Hauptagent
+  `schnelleGates`, sonst Plan-Feld; in `kontext.md` als „Schnelle Gates“, der Hauptagent
   gibt ihn dem Autor mit). Stand in `kontext.md`, Abhaken und Commit auf dem Branch per `wt commit`, dann
   `wt integrate` selbst aus dem Worktree (siehe „Zugriff“). Nach dem Folgeschritt je Exitcode endet die
   Sitzung; nach einer Vorab-Integration (der Branch hatte beim Einstieg nicht integrierte Commits) geht es
@@ -100,8 +100,8 @@ und mit `nummernPruefung`, nur dort `-Gate`. `finish -Key K`, `status`: siehe �
   umschreiben. `wt commit -Gate` startet der Hauptagent selbst wie `wt integrate`, nie `mechaniker`; es fährt
   die Kette in einem temporären Worktree auf HEAD plus den genannten Dateien, unbeeinflusst von fremder
   uncommitteter Arbeit, und committet genau die gegateten Inhalte, ohne Git-Hooks (eine seither geänderte
-  Arbeitskopie bleibt uncommittet, mit Hinweis). Planungs-Commits auf Dateien, die Tests oder Gates lesen,
-  fahren vorher die zugehörigen Tests. CI-Prüfungen nach `AGENTS.md`: Auslöser sind die Integration nach main
+  Arbeitskopie bleibt uncommittet, mit Hinweis). Planungs-, Doku- und Abschluss-Commits fahren vorher
+  statt der Kette die Tests und Gate-Schritte, die die Dateien lesen (`AGENTS.md`). CI-Prüfungen nach `AGENTS.md`: Auslöser sind die Integration nach main
   und autorisierte Pushes; Commits direkt auf main zählen als Integration (Code dort nur per
   `wt commit -Gate`). Den CI-Abgleich gegen `gate` führen: Fehlen relevante Prüfungen darin, blockiert das
   `wt integrate` und `wt commit -Gate`, bis `gate` sie enthält oder der Nutzer entscheidet. Commits auf dem

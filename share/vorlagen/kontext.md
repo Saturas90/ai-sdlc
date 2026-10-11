@@ -20,8 +20,9 @@
 
 ## Tests & Prüfbefehle
 - Gezielt: `<befehl für die betroffenen Tests>`
-- Schnelle Gates (Arbeitsbaum-Modus): `<befehl>` <!-- ohne Arbeitsbaum-Modus diese Zeile löschen -->
-- Gate-Kette (einmal je Einheit vor dem Commit; im Arbeitsbaum-Modus einmal je Integration): `<befehl>`
+- Schnelle Gates (je Einheit und Fix-Durchgang; Formatter anwendend, ohne Arbeitsbaum-Modus nur auf eigene Dateien; Lint und Typcheck über das ganze Projekt, ohne Arbeitsbaum-Modus nur prüfend): `<befehl>`
+- Wächter-Set (aus der Projekt-CLAUDE.md): `<befehl>` <!-- führt das Projekt keins, diese Zeile löschen -->
+- Gate-Kette (nur prüfend, Formatter im Prüfmodus; einmal je Einheit nach Review und Fixes vor dem Commit; im Arbeitsbaum-Modus einmal je Integration): `<befehl>`
 
 ## Bewusst nicht relevant
 - <Bereich/Dokument> — <warum nicht lesen>

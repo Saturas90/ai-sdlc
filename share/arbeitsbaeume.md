@@ -124,8 +124,9 @@ Konflikt-Review und Fixcheck ist dann der stärkste der betroffenen Einheiten.
   `wt integrate`; der Nachweis gilt für den Tree-Hash. Sie läuft im lebenden Worktree: Während des Gates
   arbeitet dort niemand — Dateien, die nur während des Laufs existieren, erkennt `wt` nicht (es prüft die
   Sauberkeit vor und nach dem Gate). Vorher (Implementierer, Fixes nach Review) laufen nur gezielte Tests und
-  die schnellen Gates: Projektwert `schnelleGates`, sonst das Schnell-Gate des Impl-Plans (`kontext.md` ›
-  Tests & Prüfbefehle); `implementieren` gibt den Befehl dem `implementierer` mit.
+  die schnellen Gates: Projektwert `schnelleGates`, sonst die schnellen Gates des Impl-Plans (`kontext.md` ›
+  Tests & Prüfbefehle);
+  `implementieren` gibt den Befehl dem `implementierer` mit.
 - Den Formatter wenden die schnellen Gates vor dem Commit an; die Integrations-Kette `gate` prüft nur, und
   Git-Hooks dürfen keine Dateien umschreiben. Verändert die Kette dennoch Dateien, endet `wt integrate` mit
   12 (Abschnitt 3); verändert ein Hook genannte Dateien, endet `wt commit` mit 12 „Commit <hash> angelegt,
@@ -143,7 +144,8 @@ Konflikt-Review und Fixcheck ist dann der stärkste der betroffenen Einheiten.
   gegateten Inhalte, ohne Git-Hooks; weicht eine genannte Datei im Hauptcheckout inzwischen ab, meldet es das,
   die spätere Änderung bleibt uncommittet. Wie `wt integrate` startet ihn die Hauptsession selbst im
   Hintergrund, nicht `mechaniker`.
-- Planungs-Commits auf Dateien, die Tests oder Gates lesen, fahren vor dem Commit die zugehörigen Tests.
+- Planungs-, Doku- und Abschluss-Commits fahren vor dem Commit statt der Kette die Tests und Gate-Schritte, die
+  die Dateien lesen (`konventionen.md` › Tests & Gates).
 
 ## 5. Konfliktvermeidung
 

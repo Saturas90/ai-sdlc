@@ -14,7 +14,7 @@ Basis: freigegebenes `issue.md` und ggf. `architektur.md`; Einstieg in den Code 
 Regeln:
 - Schritte nummeriert (S1, S2, …), einzeln überprüfbar, je Schritt `Dateien:`, `Kontext:` (Symbole mit Datei:Zeile und Ist-Signatur, Aufrufer/Fakes mit Datei:Zeile) und `Tests:` (Testdateien + gezielter Befehl). Was du dafür ohnehin erhebst, spart Implementierer und Reviewer die Suche; lange Karten in `kontext.md` › Schrittkarten.
 - Komplexe Schritte mit `[K]` markieren (einzeln ausführen, Prüftiefe M); Schritte mit Sicherheits-, Datenverlust-, Migrations- oder Recovery-Risiko zusätzlich `Prüftiefe: L` mit Grund.
-- Präzise, knapp, ohne Interpretationsspielraum. Enthalte eine Verifikationsstrategie samt Schnell-Gate.
+- Präzise, knapp, ohne Interpretationsspielraum. Enthalte eine Verifikationsstrategie samt schnellen Gates (Lint und Typcheck über das ganze Projekt, ohne Arbeitsbaum-Modus nur prüfend, nie auf eine Dateiliste beschränkt) und trage deren Befehl auch in `kontext.md` › Tests & Prüfbefehle ein.
 - Strikt im Scope von Issue/Architektur bleiben. Kein zusätzliches Feature.
 - Offene Fragen nur falls vorhanden, als letzter Abschnitt.
 - Bei Review-Findings: nur die genannten Punkte, nach „Korrektur nach Review“ (`konventionen.md`).

@@ -54,14 +54,51 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   erhalten; breite Läufe nach Stabilisierung, Wiederholungen nur wegen neuer Änderungen, Fehler oder offener
   Risiken. Logs in Dateien, im Kontext nur Ergebnis und relevante Fehlerausschnitte. Testlaufzeit allein ist
   kein Grund für einen zusätzlichen Agenten.
-- **CI-Prüfungen vor Git-Aktionen:** Vor jedem Commit und autorisierten Push die Projekt-Gate-Kette aus
-  `CLAUDE.md` mit den vorhandenen tatsächlichen CI-Prüfungen in `.github/workflows/` und deren aufgerufenen
-  Skripten abgleichen. Alle relevanten, lokal ausführbaren CI-Validierungen am endgültigen zu committenden
-  Stand erfolgreich ausführen; dazu gehören vorhandene Format-, Lint-, Typ-, Test- und Buildprüfungen im
-  CI-Prüfmodus samt nötigen Tool-, Runtime- und Dependency-Voraussetzungen aus CI. Gezielte Tests ersetzen
-  verpflichtende umfassendere CI-Checks nicht. Gültige Nachweise auf demselben relevanten Stand wiederverwenden;
-  nach späteren relevanten Änderungen nur dadurch ungültige Checks erneut ausführen. Fehlgeschlagene oder fehlende
-  erforderliche Prüfnachweise blockieren Commit und Push. Nicht lokal ausführbare erforderliche Prüfungen
+- **CI-Prüfungen vor Git-Aktionen:** Die Projekt-Gate-Kette aus `CLAUDE.md` mit den vorhandenen
+  tatsächlichen CI-Prüfungen in `.github/workflows/` und deren aufgerufenen Skripten abgleichen. Vor jedem
+  Commit (bei einer Implementierungseinheit einmal je Einheit, nach Review und Korrekturen; Planungs-, Doku-
+  und Abschluss-Commits siehe unten) und vor einem autorisierten Push alle relevanten, lokal ausführbaren
+  CI-Validierungen am endgültigen zu committenden Stand erfolgreich ausführen; dazu gehören vorhandene
+  Format-, Lint-, Typ-, Test- und Buildprüfungen im CI-Prüfmodus samt nötigen Tool-, Runtime- und
+  Dependency-Voraussetzungen aus CI; die Kette läuft nur prüfend (verändert sie Dateien, gilt sie als rot). Zeigt
+  `git status --porcelain -uall` uncommittete Dateien außerhalb der eigenen Pfade (weitere Sitzung im selben
+  Checkout), läuft sie auf HEAD plus den eigenen Dateien in einem eigenen Worktree, den der Hauptagent anlegt und
+  entfernt — außerhalb des Repos an kurzem Pfad oder in einem Ordner, den die versionierte `.gitignore`
+  ausschließt (eine Projektregel hat Vorrang); gitignorierte Laufzeitvoraussetzungen dort bereitstellen (fehlen
+  sie: melden); Abbau: Junctions und Symlinks darin zuerst als Links entfernen, nie ihre Ziele (scheitert das bei
+  einem Link oder ist der Worktree nicht vollständig lesbar: stehen lassen, nichts weiter löschen, melden), dann
+  `git worktree remove --force`. Ebenso die Nachprüfung der Drift-Prüfung; die Gegenprobe auf HEAD ohne die
+  eigenen Dateien läuft immer in einem solchen Worktree. Den geprüften HEAD (Gate-Basis bzw. Stand der letzten
+  grünen Drift-Prüfung) gibt der Hauptagent dem `mechaniker` stets mit. Autoren und Korrekturdurchgänge fahren
+  davor nur gezielte Tests und die schnellen Gates (Befehl: im Arbeitsbaum-Modus Projektwert `schnelleGates`;
+  fehlt er, ist er leer oder ohne Modus `kontext.md` bzw. Plan; Formatter anwendend, ohne Arbeitsbaum-Modus nur
+  auf eigene Dateien; Lint und Typcheck über das ganze Projekt, ohne Arbeitsbaum-Modus nur prüfend; Befunde
+  allein in fremden uncommitteten Dateien oder auch auf HEAD ohne die eigenen Dateien melden, nicht beheben);
+  gezielte Tests ersetzen die Kette vor dem Commit nicht. Planungs-, Doku- und Abschluss-Commits außerhalb einer
+  Implementierungseinheit, die weder Code noch Tests noch Konfiguration ändern, fahren statt der Kette die Tests
+  und Gate-Schritte, die die committeten Dateien lesen, auch über Ordner oder Glob und bei Umbenennung für den
+  alten Pfad; rot allein durch fremde uncommittete Dateien oder schon auf HEAD: melden, nicht beheben. Gültige
+  Nachweise auf demselben relevanten Stand wiederverwenden; nach späteren relevanten Änderungen nur dadurch
+  ungültige Checks erneut ausführen. „Relevant“ bei fremden Commits vor dem Commit einer Implementierungseinheit
+  (Drift-Prüfung, ohne Arbeitsbaum-Modus, nicht vor einem Push): Steht HEAD unmittelbar vor dem Commit nicht mehr
+  auf der Gate-Basis (HEAD beim Start der grünen Kette), weil fremde Commits hinzukamen — auch während der
+  Drift-Prüfung —, läuft die Kette nicht erneut, wenn die fremden Commits keine eigenen Pfade berühren (sonst
+  anhalten und melden wie unter „Abschluss ohne Bestätigungsrunde“), weder sie noch die eigene Änderung
+  Infrastruktur berühren (Testkonfiguration und -hilfen, per Konfiguration geladene Test-Plugins,
+  Abhängigkeits-Manifeste und Lockfiles, Migrationen samt neuer Nummern, CI-Workflows, Gate-Skripte, Build- und
+  Formatter-Konfiguration, Container-Konfiguration der Tests; eine Pfadliste in `CLAUDE.md` hat Vorrang) und auf
+  dem neuen HEAD plus den eigenen Dateien grün laufen (Nachprüfung): die schnellen Gates (Formatter nur
+  prüfend), die gezielten Tests der Einheit, die von den fremden Commits geänderten oder neuen Tests und das
+  Wächter-Set (Tests, die Quellbaum, Repository oder Doku als Daten lesen, ohne Docker, Datenbank oder geteilte
+  Sperren; Befehl in `CLAUDE.md`, `kontext.md` übernimmt ihn; ein neuer solcher Test gehört ins Set). Sonst die
+  Kette auf dem neuen Stand erneut, ohne Wächter-Set immer. Der Commit nennt im Text `Gate-Basis: <rev>`,
+  `Drift-über: <revs>` und `Drift-Prüfung: grün`. Zeigt eine spätere Kette dazu passende rote Tests, behebt das
+  Issue dieses Commits sie vorrangig (Bug-Issue). Solange der Hauptbranch bekannt rot ist, keine Commits per
+  Drift-Prüfung. Markierung: `main-rot.md` direkt in der Wurzel der Gate-Ablage des Hauptcheckouts (Standard
+  `.gate-logs/main-rot.md`, nicht im Issue-Unterordner; Rev, rote Tests, Verursacher); an legt sie, wer die
+  Kette auch auf HEAD ohne die eigenen Dateien rot sieht, entfernt, wer sie dort wieder grün sieht, oder der
+  Nutzer.
+  Fehlgeschlagene oder fehlende erforderliche Prüfnachweise blockieren Commit und Push. Nicht lokal ausführbare erforderliche Prüfungen
   transparent benennen und das weitere Vorgehen mit dem Nutzer klären, ohne eine grüne CI zu behaupten.
   Deployment-Jobs nicht automatisch lokal ausführen. Gibt es keine CI-Workflows, gelten die bestehenden
   Projekt-Gates; diese Regel verlangt keinen Aufbau einer CI-Pipeline. Im Arbeitsbaum-Modus regeln Auslöser und
@@ -70,9 +107,9 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   (auch keine ungeklärten bestrittenen oder gemeldeten Blocker), endet die Reviewschleife. Mittel
   grundsätzlich minimal einarbeiten; nur mit konkretem Grund und Ziel vertagen, wenn ein Fix nicht
   gefahrlos und lokal möglich ist. Niedrig nach Ermessen einarbeiten oder begründet vertagen. Danach
-  weder weitere Reviewrunde noch Fixcheck, neuer Reviewer oder unabhängige Verify-Stimme. Erforderliche
-  Tests und Pflicht-Gates nach Codeänderungen ausführen (im Arbeitsbaum-Modus gezielte Tests und schnelle
-  Gates, die volle Kette läuft in der Integration); Testergebnisse nicht als Review ausgeben.
+  weder weitere Reviewrunde noch Fixcheck, neuer Reviewer oder unabhängige Verify-Stimme. Nach
+  Codeänderungen betroffene Tests und schnelle Gates ausführen; die volle Kette läuft danach einmal vor dem
+  Commit (im Arbeitsbaum-Modus in der Integration); Testergebnisse nicht als Review ausgeben.
   Unmittelbar vor dem Fix-Durchgang HEAD, `git status --porcelain -uall` und Inhalts-Hashes mit
   `manifest-vor.txt` der jüngsten Sicherung abgleichen; bei fremden Änderungen oder unklarer Herkunft melden
   und nichts davon zurücknehmen. Kein Meldegrund ist ein neuer Commit, wenn der HEAD dieses Manifests (Basis)
@@ -133,6 +170,15 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   mit Pfaden, Scope und Prüfkriterien statt voller Gesprächshistorie übergeben. Erst gezielte Tests, breite
   Pflicht-Gates einmal am stabilen Stand; erneute Läufe nur bei Änderung, Fehler oder offenem Risiko.
   Reasoning nur für konkrete schwierige Arbeit erhöhen.
+- **Lange Läufe abwarten statt pollen:** Gate-Ketten, andere Läufe und Unteragenten (auch Reviewer und
+  Autoren) über etwa 5 min nicht im Sekundentakt abfragen. Warten mit Werkzeugen, die beim Ende zurückkehren
+  (`wait_agent` mit `timeout_ms`, `write_stdin` ohne Eingabe mit `yield_time_ms`; im Code-Modus ebenso die
+  Wartezeit der `exec`-Zelle und von `wait`), je Zyklus mindestens etwa 2 min, ab etwa 15 min Laufzeit etwa
+  5 min; ein festes `sleep` endet nicht mit dem Lauf und dauert höchstens einen solchen Zyklus. Ausgaben in
+  Logdateien, abgefragt wird nur Status bzw. Exitcode; Unteragenten melden nur Ergebnis oder Blocker, keine
+  Zwischenstände. Endet ein Lauf nach etwa der doppelten Dauer des letzten gleichen Laufs nicht oder ist seine
+  Sitzung verloren: einmal Log-Ende und Prozess prüfen und melden, nicht abbrechen (auch keinen Unteragenten,
+  der ihn fährt); solange er läuft, keinen zweiten Lauf starten und seinen Worktree nicht abbauen.
 - **Arbeitsbäume (opt-in):** Enthält die Projekt-CLAUDE.md einen Abschnitt `## Arbeitsbäume (ai-sdlc)` (bei
   vorhandener CLAUDE.md zu Beginn jeder Aufgabe prüfen), vor der ersten Änderung, Git-, Worktree- oder
   Handoff-Aktion `~/.codex/ai-sdlc/arbeitsbaeume.md` lesen und befolgen: Implementierung je Issue im eigenen

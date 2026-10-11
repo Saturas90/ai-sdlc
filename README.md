@@ -173,10 +173,14 @@ Ausnahme in [`codex/AGENTS.md`](codex/AGENTS.md): Sobald eine Reviewrunde keine 
 Kritisch/Hoch enthält, werden Mittel grundsätzlich minimal eingearbeitet (sonst mit Grund
 und Ziel vertagt), Niedrig nach Ermessen. Danach gibt es kein weiteres Review und keinen
 Fixcheck, auch wenn eine Projekt-`CLAUDE.md` wie in BreakMySystem.ai auf den Claude-Fixcheck
-verweist. Nötige Tests und Pflicht-Gates nach Codefixes sowie menschliche Phasenfreigaben
-gelten weiter. Vor Commit und autorisiertem Push gleicht Codex die Projekt-Gates mit vorhandenen
+verweist. Nach Codefixes laufen betroffene Tests und die schnellen Gates; menschliche Phasenfreigaben
+gelten weiter. Vor jedem Commit (bei einer Implementierungseinheit einmal nach Review und
+Korrekturen) und vor einem autorisierten Push gleicht Codex die Projekt-Gates mit vorhandenen
 CI-Workflows ab und verlangt gültige Nachweise für alle relevanten lokal ausführbaren Prüfungen
-am endgültigen Stand. Reviewer- und Autor-Anweisungen stehen in [`codex/agents/`](codex/agents/),
+am endgültigen Stand; Planungs-, Doku- und Abschluss-Commits ohne Code fahren nur die Tests und
+Gate-Schritte, die die Dateien lesen; vor dem Commit einer Implementierungseinheit ohne
+Arbeitsbaum-Modus gilt bei fremden Commits die Drift-Prüfung (nicht vor einem Push;
+`codex/AGENTS.md`). Reviewer- und Autor-Anweisungen stehen in [`codex/agents/`](codex/agents/),
 die Skill-Einstiege in [`codex/skills/`](codex/skills/).
 
 Änderungen an `codex/config.defaults.toml` werden beim nächsten `install.ps1` in eine

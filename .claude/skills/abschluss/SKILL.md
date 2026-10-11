@@ -18,6 +18,6 @@ Fenster, Prozesse und aus dem Worktree gestartete Programme beendet sind (`arbei
 4. Review-Gate mit Prüftiefe S (`reviewer`) auf Zusammenfassung und Scope-Abgleich (`~/.claude/ai-sdlc/review-gate.md`); Runde mit nur mittel/niedrig → einarbeiten + Fixcheck, keine weitere Runde. Was dabei vertagt wird, direkt in der Zusammenfassung nachtragen.
 5. Bei Abweichung (umgesetzt ohne Issue-Deckung): **melden** und mit dem Nutzer klären — nicht stillschweigend akzeptieren.
 6. Im `projektplan.md` den Status dieses Issues auf `erledigt` setzen (via `mechaniker`) — sonst terminiert der Orchestrator nicht und könnte das Issue erneut wählen. Im Arbeitsbaum-Modus vorher `git diff --quiet -- projektplan.md` (zeigt es fremde Änderungen, anhalten und den Menschen fragen) und direkt danach Schritt 7.
-7. Commit (via `mechaniker`): `IS-<NNN>: Abschluss & Zusammenfassung`. Im Arbeitsbaum-Modus vorher die zugehörigen Tests, wenn ein Test oder Gate die committeten Dateien liest.
+7. Commit (via `mechaniker`): `IS-<NNN>: Abschluss & Zusammenfassung`. Vorher statt der Gate-Kette die Tests und Gate-Schritte, die die committeten Dateien lesen (`~/.claude/ai-sdlc/konventionen.md` › Tests & Gates); ändert der Abschluss Code, Tests oder Konfiguration, läuft stattdessen die Gate-Kette.
 
 Danach: `/naechster-schritt` für das nächste Issue.
