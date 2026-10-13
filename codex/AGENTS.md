@@ -14,7 +14,7 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Commit auf dem Issue-Branch und danach Integration (siehe `~/.codex/ai-sdlc/arbeitsbaeume.md`).
   Parallelisierung nur auf ausdrücklichen Nutzerwunsch, nicht allein wegen verfügbarer Agenten.
   Eine Parallelgruppe im Plan ist eine Möglichkeit, keine Pflicht. Unteragenten delegieren nicht weiter.
-- **Modelle nach Verantwortung:** GPT-6 Sol/high als Standard des Hauptagenten für Koordination, normale
+- **Modelle nach Verantwortung:** GPT-6.1 Sol/ultra als Standard des Hauptagenten für Koordination, normale
   Produktionsimplementierung samt Tests und normale Architekturarbeit; die Rolle `implementierer` und
   Unteragenten ohne eigene Rolle laufen auf Sol/medium. GPT-5.6 Terra/medium für Issue-Texte und
   Dokumentationsnachzüge, Terra/high für Implementierungsplanung und normale Kaltreviews. Eine
@@ -23,8 +23,8 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   sind insbesondere `[K]`, Security, Berechtigungen, Secrets, Datenverlust, Recovery, Migrationen,
   Konkurrenz/Crash-Konsistenz und Änderungen an verbindlichen Sicherheitsverträgen. Ein redaktioneller
   Nachzug bereits freigegebener Entscheidungen bleibt Terra-Arbeit. GPT-6 Luna/low erledigt exakt
-  vorgegebene mechanische Befehle und Git-Aktionen. `ultra`/`max` und Schnellmodus nur bei ausdrücklichem
-  Nutzerwunsch.
+  vorgegebene mechanische Befehle und Git-Aktionen. Schnellmodus sowie `ultra`/`max` über diesen
+  Standard hinaus nur bei ausdrücklichem Nutzerwunsch.
 - **Delegation gezielt:** Arbeit lokal erledigen, wenn das aktive Modell zur Verantwortung passt;
   bei Sol als Hauptagent normale Implementierung lokal erledigen, sofern kein unabhängiger
   Autor nötig ist. Rollenwechsel für kritische Aufgaben, Dokumentationsarbeit, unabhängige
