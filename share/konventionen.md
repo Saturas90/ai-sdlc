@@ -128,7 +128,8 @@ issues/
   sie dort wieder grün sieht oder den Fix der roten Tests mit grüner Kette committet hat — nur, wenn sie seit dem
   Start dieser Kette unverändert ist, sonst melden —, oder der Mensch.
 - **Agenten:** immer typisiert aufrufen (`subagent_type` bzw. `agentType`), nie `general-purpose` für
-  SDLC-Arbeit; Erhebung und Recherche → `rechercheur`. Je Plan-Einheit ein frischer `implementierer`;
+  SDLC-Arbeit; Erhebung und Recherche → `rechercheur`. Je Plan-Einheit ein frischer `implementierer`
+  (`[K]` und `Prüftiefe: L`: `implementierer-kritisch`; max-Eskalation: `review-gate.md` Abschnitt 4);
   triviale Einheiten (eine Datei, keine Logikänderung) erledigt die Hauptsession selbst. Einen
   Autor-Agenten nur für die Fixrunden derselben Einheit fortsetzen, höchstens zweimal (sein Kontext wächst
   je Runde um 100–200K) — danach frisch, mit Findings und `kontext.md` als Übergabe.

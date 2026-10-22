@@ -109,7 +109,7 @@ und mit `nummernPruefung`, nur dort `-Gate`. `finish -Key K`, `status`: siehe �
   Issue-Branch folgen nach gezielten Tests, schnellen Gates und Review.
 - **10 Konflikt** (aus `wt start`, `wt sync` oder `wt integrate`): Rebase abgebrochen, Branch unverändert;
   ausgegeben werden Konfliktdateien, `ALTE_BASIS` und `ALTER_TIP`. Im Worktree `git rebase <hauptbranch>`;
-  Code-Konflikte löst ein Autor nach Modellrouting (kritisch `implementierer_kritisch`) mit Konfliktliste und
+  Code-Konflikte löst ein Autor nach Modellrouting (kritisch bzw. nach max-Eskalation `implementierer_kritisch`) mit Konfliktliste und
   `kontext.md` nur in den Konfliktdateien, reine Textkonflikte der Hauptagent, der auch `git add` und
   `git -c core.editor=true rebase --continue` ausführt. Ein Halt ohne offene Konfliktdatei (rerere spielte
   eine frühere Auflösung ein) gilt ebenfalls als Konflikt. Danach prüft der Reviewer-Typ der Einheit

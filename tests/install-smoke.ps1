@@ -51,6 +51,7 @@ trust_level = "trusted"
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\reviewer-architektur.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\mutations-pruefer.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\rechercheur.md')) -or
+        -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'agents\implementierer-kritisch.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\vorlagen\kontext.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\konventionen.md')) -or
         -not (Test-Path -LiteralPath (Join-Path $claudeTarget 'ai-sdlc\tools\verbrauch_auswerten.py')) -or

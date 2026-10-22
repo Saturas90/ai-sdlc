@@ -73,7 +73,7 @@ nächste Session. Jeder Agent steigt dort ein, statt das Projekt erneut zu durch
 - **Keine Bestätigungsrunde (Claude Code):** Liefert eine Runde nur mittel/niedrig, werden diese eingearbeitet und
   nur ihr Diff per **Fixcheck** (ein Agent) geprüft; ein fehlerhafter Fix wird zurückgenommen.
   Folgerunden: Runde 1–2 voller Kaltreview, ab Runde 3 Delta; Runde 3 mit Blockern ⇒ Entscheidung des
-  Menschen (Konvergenz-Stopp).
+  Menschen (Konvergenz-Stopp), bei Impl-Einheiten mit der max-Eskalation als Option.
 - **Offene Fragen** stehen am Ende und werden — soweit schon im Entwurf — **vor** dem ersten Review beantwortet.
 - **Out of Scope** referenziert ein zukünftiges Issue _oder_ wird dauerhaft abgelehnt.
 - **Kein Scope-Creep**; der Abschluss gleicht Issue ↔ (Architektur) ↔ Plan ↔ Umsetzung ab.
@@ -127,6 +127,7 @@ ihr eigenes Modell mitbringen. So bleibt das teure Modell dort, wo es zählt.
 | `architekt`           | Architekturpläne, eindeutig | **opus** / xhigh | Hoher Einsatz, keine Mehrdeutigkeit |
 | `impl-planer`         | Implementierungsplan | **sonnet** / high | Präzise Planung, gutes P/L |
 | `implementierer`      | Code umsetzen | **sonnet** / medium | Masse der Arbeit → Opus-Kontingent schonen |
+| `implementierer-kritisch` | `[K]`- und `Prüftiefe: L`-Einheiten umsetzen | **opus** / xhigh (Eskalation: max) | Komplex oder riskant → stärkster Autor; max nur nach Konvergenz-Stopp |
 | `reviewer`            | Standard-Review | **sonnet** / high | Zweites Augenpaar, ≥ Implementierer |
 | `reviewer-kritisch`   | Review riskanter Fälle | **opus** / high | `[K]`/Sicherheit/Daten, Kaltreview-Linsen, Verify — stärker als der Produzent |
 | `reviewer-architektur`| Review von Architekturplänen | **opus** / xhigh | Gleicher Effort wie `architekt`, nie schwächer als der Erzeuger |
@@ -137,7 +138,8 @@ ihr eigenes Modell mitbringen. So bleibt das teure Modell dort, wo es zählt.
 **Reviewer-Modell — bewusst gewählt:** Der Reviewer ist nie schwächer als der erzeugende Agent,
 weder im Modell noch im Effort. Standard-Reviews laufen auf Sonnet (gleich stark wie der
 Implementierer, aber unabhängig). `[K]`-Schritte und sicherheits-/datenkritischer Code eskalieren
-automatisch auf `reviewer-kritisch` (**opus**/high), Architekturpläne auf `reviewer-architektur`
+automatisch auf `reviewer-kritisch` (**opus**/high, bei Einheiten von `implementierer-kritisch` xhigh),
+Architekturpläne auf `reviewer-architektur`
 (**opus**/xhigh) — so rutscht bei den riskanten Stellen nichts durch. Haiku wird **nie** für
 Reviews genutzt, nur für Mechanik. Die Prüfpunkte stehen direkt im Body der drei Reviewer-Agenten
 (spart je Spawn einen Lese-Schritt); `share/review-checkliste.md` verweist nur noch dorthin. Jedes
@@ -148,6 +150,15 @@ Modell und Effort pro Agent stehen im Frontmatter der Datei unter `.claude/agent
 sich frei anpassen (`model: opus|sonnet|haiku`, `effort: low|medium|high|xhigh`). Die Aliase
 zeigen auf die jeweils aktuelle Modellversion. Läuft die Session selbst auf **Sonnet**, ist die
 Orchestrierung günstig; `architekt` zieht bei Bedarf Opus.
+
+**max-Eskalation:** `max` steht in keinem Frontmatter. Bestätigt eine Impl-Einheit ab Runde 3 noch
+Blocker (Konvergenz-Stopp), bietet der Konvergenzbericht neben den übrigen Optionen die Eskalation an:
+ein frischer `implementierer-kritisch` übernimmt die offenen Blocker mit `effort: max`, alle Reviews der
+Einheit laufen über `reviewer-kritisch` ebenfalls auf max (per `effort`-Parameter des Spawns; die
+Mutationsphase bleibt bei xhigh), höchstens einmal je Einheit.
+Automatisch greift sie nur mit ausdrücklicher Eskalations-Freigabe (Projekt-CLAUDE.md, Memory oder in der
+Session, etwa für einen Nachtlauf) und nur bei rein technischen Blockern
+([`share/review-gate.md`](share/review-gate.md) Abschnitt 4).
 
 **Workflow-Skripte** (Prüftiefe M/L) folgen den Mustern in
 [`share/review-gate.md`](share/review-gate.md): jeder `agent()`-Aufruf braucht einen `agentType`

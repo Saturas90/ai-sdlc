@@ -6,7 +6,7 @@ description: Führt ein eigenständiges Review eines Artefakts oder Diffs durch 
 # Skill: Review
 
 1. Gegenstand bestimmen: Datei(en) oder aktueller Diff + zugehöriger Kontext (Issue / Architektur / Impl-Plan / `kontext.md`).
-2. Prüftiefe nach `~/.claude/ai-sdlc/review-gate.md` Abschnitt 1 wählen (S: ein Reviewer-Spawn; M/L: Workflow nach den Workflow-Mustern). Reviewer nach Risiko: Standard → **`reviewer`** (sonnet); `[K]`, `Prüftiefe: L` oder sicherheits-/datenkritisch → **`reviewer-kritisch`** (opus); Architekturplan oder ADR → **`reviewer-architektur`** (opus, xhigh).
+2. Prüftiefe nach `~/.claude/ai-sdlc/review-gate.md` Abschnitt 1 wählen (S: ein Reviewer-Spawn; M/L: Workflow nach den Workflow-Mustern). Reviewer nach Risiko: Standard → **`reviewer`** (sonnet); `[K]`, `Prüftiefe: L` oder sicherheits-/datenkritisch → **`reviewer-kritisch`** (opus; Einheiten von `implementierer-kritisch` mit `effort: xhigh`, nach max-Eskalation `max`); Architekturplan oder ADR → **`reviewer-architektur`** (opus, xhigh).
 3. Prüfpaket übergeben (Abschnitt 2). Der Reviewer liefert Findings: je `Kategorie | Fundstelle | Zitat | Problem | Vorschlag`, plus `Blockierend: ja/nein`.
 4. Findings kompakt und dedupliziert zurückgeben.
 

@@ -21,7 +21,12 @@ bei einem bestrittenen Blocker in Stufe S auch Muster 1 und 3.
 Reviewer nach Gegenstand, nie schwächer als der erzeugende Sub-Agent (Modell **und** Effort):
 Architekturplan oder ADR im Gegenstand → `reviewer-architektur` (opus, xhigh), auch in Stufe S; `[K]`,
 `Prüftiefe: L` oder sicherheits-/datenkritischer Inhalt → `reviewer-kritisch` (opus, high); sonst
-`reviewer` (sonnet, high). Erzeugnisse der Hauptsession (Projektplan, Zusammenfassung) prüft `reviewer`.
+`reviewer` (sonnet, high). Einheiten von `implementierer-kritisch` (opus, xhigh) prüft `reviewer-kritisch` mit
+`effort: xhigh`, nach einer max-Eskalation (Abschnitt 4) mit `effort: max`, auch eine vorher normale Einheit —
+jeder Spawn zur Einheit (Reviewer, Linsen, Stimmen, Fixcheck, Rebase-Review) mit explizitem `effort`-Parameter
+im Agent-Tool bzw. `agent()`. Die Mutationsphase (`mutations-pruefer`) bleibt bei xhigh: Sie misst die
+Testwirksamkeit, nicht die Lösung des Autors.
+Erzeugnisse der Hauptsession (Projektplan, Zusammenfassung) prüft `reviewer`.
 Haiku reviewt nie. Eine höhere Stufe als die Tabelle nur mit Begründung im Chat bzw. per `log()` —
 allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
 
@@ -58,7 +63,8 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
 4. **Session-Wechsel mitten im Gate:** Am Ende jeder Runde und vor dem Fixcheck schreibt die Hauptsession
    „Stand“ in `kontext.md` (bzw. die dort verwiesene projekteigene Übergabe-Ablage): Gegenstand, Prüftiefe,
    Runde, Gate-Schritt (Review / Korrektur / Fixcheck), offene Findings (als Tabelle oder Verweis auf eine
-   Datei in der Gate-Ablage), Unterordner der jüngsten Sicherung, ggf. die Stufen-Abbildung. Eine neue Session
+   Datei in der Gate-Ablage), Unterordner der jüngsten Sicherung, ggf. die Stufen-Abbildung und die
+   max-Eskalation (ab Runde, gewählte Runden, Freigabe-Grundlage). Eine neue Session
    setzt dort fort, statt den Entwurf neu zu erzeugen (im Arbeitsbaum-Modus: Fortsetzung nach
    `arbeitsbaeume.md` Abschnitt 2).
 5. **Gate-Ablage und Sicherung:** Sicherungen, Findings-Tabellen und Fix-Protokoll liegen in einem
@@ -153,8 +159,22 @@ den Fixcheck.
 - **Konvergenz-Stopp:** Bestätigt Runde 3 oder eine spätere Runde noch Blocker, nicht weiter feilen. Dem
   Menschen einen Konvergenzbericht vorlegen (je Runde erhoben / bestätigt / widerlegt, Anteil Regressionen
   eigener Fixes, wiederkehrende Themen) mit Optionen: Grundsatzentscheidung statt Wortlaut-Feilen, Variante
-  streichen, Scope schneiden bzw. Issue teilen, bewusst weitere Runden (mit Anzahl). Weiter erst nach seiner
-  Entscheidung; nach den gewählten Runden gilt der Stopp erneut.
+  streichen, Scope schneiden bzw. Issue teilen, bewusst weitere Runden (mit Anzahl), bei Impl-Einheiten die
+  max-Eskalation (nächster Punkt, mit Anzahl der Runden). Weiter erst nach seiner Entscheidung (Ausnahme:
+  automatische max-Eskalation, nächster Punkt); nach den gewählten Runden gilt der Stopp erneut.
+- **max-Eskalation (nur Impl-Einheiten):** Ein frischer `implementierer-kritisch` mit `effort: max` übernimmt
+  die offenen Blocker (Übergabe: deduplizierte Findings, wiederkehrende Themen aus dem Konvergenzbericht,
+  `kontext.md`) und ist ab dann Autor der Einheit — auch für Fixcheck-Einarbeitung, Gate-Fehler und jeden
+  frischen Spawn. Ab dann prüft jeden Review-Spawn zur Einheit `reviewer-kritisch` mit `effort: max`, auch bei
+  einer vorher normalen Einheit (Abschnitt 1); Prüftiefe und Rundenzählung bleiben. Eine Einheit eskaliert
+  höchstens einmal; danach bleiben die übrigen Optionen.
+  Automatisch statt als Option nur mit **Eskalations-Freigabe** (opt-in; erteilt wie die stehende Freigabe in
+  `konventionen.md`: Projekt-CLAUDE.md, gespeicherte Nutzervorgabe/Memory oder ausdrücklich in der Session)
+  und nur, wenn alle offenen Blocker technisch sind (Fehlverhalten, rote Tests, ungelöste Randfälle) — nie,
+  wenn ein Blocker Scope, Akzeptanzkriterien, Verträge, freigegebene Entscheidungen oder den Plan betrifft
+  oder ein gemeldeter Fix eine Entscheidung braucht; dann zwei Runden, danach gilt der Stopp erneut (ohne
+  weitere Eskalation, der Mensch entscheidet). Konvergenzbericht und Eskalation nennt die Hauptsession dem
+  Menschen trotzdem (Chat und „Stand“).
 - **Findings-Flut:** Mehr als 10 Blocker oder mehr als 40 Findings in einer Runde (Dubletten grob
   zusammengefasst) heißen: Gegenstand zu groß oder unreif. Nicht einzeln verifizieren und abarbeiten,
   sondern dem Menschen melden und schneiden bzw. grundsätzlich überarbeiten.
@@ -196,10 +216,10 @@ Verbrauchsauswertung gruppiert danach.
 
    | Rolle | `agentType` |
    |---|---|
-   | Linse, Fixcheck, Verify-Stimme (auch Bündel) | `reviewer-kritisch`; Nicht-[K]-Artefakte von Sonnet-Erzeugern auch `reviewer` |
+   | Linse, Fixcheck, Verify-Stimme (auch Bündel) | `reviewer-kritisch`; Nicht-[K]-Artefakte von Sonnet-Erzeugern auch `reviewer`; `effort` laut Abschnitt 1 |
    | **Gegenstand Architekturplan** — alle Linsen, Stimmen und der Fixcheck (Vorrang vor der Zeile darüber) | `reviewer-architektur` |
    | Mutation (Testwirksamkeit) — immer allein in eigener serieller Phase, nie parallel zu lesenden Linsen | `mutations-pruefer` |
-   | Überarbeiten, Fixen | der erzeugende Agent (`issue-autor`, `architekt`, `impl-planer`, `implementierer`) |
+   | Überarbeiten, Fixen | der erzeugende Agent (`issue-autor`, `architekt`, `impl-planer`, `implementierer`, `implementierer-kritisch`) |
    | Erheben, Recherche in Repo **oder Web** | `rechercheur`; reine Dateisuche auch `Explore` mit explizitem `effort`; Fragen zu Claude Code: `claude-code-guide` |
    | Abhaken, Committen | `mechaniker` |
 

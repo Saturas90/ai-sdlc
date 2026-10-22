@@ -24,7 +24,8 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Konkurrenz/Crash-Konsistenz und Änderungen an verbindlichen Sicherheitsverträgen. Ein redaktioneller
   Nachzug bereits freigegebener Entscheidungen bleibt Terra-Arbeit. GPT-6 Luna/low erledigt exakt
   vorgegebene mechanische Befehle und Git-Aktionen. Schnellmodus sowie `ultra`/`max` über diesen
-  Standard hinaus nur bei ausdrücklichem Nutzerwunsch.
+  Standard hinaus nur bei ausdrücklichem Nutzerwunsch (dazu zählt die gewählte oder freigegebene
+  max-Eskalation unter „Konvergenz“).
 - **Delegation gezielt:** Arbeit lokal erledigen, wenn das aktive Modell zur Verantwortung passt;
   bei Sol als Hauptagent normale Implementierung lokal erledigen, sofern kein unabhängiger
   Autor nötig ist. Rollenwechsel für kritische Aufgaben, Dokumentationsarbeit, unabhängige
@@ -128,7 +129,16 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Menschliche Phasenfreigaben bleiben erforderlich.
 - **Konvergenz:** Bestätigt Runde 3 oder eine spätere Runde noch Blocker, anhalten und dem Nutzer Verlauf
   und Optionen vorlegen (Grundsatzentscheidung, Variante streichen, Scope schneiden, weitere Runden mit
-  Anzahl); nach den gewählten Runden gilt der Stopp erneut. Mehr als 10 Blocker oder mehr als 40 Findings in
+  Anzahl, bei Implementierungseinheiten die max-Eskalation mit Anzahl der Runden); nach den gewählten Runden
+  gilt der Stopp erneut. max-Eskalation: ein frischer `implementierer_kritisch` mit Astra und der höchsten
+  verfügbaren Reasoning-Stufe (`ultra`/`max`, per Spawn-Parameter bzw. explizit im Auftrag) übernimmt die offenen Blocker (Findings, wiederkehrende Themen,
+  `kontext.md`) und ist ab dann Autor der Einheit; jedes Review der Einheit läuft auf derselben Stufe mit
+  `reviewer_kritisch`; höchstens einmal je Einheit, in „Stand“ festhalten. Automatisch statt als Option nur
+  mit ausdrücklicher Eskalations-Freigabe des Nutzers (`CLAUDE.md`, gespeicherte Vorgabe oder in der Sitzung)
+  und nur, wenn alle offenen Blocker technisch sind (Fehlverhalten, rote Tests, ungelöste Randfälle) — nie bei
+  Blockern zu Scope, Akzeptanzkriterien, Verträgen, freigegebenen Entscheidungen oder Plan oder bei
+  Entscheidungsbedarf; dann zwei Runden, danach gilt der Stopp erneut (ohne weitere Eskalation), Verlauf dem
+  Nutzer trotzdem melden. Mehr als 10 Blocker oder mehr als 40 Findings in
   einer Runde heißen: Gegenstand zu groß, dem Nutzer melden. Für Einheiten mit `Prüftiefe: L` sieht Codex
   keinen Mutationsnachweis vor: vor der Umsetzung dem Nutzer melden.
 - **Korrekturen minimal:** Nur die übergebenen Findings, lokal; Formulierungsvorschläge aus Findings nicht

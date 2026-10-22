@@ -83,7 +83,8 @@ Konflikt-Review und Fixcheck ist dann der stärkste der betroffenen Einheiten.
 - **10 Konflikt** (aus `wt integrate`, `wt start` oder `wt sync`): Das Skript hat den Rebase abgebrochen; der
   Branch ist unverändert, ausgegeben werden die Konfliktdateien sowie `ALTE_BASIS` und `ALTER_TIP`. Im
   Worktree (`EnterWorktree(path)`, Pfad aus `WORKTREE=` bzw. `wt status`) `git rebase <hauptbranch>`;
-  Code-Konflikte löst ein frischer `implementierer` mit Konfliktliste und `kontext.md`, reine
+  Code-Konflikte löst ein frischer Autor nach Einheitstyp (`implementierer`, bei `[K]`/`Prüftiefe: L` oder
+  nach max-Eskalation `implementierer-kritisch`) mit Konfliktliste und `kontext.md`, reine
   Text-Konflikte die Session; `git add` und `rebase --continue` führt die Session aus. Danach Review der
   Auflösung (`review-gate.md` Abschnitt 6); Korrekturen daraus committet die Hauptsession per
   `git commit --amend --no-edit -- <Dateien>` (mehrere Commits auf dem Branch: eigener Commit, Abschnitt 2).
@@ -126,7 +127,7 @@ Konflikt-Review und Fixcheck ist dann der stärkste der betroffenen Einheiten.
   Sauberkeit vor und nach dem Gate). Vorher (Implementierer, Fixes nach Review) laufen nur gezielte Tests und
   die schnellen Gates: Projektwert `schnelleGates`, sonst die schnellen Gates des Impl-Plans (`kontext.md` ›
   Tests & Prüfbefehle);
-  `implementieren` gibt den Befehl dem `implementierer` mit.
+  `implementieren` gibt den Befehl dem Autor (`implementierer` bzw. `implementierer-kritisch`) mit.
 - Den Formatter wenden die schnellen Gates vor dem Commit an; die Integrations-Kette `gate` prüft nur, und
   Git-Hooks dürfen keine Dateien umschreiben. Verändert die Kette dennoch Dateien, endet `wt integrate` mit
   12 (Abschnitt 3); verändert ein Hook genannte Dateien, endet `wt commit` mit 12 „Commit <hash> angelegt,
