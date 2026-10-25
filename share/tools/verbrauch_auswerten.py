@@ -21,10 +21,14 @@ PREISE = {
     "claude-opus-5-5": (4.0, 20.0, 0.20),
     "claude-opus-5": (5.0, 25.0, 0.50),
     "claude-opus-4-8": (5.0, 25.0, 0.50),
+    "claude-sonnet-5-5": (2.0, 10.0, 0.20),
     "claude-sonnet-5": (2.0, 10.0, 0.20),
     "claude-sonnet-4-6": (3.0, 15.0, 0.30),
+    "claude-haiku-5-5": (0.10, 0.50, 0.01),
     "claude-haiku-4-5": (1.0, 5.0, 0.10),
 }
+# Preisstaffel nach Promptlänge (input + cache read + cache write): ab Grenze gilt der Faktor auf alle Sätze
+STAFFEL = {"claude-haiku-5-5": (100_000, 5.0)}
 
 
 def preis_schluessel(modell):
@@ -40,6 +44,10 @@ def kosten(modell, u):
     if k is None:
         return {"input": 0.0, "cwrite": 0.0, "cread": 0.0, "output": 0.0}
     pin, pout, pread = PREISE[k]
+    grenze, faktor = STAFFEL.get(k, (None, 1.0))
+    prompt = sum((u.get(n, 0) or 0) for n in ("input_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"))
+    if grenze is not None and prompt > grenze:
+        pin, pout, pread = pin * faktor, pout * faktor, pread * faktor
     cc = u.get("cache_creation") or {}
     c5 = cc.get("ephemeral_5m_input_tokens")
     c1 = cc.get("ephemeral_1h_input_tokens")
