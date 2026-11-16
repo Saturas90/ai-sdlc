@@ -42,6 +42,15 @@ Wird nach `~/.claude/` und `~/.codex/` installiert und dann in **anderen** Proje
   Vorlage `kontext.md` (Stand), `review-gate.md` 2.4, das README, auf der Codex-Seite „Modelle nach
   Verantwortung“, `codex/arbeitsbaeume.md` (Fall 10), `implementierer_kritisch` und der Codex-Skill
   `implementieren` — bei Änderungen alle mitziehen.
+- **Test-Ökonomie:** Claude-Regel in `share/konventionen.md` › Test-Ökonomie, Codex-Regel vollständig in
+  `codex/AGENTS.md` „Test-Ökonomie“. Kurzfassungen tragen `impl-planer`, `implementierer`,
+  `implementierer-kritisch` (dazu Grenz- und Fehlerpfade der kritischen Kanten), die drei Reviewer (Prüfpunkt
+  Tests; `reviewer-architektur` nur zur Teststrategie), `mutations-pruefer` (Leitfrage, Lösch-Einheit,
+  `äquivalent`), `review-gate.md` (Einleitung, Muster 6), die Skills `impl-plan` und `implementieren`
+  (Lösch-Einheit), die
+  Vorlage `impl-plan.md`, das README, die Codex-Rollen
+  `impl_planer`, `implementierer`, `implementierer_kritisch`, `reviewer`, `reviewer_kritisch` und die
+  Codex-Skills `impl-plan` und `implementieren` — bei Änderungen alle mitziehen.
 - Nach Änderungen: `install.ps1` erneut ausführen. Codex-Dateien mit abweichendem Inhalt
   werden vorher unter `~/.codex/ai-sdlc-backups/` gesichert, eigene Dateien in kopierten
   Claude-Verzeichnissen unter `~/.claude/ai-sdlc-backups/`.

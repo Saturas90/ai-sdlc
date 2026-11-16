@@ -2,7 +2,7 @@
 
 Diese Datei enthält die geteilten Regeln des Workflows. Sie wird von allen Skills und
 Sub-Agenten referenziert — **nirgends duplizieren**, nur hier ändern. Ausnahme: knappe Kurzfassungen in
-den Agenten-Bodies (Reviewer-Prüfpunkte, Lese- und Fix-Regeln), damit nicht jeder Spawn diese Datei lesen
+den Agenten-Bodies (Reviewer-Prüfpunkte, Lese-, Fix- und Testregeln), damit nicht jeder Spawn diese Datei lesen
 muss. Definiert die Projekt-CLAUDE.md eigene Regeln, haben diese Vorrang.
 
 ## Verzeichnis- & Namensschema (im Zielprojekt)
@@ -140,6 +140,48 @@ issues/
   Arbeitsbaum-Modus liegt beides für ein Issue mit Worktree dort, siehe `wt status`). Ab geschätzt ~200K
   Kontext am nächsten Einheits- bzw. Rundenende übergeben und eine neue Session vorschlagen; über ~300K
   keine neue Einheit beginnen.
+
+## Test-Ökonomie
+
+Tests sichern Verhalten ab, keine Codezeilen. Jeder Test kostet Laufzeit in jeder Gate-Kette, Kontext und
+Aufwand bei jedem Umbau; ein neuer Test braucht deshalb einen Grund. Testregeln der Projekt-CLAUDE.md gehen vor.
+„Einheit“ meint hier die getestete Klasse bzw. das getestete Modul, nicht die Plan-Einheit.
+
+- **Gegenstand:** beobachtbares Verhalten an der Grenze der getesteten Einheit — Ergebnis, Zustand (auch nach
+  Abbruch oder Crash), Fehler, Port-Aufrufe und ihre Reihenfolge mit fachlicher Wirkung —, abgeleitet aus
+  Akzeptanzkriterien, Verträgen und Fehlerpfaden mit eigener Wirkung. Nicht: interne Zwischenschritte, private Hilfen, Aufrufreihenfolgen ohne
+  fachliche Bedeutung, bloßes Durchreichen von Feldern oder Parametern, Standardwerte ohne Vertragsrang.
+- **Ein Test je Verhalten:** Varianten desselben Verhaltens parametrisieren. Vor einem neuen Test prüfen, ob
+  ein bestehender den Fall per Parameter oder Assertion aufnimmt — dann ihn erweitern.
+- **Verdrahtung** (Bootstrap, Composition Root, Fabriken): ein Smoke-Test je Einstiegspunkt über die echte
+  Zusammensetzung, kein Test je Abhängigkeit oder Parameter.
+- **Wortlaut:** Tests, die Doku, Meldungen oder Quelltext als Text prüfen, nur wo der Wortlaut Vertrag ist
+  (normative Doku, Ausgabeformat für Dritte) oder ein Scanner bzw. Leser eine Architektur-, Import-, Projekt-
+  oder Doku-Regel durchsetzt (Wächter-Set). Dass eine Ausgabe bestimmte Inhalte nicht enthält (z. B.
+  Geheimnisse), ist Verhalten, kein Wortlaut.
+- **Regressionsfall zu einem Finding** nur, wenn es ein Fehlverhalten belegt, das unbemerkt zurückkehren
+  kann — als Erweiterung eines bestehenden Tests, sonst als neuer Test. Findings zu Gliederung, Benennung oder
+  Stil bekommen keinen.
+- **Dichte nach Risiko:** Plan-Einheiten mit `[K]` oder `Prüftiefe: L` und sicherheits- oder datenkritischer
+  Code testen die Grenz- und Fehlerpfade ihrer kritischen Kanten gründlich; sonst der Hauptpfad und die
+  Fehlerpfade mit eigener Wirkung.
+- **Bestand:** Bestehende Tests nur anpassen, soweit das Issue ihr geprüftes Verhalten oder die genutzte
+  Schnittstelle ändert oder entfernt; nie nebenbei löschen, zusammenlegen oder umschreiben — erlaubt sind das
+  Erweitern um Fälle und das Korrigieren einer nachweislich falschen oder wirkungslosen Assertion zum selben
+  Verhalten. Testballast (Tests gegen die Punkte oben) wird nur in eigenen Aufräum-Issues abgebaut.
+  Zusammenlegen oder Umschreiben heißt dort Ersetzen: neue oder erweiterte Tests in vorangehenden
+  Plan-Einheiten, das Löschen in einer eigenen Plan-Einheit, die nur löscht und nie gebündelt wird
+  (Lösch-Einheit); der Plan nennt je zu löschendem Test jedes Verhalten, das er prüft. Vor der Lösch-Einheit
+  läuft auf dem committeten Stand davor die Mutationsphase (`review-gate.md` Muster 6): je Verhalten die
+  feinste Mutation, die den zu löschenden Test rot macht, und dieselbe Mutation gegen die verbleibenden Tests
+  (zu löschende abgewählt). Welche Tests die Lösch-Einheit löscht, entscheidet der Mensch anhand dieses
+  Protokolls (Gate-Ablage); ohne seine Entscheidung wird nichts gelöscht.
+- **Review:** Testballast in neu hinzugefügten Tests bzw. Testfällen ist mittel/niedrig, in bestehenden Tests
+  höchstens niedrig mit Hinweis auf ein Aufräum-Issue. Bestehende Tests gelöscht, zusammengelegt oder
+  umgeschrieben, ohne dass das Issue ihr Verhalten oder ihre Schnittstelle ändert (die erlaubten Fälle oben
+  ausgenommen), ist hoch — außer in der Lösch-Einheit eines Aufräum-Issues für Tests, deren Löschung der
+  Mensch anhand des Mutationsprotokolls entschieden hat; im Plan-Review genügen die Verhaltensliste je zu
+  löschendem Test und die eigene Lösch-Einheit.
 
 ## Freigabe-Prinzip
 

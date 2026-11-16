@@ -18,11 +18,13 @@ Jeder Schritt ist einzeln überprüfbar. `[K]` = komplex ⇒ einzeln ausführen,
 `Prüftiefe: L (<Grund>)` nur bei Sicherheit, Datenverlust, Migration oder Recovery; schließt `[K]` ein.
 `Kontext:` nennt, was der Implementierer lesen muss — Symbole mit Datei:Zeile und Ist-Signatur,
 Aufrufer/Fakes mit Datei:Zeile; lange Karten stehen in `kontext.md` › Schrittkarten.
+`Tests:` nennt das abgesicherte Verhalten (Akzeptanzkriterium, Vertrag, Fehlerpfad) und erweitert bestehende
+Tests vor neuen (`konventionen.md` › Test-Ökonomie).
 
 - [ ] S1: <Aktion · erwartetes Ergebnis>
   - Dateien: <ändern / neu / löschen>
   - Kontext: <Symbol — Datei:Zeile; Aufrufer — Datei:Zeile>
-  - Tests: <Testdateien · gezielter Befehl>
+  - Tests: <abgesichertes Verhalten/AK · Testdateien (erweitert/neu) · gezielter Befehl>
 - [ ] S2 [K]: <…>
 - [ ] S3 [K] · Prüftiefe: L (<Grund>): <…>
 

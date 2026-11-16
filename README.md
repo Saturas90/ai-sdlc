@@ -79,6 +79,10 @@ nächste Session. Jeder Agent steigt dort ein, statt das Projekt erneut zu durch
 - **Kein Scope-Creep**; der Abschluss gleicht Issue ↔ (Architektur) ↔ Plan ↔ Umsetzung ab.
 - **Kontext-Ökonomie:** Kontextpaket, Lese-Disziplin, Größenbudgets, frischer Implementierer je
   Einheit, eine Session je Einheit (Details in den Konventionen).
+- **Test-Ökonomie:** Tests sichern Verhalten an der Grenze der getesteten Klasse bzw. des Moduls ab, je
+  Verhalten ein Test (Varianten parametrisiert), Regressionsfälle nur zu belegtem Fehlverhalten; Testballast
+  ist ein Review-Befund (mittel/niedrig). Bestehende Tests fallen nur in eigenen Aufräum-Issues weg; welche,
+  entscheidet der Mensch anhand eines Mutationsprotokolls (fängt ein verbleibender Test jedes ihrer Verhalten?).
 - Commits: `IS-<NNN>: <kurz>` je Planungsartefakt und je review-gesicherter Impl-Einheit.
 
 Vollständige Regeln: [`share/konventionen.md`](share/konventionen.md) · Gate: [`share/review-gate.md`](share/review-gate.md).

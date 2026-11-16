@@ -156,6 +156,37 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Fundstellen Datei:Zeile), abgelehnt mit Grund, gemeldet oder vertagt mit Grund und Ziel. Nach einer
   blockerfreien Runde Mittel grundsätzlich minimal einarbeiten und nur bei nicht gefahrlos lokalem Fix
   vertagen; Niedrig nach Ermessen. Neu erkannte Blocker und Entscheidungsbedarf melden, nicht vertagen.
+- **Test-Ökonomie:** Tests sichern Verhalten ab, keine Codezeilen; jeder Test kostet Laufzeit in jeder
+  Gate-Kette, Kontext und Umbauaufwand. Testregeln aus `CLAUDE.md` gehen vor. „Einheit“ meint hier die
+  getestete Klasse bzw. das getestete Modul, nicht die Planeinheit. Getestet wird beobachtbares Verhalten an
+  ihrer Grenze (Ergebnis, Zustand auch nach Abbruch oder Crash, Fehler, Port-Aufrufe und ihre Reihenfolge mit
+  fachlicher Wirkung), abgeleitet aus
+  Akzeptanzkriterien, Verträgen und Fehlerpfaden mit eigener Wirkung — keine internen Zwischenschritte,
+  privaten Hilfen, Aufrufreihenfolgen ohne fachliche Bedeutung, kein bloßes Durchreichen, keine Standardwerte
+  ohne Vertragsrang. Je Verhalten ein Test, Varianten parametrisiert; vor einem neuen Test prüfen, ob ein
+  bestehender den Fall per Parameter oder Assertion aufnimmt, dann ihn erweitern. Verdrahtung (Bootstrap,
+  Composition Root, Fabriken): ein Smoke-Test je Einstiegspunkt, kein Test je Abhängigkeit oder Parameter.
+  Doku, Meldungen oder Quelltext als Text nur prüfen, wo der Wortlaut Vertrag ist oder ein Scanner bzw. Leser
+  eine Architektur-, Import-, Projekt- oder Doku-Regel durchsetzt (Wächter-Set); dass eine Ausgabe bestimmte
+  Inhalte nicht enthält (z. B. Geheimnisse), ist Verhalten. Regressionsfall zu einem Finding nur bei belegtem
+  Fehlverhalten, das unbemerkt zurückkehren kann — als Erweiterung eines bestehenden Tests, sonst neu;
+  Findings zu Gliederung, Benennung oder Stil bekommen keinen. Planeinheiten mit `[K]` oder `Prüftiefe: L`
+  und sicherheits- oder datenkritischer Code testen die Grenz- und Fehlerpfade ihrer kritischen Kanten
+  gründlich, sonst der Hauptpfad und Fehlerpfade mit eigener Wirkung. Bestehende Tests nur anpassen, soweit
+  das Issue ihr geprüftes Verhalten oder die genutzte Schnittstelle ändert oder entfernt; nie nebenbei löschen,
+  zusammenlegen oder umschreiben — erlaubt sind Erweitern um Fälle und Korrigieren einer nachweislich falschen
+  oder wirkungslosen Assertion zum selben Verhalten. Testballast (Tests gegen diese Regeln) wird nur in eigenen
+  Aufräum-Issues abgebaut. Zusammenlegen oder Umschreiben heißt dort Ersetzen: neue oder erweiterte Tests in
+  vorangehenden Planeinheiten, das Löschen in einer eigenen Planeinheit, die nur löscht und nie gebündelt wird
+  (Lösch-Einheit); der Plan nennt je zu löschendem Test jedes Verhalten, das er prüft. Welche Tests entfallen,
+  entscheidet der Nutzer anhand eines Mutationsprotokolls der Claude-Mutationsphase (auf dem committeten Stand
+  vor der Lösch-Einheit je Verhalten die feinste Mutation, die den zu löschenden Test rot macht, geprüft gegen
+  die verbleibenden Tests, zu löschende abgewählt). Codex führt dafür keine Mutationen aus: Lösch-Einheiten vor
+  der Umsetzung dem Nutzer melden, der das Protokoll beibringt und entscheidet. Reviewer melden Testballast in neu hinzugefügten Tests bzw. Testfällen als mittel/niedrig, in
+  bestehenden höchstens als niedrig mit Hinweis auf ein Aufräum-Issue; bestehende Tests gelöscht,
+  zusammengelegt oder umgeschrieben, ohne dass das Issue ihr Verhalten oder ihre Schnittstelle ändert (die
+  erlaubten Fälle ausgenommen), als hoch — außer in der Lösch-Einheit eines Aufräum-Issues für Tests, deren
+  Löschung der Nutzer anhand des Mutationsprotokolls entschieden hat; im Plan genügen die Verhaltensliste je zu löschendem Test und die eigene Lösch-Einheit.
 - **Kontext klein halten:** Gezielte Suche/Ausschnitte, keine wiederholten Gesamtdokumente. Liegt im
   Issue-Ordner ein `kontext.md` (Anker mit Datei:Zeile, Normauszüge, Tests, bewusst Irrelevantes, Vertagtes,
   Stand; höchstens 8 KB), zuerst diese Datei lesen, ab den Ankern gezielt suchen und neue relevante Stellen

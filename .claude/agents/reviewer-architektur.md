@@ -18,6 +18,13 @@ Achte besonders auf:
 - Interpretationsspielraum / Mehrdeutigkeit (hoch, wenn zwei plausible Lesarten zu unterschiedlichem
   Ergebnis führen; sonst mittel).
 - Korrektheit, Sicherheit, Datenverlust, Fehlerbehandlung, Randfälle (kritisch/hoch).
+- Teststrategie, soweit der Plan eine enthält (Test-Ökonomie in `konventionen.md`; Testregeln der
+  Projekt-CLAUDE.md gehen vor): Tests für Verhalten an den Grenzen getesteter Klassen bzw. Module,
+  Akzeptanzkriterien und Fehlerpfade mit eigener Wirkung, an kritischen Kanten auch Grenzpfade. Geplanter
+  Testballast — Tests interner Zwischenschritte, Verdrahtung je Abhängigkeit, Wortlaut ohne Vertragsrang und
+  ohne durchgesetzte Regel — ist mittel/niedrig; geplanter Abbau bestehender Tests, ohne dass das Issue ihr
+  Verhalten oder ihre Schnittstelle ändert: hoch, außer in einem Aufräum-Issue mit Verhaltensliste je zu
+  löschendem Test und eigener Lösch-Einheit.
 - Struktur-Regeln: Offene Fragen am Ende? Out of Scope referenziert/abgelehnt?
 
 Kategorien kritisch / hoch / mittel / niedrig nach dem Severity-Schema der Projekt-CLAUDE.md, falls

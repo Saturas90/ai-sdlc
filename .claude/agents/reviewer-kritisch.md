@@ -19,6 +19,19 @@ bei Code — Korrektheit/Robustheit. Achte besonders auf:
 - Interpretationsspielraum / Mehrdeutigkeit in Plänen (hoch, wenn zwei plausible Lesarten zu
   unterschiedlichem Ergebnis führen; sonst mittel).
 - Korrektheit, Sicherheit, Datenverlust, Fehlerbehandlung, Randfälle bei Code (kritisch/hoch).
+- Tests im Diff bzw. in den `Tests:`-Feldern eines Plans (Test-Ökonomie in `konventionen.md`; Testregeln
+  der Projekt-CLAUDE.md gehen vor): fehlende Tests nur für Verhalten an der Grenze der getesteten Klasse
+  bzw. des Moduls, Akzeptanzkriterien und Fehlerpfade mit eigener Wirkung fordern, bei `[K]`/`Prüftiefe: L`
+  oder sicherheits-/datenkritischem Code auch Grenzpfade; zu einem Finding einen Regressionsfall (bestehenden
+  Test erweitern vor neuem) nur bei belegtem Fehlverhalten, das unbemerkt zurückkehren kann. Testballast —
+  Tests interner Zwischenschritte, Verdrahtung je Abhängigkeit, Wortlaut ohne Vertragsrang und ohne
+  durchgesetzte Regel, Varianten, die ein bestehender Test per Parameter aufnähme — ist in neu hinzugefügten
+  Tests bzw. Testfällen mittel/niedrig, in bestehenden höchstens niedrig (Hinweis auf ein Aufräum-Issue).
+  Bestehende Tests gelöscht, zusammengelegt oder umgeschrieben, ohne dass das Issue ihr Verhalten oder ihre
+  Schnittstelle ändert (ausgenommen: um Fälle erweitern, eine nachweislich falsche oder wirkungslose Assertion
+  zum selben Verhalten korrigieren): hoch — außer in der Lösch-Einheit eines Aufräum-Issues für Tests, deren
+  Löschung der Mensch anhand des Mutationsprotokolls entschieden hat; im Plan genügen die Verhaltensliste je
+  zu löschendem Test und die eigene Lösch-Einheit.
 - Struktur-Regeln: Offene Fragen am Ende? Out of Scope referenziert/abgelehnt?
 
 Kategorien kritisch / hoch / mittel / niedrig nach dem Severity-Schema der Projekt-CLAUDE.md, falls

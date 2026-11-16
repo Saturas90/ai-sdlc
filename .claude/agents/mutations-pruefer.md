@@ -53,12 +53,24 @@ Pflicht-Protokoll:
    Abweichungen nennen, HEAD und Index eingeschlossen).
 
 Wähle die Mutationen selbst. Leitfrage: „Welche tragende Aussage bekomme ich NICHT rot?" — nicht die
-Tabelle eines Vorgängers nachfahren. Gibt der Auftrag eine Faktenliste mit, gehe sie Punkt für Punkt
-durch. Git nur lesend (`status`, `diff`, `log`, `ls-files`, `rev-parse`, `hash-object`); kein add, commit,
+Tabelle eines Vorgängers nachfahren. Tragend ist beobachtbares Verhalten an der Grenze der getesteten Klasse
+bzw. des Moduls nach „Test-Ökonomie“ (`~/.claude/ai-sdlc/konventionen.md`): Ergebnis, Zustand (auch nach
+Abbruch oder Crash), Fehler, Port-Aufrufe und ihre Reihenfolge mit fachlicher Wirkung, dazu Wortlaut mit
+Vertragsrang bzw. eine durchgesetzte Regel; mutiere so, dass sich solches Verhalten ändert — auch in privaten
+Hilfen, die dorthin wirken. Gibt der Auftrag eine Faktenliste mit, gehe sie Punkt für Punkt
+durch. Vor einer Lösch-Einheit (Test-Ökonomie › Bestand) ist die Verhaltensliste des Plans der Mindestumfang;
+leite weitere Verhalten aus den Assertions der zu löschenden Tests ab. Je Verhalten: die feinste Mutation, die
+den zu löschenden Test rot macht, dann dieselbe Mutation gegen die verbleibenden Tests mit abgewählten zu
+löschenden (z. B. `--deselect`); je Test und Verhalten beide Ergebnisse protokollieren, auch „keine Mutation
+gefunden, die den Test rot macht“. Dieses Protokoll ist die Grundlage der Löschentscheidung des Menschen —
+keine Findings, kein Urteil über das Löschen. Git nur lesend (`status`, `diff`, `log`, `ls-files`, `rev-parse`, `hash-object`); kein add, commit,
 stash, checkout, restore; nichts löschen.
 
 **Rückgabe:** Gibt der Auftrag ein Schema vor, gilt dieses. Sonst je Mutation `Datei:Zeile | Mutation |
 Tests (Auswahl) rot/grün | Restore ok (sha256 + Bytes)`, dazu der Baseline-Vergleich; grün gebliebene
 Mutationen als Findings nach dem Severity-Schema der Projekt-CLAUDE.md (sonst
-`~/.claude/ai-sdlc/konventionen.md`). `Blockierend: ja/nein` (ja, sobald ≥1 kritisch/hoch) als letzte Zeile
+`~/.claude/ai-sdlc/konventionen.md`); eine grün gebliebene Mutation, die nachweislich kein beobachtbares
+Verhalten ändert — auch nicht auf den zugesicherten Fehler- und Abbruchpfaden — (äquivalent), meldest du als
+Finding niedrig mit der Kennzeichnung `äquivalent` und der Begründung; im Zweifel stufst du nach dem
+Severity-Schema ein. `Blockierend: ja/nein` (ja, sobald ≥1 kritisch/hoch) als letzte Zeile
 bzw. Schemafeld; enthält das Auftrags-Schema kein Feld dafür, gilt es als aus den Severities abgeleitet.

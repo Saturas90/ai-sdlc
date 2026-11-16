@@ -8,7 +8,8 @@ Stufen des Projekts. Regelt die Projekt-CLAUDE.md
 Teile des Ablaufs selbst (z. B. Rundenumfang, Kaltreview, Freigabe vor Korrekturen), gilt jeweils diese
 Teilregel; alles Übrige hier gilt weiter. Abschnitte 1–5 gelten immer, Abschnitt 6 nach einem
 Rebase-Konflikt im Arbeitsbaum-Modus (`arbeitsbaeume.md`); die Workflow-Muster nur bei Prüftiefe M/L lesen —
-bei einem bestrittenen Blocker in Stufe S auch Muster 1 und 3.
+bei einem bestrittenen Blocker in Stufe S auch Muster 1 und 3, vor der Lösch-Einheit eines Aufräum-Issues
+Muster 6.
 
 ## 1. Prüftiefe (vor Runde 1 festlegen)
 
@@ -260,7 +261,11 @@ Verbrauchsauswertung gruppiert danach.
    ≤ 120 Zeichen, Maßnahme ≤ 2 Sätze) und Zähler je Severity (erhoben / bestätigt / widerlegt) zurück —
    keine Rohstimmen, keine Linsentexte. Beim Fixcheck je Befund zusätzlich die Kennzeichnung (Finding-ID, „ohne Auftrag“ oder „außerhalb
    der Fixes“) und die Zuordnungsliste (Änderung → Finding-ID(s) oder „ohne Auftrag“, ohne Severity).
-6. **Mutationsphase** (nur Stufe L bzw. auf Wunsch; läuft zusätzlich zu den Linsen): Die Hauptsession gibt
+6. **Mutationsphase** (Stufe L zusätzlich zu den Linsen bzw. auf Wunsch; vor jeder Lösch-Einheit eines
+   Aufräum-Issues unabhängig von der Stufe). Vor einer Lösch-Einheit (`konventionen.md` › Test-Ökonomie) auf
+   dem committeten Stand davor, die Verhaltensliste des Plans als Faktenliste; ohne Workflow spawnt die
+   Hauptsession `mutations-pruefer` direkt, legt das Protokoll statt per `log()` in der Gate-Ablage ab und legt
+   es dem Menschen zur Löschentscheidung vor. Ablauf: Die Hauptsession gibt
    ein frisches, leeres Sicherungsverzeichnis und den Arbeitsbaum
    vor — committeter Gegenstand in eigenem Worktree außerhalb des Repos an kurzem Pfad; sonst vorher
    Parallel-Check auf **jede** aktive Session im selben Arbeitsbaum (mtimes aller Dateien aus
