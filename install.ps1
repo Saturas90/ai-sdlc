@@ -1,5 +1,5 @@
 # Installiert Claude-Code- und Codex-Workflow-Dateien aus diesem Repository.
-# Standard: Symlinks, bei fehlenden Rechten Kopien. Codex-Skills immer als Dateien.
+# Standard: Symlinks, bei fehlenden Rechten Kopien. Codex-Skills und -Rollen immer als Dateien.
 # -Copy erzwingt Kopien für alle Dateien.
 # -ClaudeHome und -CodexHome erlauben eine isolierte Probeinstallation.
 #Requires -Version 7
@@ -188,7 +188,9 @@ Install-Item (Join-Path $repo 'share') (Join-Path $claudeRoot 'ai-sdlc') $true $
 Write-Host "Codex-Regeln ->  $codexRoot"
 Install-CodexFile (Join-Path $repo 'codex\AGENTS.md') (Join-Path $codexRoot 'AGENTS.md')
 foreach ($file in Get-ChildItem -LiteralPath (Join-Path $repo 'codex\agents') -Filter '*.toml' -File) {
-    Install-CodexFile $file.FullName (Join-Path $codexRoot "agents\$($file.Name)")
+    # Codex listet verlinkte Rollen, wendet sie beim Spawn aber nur aus regulären Dateien an
+    # („agent type is currently not available“).
+    Install-CodexFile $file.FullName (Join-Path $codexRoot "agents\$($file.Name)") -ForceCopy
 }
 foreach ($directory in Get-ChildItem -LiteralPath (Join-Path $repo 'codex\skills') -Directory) {
     # Codex erkennt verlinkte Skill-Verzeichnisse, überspringt aber SKILL.md-Dateilinks.

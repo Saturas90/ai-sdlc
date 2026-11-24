@@ -12,9 +12,11 @@ cd <pfad-zu-diesem-repo>    # dorthin, wo du ai-sdlc abgelegt/geklont hast
 ./install.ps1              # Claude nach ~/.claude, Codex nach ~/.codex; -Copy erzwingt Kopien
 ```
 
-Danach sind die Skills in **jedem** Projekt verfügbar. Codex-`SKILL.md`-Dateien werden immer
-kopiert, weil Codex einzelne Dateisymlinks bei der Skill-Erkennung überspringt. Vorhandene
-Skill-Dateilinks werden beim erneuten Installieren durch Kopien ersetzt. Symlinks für die
+Danach sind die Skills in **jedem** Projekt verfügbar. Codex-`SKILL.md`-Dateien und die
+Codex-Rollen (`~/.codex/agents/*.toml`) werden immer kopiert: Codex überspringt einzelne
+Dateisymlinks bei der Skill-Erkennung und wendet verlinkte Rollen beim Spawn nicht an („agent type
+is currently not available“). Vorhandene Dateilinks werden beim erneuten Installieren durch Kopien
+ersetzt. Symlinks für die
 übrigen Dateien brauchen Admin-Rechte
 _oder_ den Windows-Entwicklermodus (Einstellungen → System → Für Entwickler).
 Bei fehlenden Rechten kopiert der Installer. Eine bestehende Codex-`config.toml` behält alle
@@ -200,7 +202,7 @@ die Skill-Einstiege in [`codex/skills/`](codex/skills/).
 
 Änderungen an `codex/config.defaults.toml` werden beim nächsten `install.ps1` in eine
 vorhandene Codex-Konfiguration übernommen. Änderungen an verlinkten Codex-Dateien wirken
-direkt; bei Kopien und nach Änderungen an Codex-Skills den Installer erneut ausführen. Neue Modell- und Rollenwerte gelten
+direkt; bei Kopien und nach Änderungen an Codex-Skills oder -Rollen den Installer erneut ausführen. Neue Modell- und Rollenwerte gelten
 erst für neue Codex-Sitzungen und Agenten.
 
 ## Anpassen
