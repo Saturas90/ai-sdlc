@@ -1,6 +1,6 @@
 name = "architekt_kritisch"
 description = "Erarbeitet kritische Sicherheits-, Daten- und Recovery-Architekturentscheidungen für freigegebene Issues nach CLAUDE.md."
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
 developer_instructions = """

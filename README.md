@@ -179,10 +179,10 @@ Effort und Review-Serie misst [`share/tools/verbrauch_auswerten.py`](share/tools
 ## Codex-Modellwahl
 
 Die Codex-Quellen liegen unter [`codex/`](codex/) und werden nach `~/.codex/` installiert.
-Der Standard der Hauptsitzung ist **GPT-6.1 Sol/ultra**, auch für normale Architektur; die
+Der Standard der Hauptsitzung ist **GPT-6.2 Sol/ultra**, auch für normale Architektur; die
 Rolle `implementierer` und Unteragenten ohne eigene Rolle nutzen Sol/medium, mechanische
 Aufträge GPT-6 Luna/low. Issue-Texte, Dokumentationsnachzüge, Implementierungsplanung und
-normale Kaltreviews nutzen gezielt GPT-5.6 Terra. GPT-6 Astra/xhigh ist kritischen
+normale Kaltreviews nutzen gezielt GPT-6.1 Terra. GPT-6.2 Astra/xhigh ist kritischen
 Architekturentscheidungen, Implementierungen und Reviews vorbehalten. Die Codex-Regeln
 halten Aufgaben sequenziell und begrenzen Kontext, Delegation und wiederholte Prüfungen,
 ohne fachliche Gates zu verkürzen. Für Codex gilt beim Reviewabschluss die eng begrenzte

@@ -40,7 +40,7 @@ trust_level = "trusted"
 
     & (Join-Path $repo 'install.ps1') -Copy -ClaudeHome $claudeTarget -CodexHome $codexTarget *> (Join-Path $testPath 'first.log')
     $config = Get-Content -LiteralPath (Join-Path $codexTarget 'config.toml') -Raw
-    if ($config -notmatch '(?m)^model = "gpt-6\.1-sol"' -or
+    if ($config -notmatch '(?m)^model = "gpt-6\.2-sol"' -or
         $config -notmatch '(?m)^model_reasoning_effort = "ultra"' -or
         $config -notmatch 'personality = "pragmatic"' -or
         $config -notmatch 'trust_level = "trusted"' -or

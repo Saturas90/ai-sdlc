@@ -1,6 +1,6 @@
 name = "implementierer"
 description = "Setzt normale, klar abgegrenzte Einheiten eines freigegebenen Plans nach CLAUDE.md mit Sol um; kritische Einheiten gehören an implementierer_kritisch."
-model = "gpt-6-sol"
+model = "gpt-6.2-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """

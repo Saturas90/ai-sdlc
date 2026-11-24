@@ -1,6 +1,6 @@
 name = "reviewer"
 description = "Unabhängiger Read-only-Kaltreviewer für Standardartefakte und normale Implementierungsschritte nach CLAUDE.md."
-model = "gpt-5.6-terra"
+model = "gpt-6.1-terra"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """

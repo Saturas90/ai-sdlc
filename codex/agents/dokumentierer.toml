@@ -1,6 +1,6 @@
 name = "dokumentierer"
 description = "Pflegt mit Terra bestehende Dokumentation, Zusammenfassungen und freigegebene Entscheidungen nach; trifft keine neuen kritischen Architektur- oder Sicherheitsentscheidungen."
-model = "gpt-5.6-terra"
+model = "gpt-6.1-terra"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """

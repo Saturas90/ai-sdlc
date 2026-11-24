@@ -1,6 +1,6 @@
 name = "implementierer_kritisch"
 description = "Implementiert kritische [K]-, Security-, Daten- und Recovery-Einheiten mit Astra nach freigegebenem Plan und CLAUDE.md."
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
 developer_instructions = """
