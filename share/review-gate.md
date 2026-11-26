@@ -65,8 +65,8 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
    „Stand“ in `kontext.md` (bzw. die dort verwiesene projekteigene Übergabe-Ablage): Gegenstand, Prüftiefe,
    Runde, Gate-Schritt (Review / Korrektur / Fixcheck), offene Findings (als Tabelle oder Verweis auf eine
    Datei in der Gate-Ablage), Unterordner der jüngsten Sicherung, in Stufe L die Ordner der
-   Mutationsergebnisse (Muster 6), ggf. die Stufen-Abbildung und die max-Eskalation (ab Runde, gewählte
-   Runden, Freigabe-Grundlage). Eine neue Session
+   Mutationsergebnisse (Muster 6), vor einer Lösch-Einheit die Löschentscheidung (bleibt bis zu deren
+   Commit), ggf. die Stufen-Abbildung und die max-Eskalation (ab Runde, gewählte Runden, Freigabe-Grundlage). Eine neue Session
    setzt dort fort, statt den Entwurf neu zu erzeugen (im Arbeitsbaum-Modus: Fortsetzung nach
    `arbeitsbaeume.md` Abschnitt 2).
 5. **Gate-Ablage und Sicherung:** Sicherungen, Findings-Tabellen und Fix-Protokoll liegen in einem
@@ -265,8 +265,8 @@ Verbrauchsauswertung gruppiert danach.
    der Fixes“) und die Zuordnungsliste (Änderung → Finding-ID(s) oder „ohne Auftrag“, ohne Severity).
 6. **Mutationsphase** (Stufe L zusätzlich zu den Linsen bzw. auf Wunsch; vor jeder Lösch-Einheit eines
    Aufräum-Issues unabhängig von der Stufe). In Stufe L wählt der `mutations-pruefer` die Mutationen nur in
-   Runde 1 frei. Vor dem Abräumen kopiert die Hauptsession alle `mut-NNN.diff` samt `ergebnis.tsv` aus dem
-   Sicherungsverzeichnis in die Gate-Ablage (Abschnitt 2, Punkt 5) unter `<gegenstand>-r<N>-mutation/` und
+   Runde 1 frei. Außer vor einer Lösch-Einheit (siehe unten) kopiert die Hauptsession vor dem Abräumen alle
+   `mut-NNN.diff` samt `ergebnis.tsv` aus dem Sicherungsverzeichnis in die Gate-Ablage (Abschnitt 2, Punkt 5) unter `<gegenstand>-r<N>-mutation/` und
    nennt den Ordner in „Stand“. Ab Runde 2 (Delta) erhält der `mutations-pruefer` diesen Ordner, den Fix-Diff
    und die Liste dessen, was seit der Vorrunde neu ist (Scope, Akzeptanzkriterien, Verträge, normative
    Klauseln; Abschnitt 4): Er fährt die grün gebliebenen Mutationen außer `äquivalent` erneut, ebenso rot
@@ -274,9 +274,13 @@ Verbrauchsauswertung gruppiert danach.
    und im genannten Neuen. Die Mutationsphase vor einer Lösch-Einheit läuft immer voll, nie als Delta.
    Einstufung der Befunde: `konventionen.md` › Test-Ökonomie › Mutationsbefunde. Vor einer
    Lösch-Einheit (`konventionen.md` › Test-Ökonomie) auf
-   dem committeten Stand davor, die Verhaltensliste des Plans als Faktenliste; ohne Workflow spawnt die
-   Hauptsession `mutations-pruefer` direkt, legt das Protokoll statt per `log()` in der Gate-Ablage ab und legt
-   es dem Menschen zur Löschentscheidung vor. Ablauf: Die Hauptsession gibt
+   dem committeten Stand davor, die Verhaltensliste des Plans als Faktenliste, immer ohne Workflow: Die
+   Hauptsession spawnt `mutations-pruefer` direkt und legt vor dem Abräumen seine Rückgabe als `protokoll.md`
+   samt allen `mut-NNN.diff` und `ergebnis.tsv` aus dem Sicherungsverzeichnis im Ordner
+   `<einheit>-loeschprotokoll/` der Gate-Ablage ab (Abschnitt 2, Punkt 5; bei Wiederholung mit Suffix, nie
+   überschreiben) — nie als Mutationsordner, er löst kein Delta aus; das Protokoll legt sie dem Menschen zur
+   Löschentscheidung vor. Was unten ein Skript per `log()` protokolliert, hält sie dann in `protokoll.md`
+   fest. Ablauf: Die Hauptsession gibt
    ein frisches, leeres Sicherungsverzeichnis und den Arbeitsbaum
    vor — committeter Gegenstand in eigenem Worktree außerhalb des Repos an kurzem Pfad; sonst vorher
    Parallel-Check auf **jede** aktive Session im selben Arbeitsbaum (mtimes aller Dateien aus
@@ -291,7 +295,7 @@ Verbrauchsauswertung gruppiert danach.
    Parallel-Check. Den Abgleich fährt nur die anlegende Hauptsession, Subagenten nie. Findet eine andere
    Session die Markierung, fasst sie nichts im genannten Arbeitsbaum und Sicherungsverzeichnis an und fragt
    den Menschen, ob die Besitzer-Session beendet ist; erst nach seiner Bestätigung fährt sie den Abgleich.
-   Markierung ohne Sicherungsverzeichnis: nur melden. Nach Ende des Workflows, auch nach Abbruch oder Fehler, prüft die **Hauptsession selbst** je
+   Markierung ohne Sicherungsverzeichnis: nur melden. Nach Ende des Workflows bzw. des direkten Spawns, auch nach Abbruch oder Fehler, prüft die **Hauptsession selbst** je
    Datei die jüngste Zeile aus `manifest.tsv` (Format siehe `mutations-pruefer`):
    - `restored`, `orig` oder `mut` mit Platte = `orig`-Hash: in Ordnung. `restored`/`orig` mit anderer
      Platte: nur melden.

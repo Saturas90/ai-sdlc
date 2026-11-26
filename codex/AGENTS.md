@@ -187,10 +187,13 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Aufräum-Issues abgebaut. Zusammenlegen oder Umschreiben heißt dort Ersetzen: neue oder erweiterte Tests in
   vorangehenden Planeinheiten, das Löschen in einer eigenen Planeinheit, die nur löscht und nie gebündelt wird
   (Lösch-Einheit); der Plan nennt je zu löschendem Test jedes Verhalten, das er prüft. Welche Tests entfallen,
-  entscheidet der Nutzer anhand eines Mutationsprotokolls der Claude-Mutationsphase (auf dem committeten Stand
-  vor der Lösch-Einheit je Verhalten die feinste Mutation, die den zu löschenden Test rot macht, geprüft gegen
-  die verbleibenden Tests, zu löschende abgewählt). Codex führt dafür keine Mutationen aus: Lösch-Einheiten vor
-  der Umsetzung dem Nutzer melden, der das Protokoll beibringt und entscheidet. Reviewer melden Testballast in neu hinzugefügten Tests bzw. Testfällen als mittel/niedrig, in
+  entscheidet der Nutzer anhand eines Mutationsprotokolls, das Codex nicht erzeugt (z. B. aus der
+  Claude-Mutationsphase): auf dem committeten Stand vor der Lösch-Einheit je Verhalten die feinste Mutation, die
+  den zu löschenden Test rot macht, geprüft gegen die verbleibenden Tests, zu löschende abgewählt. Codex führt
+  dafür keine Mutationen aus: Lösch-Einheiten vor der Umsetzung dem Nutzer melden, der das Protokoll beibringt
+  und entscheidet. Der Hauptagent legt das Protokoll im Ordner `<einheit>-loeschprotokoll/` der Gate-Ablage ab
+  (bei Wiederholung mit Suffix, nie überschreiben) und hält die Entscheidung in „Stand“ bis zum Commit der Lösch-Einheit fest; dieser nennt Protokollordner
+  (relativ zur Gate-Ablage) und gelöschte Tests. Reviewer melden Testballast in neu hinzugefügten Tests bzw. Testfällen als mittel/niedrig, in
   bestehenden höchstens als niedrig mit Hinweis auf ein Aufräum-Issue, fehlende Wächter-Abdeckung absichtlicher
   Umgehung höchstens als niedrig, außer die Umgehung ist im Projekt belegt oder ein freigegebenes Artefakt
   verlangt sie mit Begründung; bestehende Tests gelöscht,
@@ -205,7 +208,8 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   schließt sie nicht aus. Der Hauptagent überschreibt „Stand“ (bzw. die dort verwiesene projekteigene
   Übergabe) vor jedem Commit und mitten im Gate am Ende jeder Runde sowie vor Abschlusskorrekturen (Gegenstand, Runde,
   Gate-Schritt, offene Findings als Tabelle oder Verweis auf eine Datei in der Gate-Ablage, Unterordner der
-  jüngsten Sicherung, ggf. Stufen-Abbildung); eine neue Sitzung setzt dort fort, statt neu zu erzeugen. Die
+  jüngsten Sicherung, ggf. Stufen-Abbildung, vor einer Lösch-Einheit die Löschentscheidung bis zu deren
+  Commit); eine neue Sitzung setzt dort fort, statt neu zu erzeugen. Die
   Gate-Ablage für Sicherungen, Findings-Tabellen und Fix-Protokoll ist ein gitignorierter Projektordner,
   Standard `.gate-logs/<issue>/` (ohne Issue `<gegenstand>`); eine Projektregel hat Vorrang. Nie Scratchpad,
   Temp oder Issue-Ordner. Fehlt der Ignore-Eintrag, ihn in der Datei aus

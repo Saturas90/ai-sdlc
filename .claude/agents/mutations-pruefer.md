@@ -45,7 +45,8 @@ Pflicht-Protokoll:
    beabsichtigten Hunk zeigen, sonst kein Test und kein Restore, nur Abbruch und Meldung. Dann die `mut`-Zeile.
 4. Nur die einschlägigen Tests laufen lassen (z. B. `pytest -q -x <pfad>::<test>`), Ausgabe auf Status bzw.
    Tail begrenzen; Ergebnis per `printf` an `ergebnis.tsv` anhängen: `mut-NNN <TAB> Datei:Zeile <TAB>
-   rot machende Tests bzw. grün <TAB> äquivalent bzw. -`.
+   rot machende Tests bzw. grün <TAB> äquivalent bzw. -`; vor einer Lösch-Einheit je Lauf eine Zeile, die
+   dritte Spalte mit `ziel:` (gegen den zu löschenden Test) bzw. `rest:` (gegen die verbleibenden) davor.
 5. **Zurückschreiben in einem Bash-Aufruf, nur wenn** Platte = `mut`-Hash, Sicherung = `orig`-Hash **und**
    der mit denselben Labels neu erzeugte Diff per `cmp` byte-gleich zu `mut-NNN.diff` ist: dann `cp -p`, Hash
    und Bytes gegen `orig`
@@ -72,7 +73,11 @@ gefunden, die den Test rot macht“. Dieses Protokoll ist die Grundlage der Lös
 keine Findings, kein Urteil über das Löschen. Git nur lesend (`status`, `diff`, `log`, `ls-files`, `rev-parse`, `hash-object`); kein add, commit,
 stash, checkout, restore; nichts löschen.
 
-**Rückgabe:** Gibt der Auftrag ein Schema vor, gilt dieses. Sonst je Mutation `Datei:Zeile | Mutation |
+**Rückgabe:** Vor einer Lösch-Einheit immer, auch gegen ein Schema des Auftrags, das Protokoll: je zu
+löschendem Test und Verhalten die Mutation (Datei:Zeile, `mut-NNN.diff`) bzw. „keine Mutation gefunden, die
+den Test rot macht“, das Ergebnis gegen den zu löschenden und gegen die verbleibenden Tests, Restore ok
+(sha256 + Bytes), dazu der Baseline-Vergleich — keine Findings, keine Severities, kein `Blockierend`. Sonst gilt
+ein Schema des Auftrags; ohne Schema je Mutation `Datei:Zeile | Mutation |
 Tests (Auswahl) rot/grün | Restore ok (sha256 + Bytes)`, dazu der Baseline-Vergleich; grün gebliebene
 Mutationen als Findings nach dem Severity-Schema der Projekt-CLAUDE.md (sonst
 `~/.claude/ai-sdlc/konventionen.md`), eingestuft nach „Test-Ökonomie“ › Mutationsbefunde: kritisch/hoch nur

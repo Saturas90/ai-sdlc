@@ -9,4 +9,5 @@ sonst → `~/.claude/agents/reviewer-kritisch.md`.
 Pflege: Änderungen sinngemäß in allen drei Reviewer-Agenten nachziehen — Prüfpunkte, Einstufungsregeln,
 Absatz „Lesen“ (Prüfpaket, Folgerunde, Fixcheck, Verify-Stimme) und Rückgabevertrag; `reviewer-architektur`
 weicht bei Bezugsdokumenten und Code-Bezug bewusst ab. Den Blockierend-Wortlaut auch in
-`mutations-pruefer.md` gleich halten. Ablauf, Prüftiefe und Workflow-Muster stehen in `review-gate.md`.
+`mutations-pruefer.md` gleich halten (dessen Rückgabe vor einer Lösch-Einheit trägt bewusst kein
+`Blockierend`). Ablauf, Prüftiefe und Workflow-Muster stehen in `review-gate.md`.

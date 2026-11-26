@@ -192,7 +192,8 @@ Aufwand bei jedem Umbau; ein neuer Test braucht deshalb einen Grund. Testregeln 
   läuft auf dem committeten Stand davor die Mutationsphase (`review-gate.md` Muster 6): je Verhalten die
   feinste Mutation, die den zu löschenden Test rot macht, und dieselbe Mutation gegen die verbleibenden Tests
   (zu löschende abgewählt). Welche Tests die Lösch-Einheit löscht, entscheidet der Mensch anhand dieses
-  Protokolls (Gate-Ablage); ohne seine Entscheidung wird nichts gelöscht.
+  Protokolls (Gate-Ablage); ohne seine Entscheidung wird nichts gelöscht. Der Commit der Lösch-Einheit nennt
+  den Protokollordner (relativ zur Gate-Ablage) und die gelöschten Tests.
 - **Review:** Testballast in neu hinzugefügten Tests bzw. Testfällen ist mittel/niedrig, in bestehenden Tests
   höchstens niedrig mit Hinweis auf ein Aufräum-Issue. Fehlt einem Wächter die Abdeckung absichtlicher
   Umgehung, ist das höchstens niedrig, außer die Umgehung ist im Projekt belegt oder ein freigegebenes
