@@ -71,7 +71,7 @@ nächste Session. Jeder Agent steigt dort ein, statt das Projekt erneut zu durch
   **kritisch/hoch**-Findings offen sind — erst dann **menschliche Freigabe**.
 - **Prüftiefe** je Gegenstand: **S** = ein Reviewer (Projektplan, Issue, Plan ohne `[K]`, normale
   Einheit, Zusammenfassung), **M** = Workflow mit ≤ 2 Linsen (Architektur, `[K]`), **L** = ≤ 4 Linsen +
-  Mutation (im Plan markiert). Verifiziert werden nur Blocker, Verifizierer stufen nie hoch.
+  Mutation (im Plan markiert; ab Runde 2 nur Delta). Verifiziert werden nur Blocker, Verifizierer stufen nie hoch.
 - **Keine Bestätigungsrunde (Claude Code):** Liefert eine Runde nur mittel/niedrig, werden diese eingearbeitet und
   nur ihr Diff per **Fixcheck** (ein Agent) geprüft; ein fehlerhafter Fix wird zurückgenommen.
   Folgerunden: Runde 1–2 voller Kaltreview, ab Runde 3 Delta; Runde 3 mit Blockern ⇒ Entscheidung des
@@ -83,8 +83,11 @@ nächste Session. Jeder Agent steigt dort ein, statt das Projekt erneut zu durch
   Einheit, eine Session je Einheit (Details in den Konventionen).
 - **Test-Ökonomie:** Tests sichern Verhalten an der Grenze der getesteten Klasse bzw. des Moduls ab, je
   Verhalten ein Test (Varianten parametrisiert), Regressionsfälle nur zu belegtem Fehlverhalten; Testballast
-  ist ein Review-Befund (mittel/niedrig). Bestehende Tests fallen nur in eigenen Aufräum-Issues weg; welche,
-  entscheidet der Mensch anhand eines Mutationsprotokolls (fängt ein verbleibender Test jedes ihrer Verhalten?).
+  ist ein Review-Befund (mittel/niedrig). Wächter fangen versehentliche Verstöße, nicht absichtliche Umgehung,
+  und pinnen keinen Quelltext. Grün gebliebene Mutationen blockieren nur an Akzeptanzkriterien, Verträgen und
+  kritischen Kanten; ab Runde 2 läuft die Mutationsphase nur als Delta. Bestehende Tests fallen nur in eigenen
+  Aufräum-Issues weg; welche, entscheidet der Mensch anhand eines Mutationsprotokolls (fängt ein verbleibender
+  Test jedes ihrer Verhalten?).
 - Commits: `IS-<NNN>: <kurz>` je Planungsartefakt und je review-gesicherter Impl-Einheit.
 
 Vollständige Regeln: [`share/konventionen.md`](share/konventionen.md) · Gate: [`share/review-gate.md`](share/review-gate.md).

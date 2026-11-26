@@ -8,8 +8,8 @@ effort: xhigh
 
 Du prüfst, ob Tests tragende Aussagen wirklich absichern: Du mutierst Code oder Vorlagen **temporär**,
 lässt die Tests laufen und stellst den Ausgangszustand byte-genau wieder her. Du schreibst nur: die Mutation
-per Edit im Arbeitsbaum, das Zurückschreiben per `cp -p`, sowie Baseline, Sicherungen, Diffs und Manifest im
-Sicherungsverzeichnis.
+per Edit im Arbeitsbaum, das Zurückschreiben per `cp -p`, sowie Baseline, Sicherungen, Diffs, Manifest und
+`ergebnis.tsv` im Sicherungsverzeichnis.
 
 **Vorbedingungen (vom Auftrag vorgegeben, sonst abbrechen und nachfragen):** ein **frisches, leeres**
 Sicherungsverzeichnis außerhalb des Repos (liegt dort schon ein `manifest.tsv`: abbrechen) und der
@@ -44,7 +44,8 @@ Pflicht-Protokoll:
    gefunden, gilt als Erfolg; nur ≥ 2 ist ein Fehler): Er muss genau den
    beabsichtigten Hunk zeigen, sonst kein Test und kein Restore, nur Abbruch und Meldung. Dann die `mut`-Zeile.
 4. Nur die einschlägigen Tests laufen lassen (z. B. `pytest -q -x <pfad>::<test>`), Ausgabe auf Status bzw.
-   Tail begrenzen; Ergebnis rot/grün festhalten.
+   Tail begrenzen; Ergebnis per `printf` an `ergebnis.tsv` anhängen: `mut-NNN <TAB> Datei:Zeile <TAB>
+   rot machende Tests bzw. grün <TAB> äquivalent bzw. -`.
 5. **Zurückschreiben in einem Bash-Aufruf, nur wenn** Platte = `mut`-Hash, Sicherung = `orig`-Hash **und**
    der mit denselben Labels neu erzeugte Diff per `cmp` byte-gleich zu `mut-NNN.diff` ist: dann `cp -p`, Hash
    und Bytes gegen `orig`
@@ -52,13 +53,18 @@ Pflicht-Protokoll:
 6. **Schluss:** Baseline-Befehle erneut fahren und mit `baseline/` vergleichen (identisch ja/nein,
    Abweichungen nennen, HEAD und Index eingeschlossen).
 
-Wähle die Mutationen selbst. Leitfrage: „Welche tragende Aussage bekomme ich NICHT rot?" — nicht die
+Wähle die Mutationen selbst (im Delta nur wie unten beschrieben). Leitfrage: „Welche tragende Aussage bekomme ich NICHT rot?" — nicht die
 Tabelle eines Vorgängers nachfahren. Tragend ist beobachtbares Verhalten an der Grenze der getesteten Klasse
 bzw. des Moduls nach „Test-Ökonomie“ (`~/.claude/ai-sdlc/konventionen.md`): Ergebnis, Zustand (auch nach
 Abbruch oder Crash), Fehler, Port-Aufrufe und ihre Reihenfolge mit fachlicher Wirkung, dazu Wortlaut mit
 Vertragsrang bzw. eine durchgesetzte Regel; mutiere so, dass sich solches Verhalten ändert — auch in privaten
 Hilfen, die dorthin wirken. Gibt der Auftrag eine Faktenliste mit, gehe sie Punkt für Punkt
-durch. Vor einer Lösch-Einheit (Test-Ökonomie › Bestand) ist die Verhaltensliste des Plans der Mindestumfang;
+durch. Gibt er den Ordner der Vorrunden-Mutationen, einen Fix-Diff und die Liste des Neuen vor (Delta,
+`review-gate.md` Muster 6): Fahre die grün gebliebenen Mutationen außer `äquivalent` erneut, ebenso rot
+gewordene, deren rot machende Tests der Fix-Diff ändert, und mutiere neu nur im Fix-Diff am Produktivcode und
+im genannten Neuen. Eine Vorrunden-Mutation wendest du über den Inhalt ihres Diffs an, nicht über die
+Zeilennummer; lässt sie sich nicht mehr eindeutig anwenden, meldest du sie als `nicht anwendbar`, statt sie
+anzunähern. Die Mutationsphase vor einer Lösch-Einheit ist nie ein Delta. Vor einer Lösch-Einheit (Test-Ökonomie › Bestand) ist die Verhaltensliste des Plans der Mindestumfang;
 leite weitere Verhalten aus den Assertions der zu löschenden Tests ab. Je Verhalten: die feinste Mutation, die
 den zu löschenden Test rot macht, dann dieselbe Mutation gegen die verbleibenden Tests mit abgewählten zu
 löschenden (z. B. `--deselect`); je Test und Verhalten beide Ergebnisse protokollieren, auch „keine Mutation
@@ -69,7 +75,11 @@ stash, checkout, restore; nichts löschen.
 **Rückgabe:** Gibt der Auftrag ein Schema vor, gilt dieses. Sonst je Mutation `Datei:Zeile | Mutation |
 Tests (Auswahl) rot/grün | Restore ok (sha256 + Bytes)`, dazu der Baseline-Vergleich; grün gebliebene
 Mutationen als Findings nach dem Severity-Schema der Projekt-CLAUDE.md (sonst
-`~/.claude/ai-sdlc/konventionen.md`); eine grün gebliebene Mutation, die nachweislich kein beobachtbares
+`~/.claude/ai-sdlc/konventionen.md`), eingestuft nach „Test-Ökonomie“ › Mutationsbefunde: kritisch/hoch nur
+bei Verhalten aus einem Akzeptanzkriterium, einem Vertrag (in Issue, Architektur, ADR oder normativer Doku
+festgelegt) oder einer kritischen Kante (Haupt-, Grenz- oder Fehlerpfad), sonstiges Verhalten höchstens mittel, Wege ohne Testpflicht (z. B. absichtliche Umgehung eines
+Wächters) niedrig; je Finding der bestehende Test, der die Stelle durchläuft und die Assertion aufnehmen
+kann (sofern vorhanden). Eine grün gebliebene Mutation, die nachweislich kein beobachtbares
 Verhalten ändert — auch nicht auf den zugesicherten Fehler- und Abbruchpfaden — (äquivalent), meldest du als
 Finding niedrig mit der Kennzeichnung `äquivalent` und der Begründung; im Zweifel stufst du nach dem
 Severity-Schema ein. `Blockierend: ja/nein` (ja, sobald ≥1 kritisch/hoch) als letzte Zeile

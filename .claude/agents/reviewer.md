@@ -22,8 +22,14 @@ bei Code — Korrektheit/Robustheit. Achte besonders auf:
   oder sicherheits-/datenkritischem Code auch Grenzpfade; zu einem Finding einen Regressionsfall (bestehenden
   Test erweitern vor neuem) nur bei belegtem Fehlverhalten, das unbemerkt zurückkehren kann. Testballast —
   Tests interner Zwischenschritte, Verdrahtung je Abhängigkeit, Wortlaut ohne Vertragsrang und ohne
-  durchgesetzte Regel, Varianten, die ein bestehender Test per Parameter aufnähme — ist in neu hinzugefügten
-  Tests bzw. Testfällen mittel/niedrig, in bestehenden höchstens niedrig (Hinweis auf ein Aufräum-Issue).
+  durchgesetzte Regel, Varianten, die ein bestehender Test per Parameter aufnähme, Pins von Quelltext ohne
+  Vertragsrang, Wächter-Abdeckung absichtlicher Umgehung (`getattr`, Sternimport, Aliasketten, Namen als
+  String …), die weder im Projekt belegt ist noch von einem freigegebenen Artefakt mit Begründung verlangt
+  wird, Wächter mit eigener Namens- oder Importauflösung ohne begründete Wahl im freigegebenen Artefakt
+  (Linter, Review oder Wächter) — ist in neu hinzugefügten Tests bzw. Testfällen mittel/niedrig, in
+  bestehenden höchstens niedrig (Hinweis auf ein Aufräum-Issue). Fehlt einem Wächter diese Abdeckung:
+  höchstens niedrig, außer belegt oder so verlangt. Code im Diff, der eine Wächter-Regel absichtlich umgeht:
+  Finding nach seiner Wirkung.
   Bestehende Tests gelöscht, zusammengelegt oder umgeschrieben, ohne dass das Issue ihr Verhalten oder ihre
   Schnittstelle ändert (ausgenommen: um Fälle erweitern, eine nachweislich falsche oder wirkungslose Assertion
   zum selben Verhalten korrigieren): hoch — außer in der Lösch-Einheit eines Aufräum-Issues für Tests, deren

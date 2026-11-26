@@ -22,7 +22,12 @@ Achte besonders auf:
   Projekt-CLAUDE.md gehen vor): Tests für Verhalten an den Grenzen getesteter Klassen bzw. Module,
   Akzeptanzkriterien und Fehlerpfade mit eigener Wirkung, an kritischen Kanten auch Grenzpfade. Geplanter
   Testballast — Tests interner Zwischenschritte, Verdrahtung je Abhängigkeit, Wortlaut ohne Vertragsrang und
-  ohne durchgesetzte Regel — ist mittel/niedrig; geplanter Abbau bestehender Tests, ohne dass das Issue ihr
+  ohne durchgesetzte Regel, Pins von Quelltext ohne Vertragsrang, Wächter gegen absichtliche Umgehung, die
+  weder im Projekt belegt ist noch im geprüften oder einem freigegebenen Artefakt mit Begründung verlangt
+  wird, Wächter mit eigener Namens- oder Importauflösung ohne Begründung der Wahl (Linter, Review oder
+  Wächter) — ist mittel/niedrig; fehlende
+  Wächter-Abdeckung absichtlicher Umgehung höchstens niedrig, außer belegt oder mit Begründung verlangt;
+  geplanter Abbau bestehender Tests, ohne dass das Issue ihr
   Verhalten oder ihre Schnittstelle ändert: hoch, außer in einem Aufräum-Issue mit Verhaltensliste je zu
   löschendem Test und eigener Lösch-Einheit.
 - Struktur-Regeln: Offene Fragen am Ende? Out of Scope referenziert/abgelehnt?

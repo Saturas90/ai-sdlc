@@ -159,12 +159,29 @@ Aufwand bei jedem Umbau; ein neuer Test braucht deshalb einen Grund. Testregeln 
   (normative Doku, Ausgabeformat für Dritte) oder ein Scanner bzw. Leser eine Architektur-, Import-, Projekt-
   oder Doku-Regel durchsetzt (Wächter-Set). Dass eine Ausgabe bestimmte Inhalte nicht enthält (z. B.
   Geheimnisse), ist Verhalten, kein Wortlaut.
+- **Wächter** (Tests des Wächter-Sets) fangen versehentliche Verstöße gegen ihre Regel auf den im Projekt
+  üblichen Wegen (z. B. direkter Import, Aufruf, Attributzugriff). Absichtliche Umgehung (dynamischer Zugriff
+  per `getattr`, `globals` oder `importlib`, Sternimport, Alias- und Zuweisungsketten, Namen als String,
+  Introspektion) decken sie erst ab, wenn eine solche Umgehung im Projekt belegt ist oder ein freigegebenes
+  Artefakt es mit Begründung verlangt; Code im Diff, der eine Wächter-Regel absichtlich umgeht, ist ein
+  Review-Befund nach seiner Wirkung. Kein Pin von Quelltext (wörtlich oder AST-gleich), außer der Wortlaut ist
+  Vertrag (z. B. ausgelieferte Migrationen, veröffentlichte Schemas); was sonst in genau dieser Form bleiben
+  muss, sichern Verhaltenstests und Review. Braucht eine Regel eine eigene Namens- oder Importauflösung, legt ein freigegebenes Artefakt (Architektur
+  oder Impl-Plan) mit Begründung fest, ob eine Linter- bzw. Typprüfer-Regel, das Review oder ein so
+  ausgebauter Wächter sie durchsetzt.
 - **Regressionsfall zu einem Finding** nur, wenn es ein Fehlverhalten belegt, das unbemerkt zurückkehren
   kann — als Erweiterung eines bestehenden Tests, sonst als neuer Test. Findings zu Gliederung, Benennung oder
   Stil bekommen keinen.
 - **Dichte nach Risiko:** Plan-Einheiten mit `[K]` oder `Prüftiefe: L` und sicherheits- oder datenkritischer
   Code testen die Grenz- und Fehlerpfade ihrer kritischen Kanten gründlich; sonst der Hauptpfad und die
   Fehlerpfade mit eigener Wirkung.
+- **Mutationsbefunde** (grün gebliebene Mutationen der Mutationsphase, `review-gate.md` Muster 6) sind
+  kritisch/hoch nur, wenn die Mutation Verhalten aus einem Akzeptanzkriterium, einem Vertrag (in Issue,
+  Architektur, ADR oder normativer Doku festgelegte Schnittstelle oder Zusicherung) oder einer kritischen
+  Kante (Haupt-, Grenz- oder Fehlerpfad) ändert; sonstiges Verhalten nach „Gegenstand“ höchstens
+  mittel; Wege, die diese Regeln nicht zu testen verlangen (z. B. absichtliche Umgehung eines Wächters), und
+  äquivalente Mutationen niedrig. Geschlossen wird ein Befund zuerst per Assertion oder Parameter in dem
+  bestehenden Test, der die Stelle durchläuft.
 - **Bestand:** Bestehende Tests nur anpassen, soweit das Issue ihr geprüftes Verhalten oder die genutzte
   Schnittstelle ändert oder entfernt; nie nebenbei löschen, zusammenlegen oder umschreiben — erlaubt sind das
   Erweitern um Fälle und das Korrigieren einer nachweislich falschen oder wirkungslosen Assertion zum selben
@@ -177,7 +194,9 @@ Aufwand bei jedem Umbau; ein neuer Test braucht deshalb einen Grund. Testregeln 
   (zu löschende abgewählt). Welche Tests die Lösch-Einheit löscht, entscheidet der Mensch anhand dieses
   Protokolls (Gate-Ablage); ohne seine Entscheidung wird nichts gelöscht.
 - **Review:** Testballast in neu hinzugefügten Tests bzw. Testfällen ist mittel/niedrig, in bestehenden Tests
-  höchstens niedrig mit Hinweis auf ein Aufräum-Issue. Bestehende Tests gelöscht, zusammengelegt oder
+  höchstens niedrig mit Hinweis auf ein Aufräum-Issue. Fehlt einem Wächter die Abdeckung absichtlicher
+  Umgehung, ist das höchstens niedrig, außer die Umgehung ist im Projekt belegt oder ein freigegebenes
+  Artefakt verlangt sie mit Begründung. Bestehende Tests gelöscht, zusammengelegt oder
   umgeschrieben, ohne dass das Issue ihr Verhalten oder ihre Schnittstelle ändert (die erlaubten Fälle oben
   ausgenommen), ist hoch — außer in der Lösch-Einheit eines Aufräum-Issues für Tests, deren Löschung der
   Mensch anhand des Mutationsprotokolls entschieden hat; im Plan-Review genügen die Verhaltensliste je zu

@@ -17,7 +17,7 @@ Muster 6.
 |-------|------------|------|
 | **S** | Projektplan, Issue, Impl-Plan ohne `[K]`, normale Impl-Einheit, Zusammenfassung | **ein** Reviewer-Spawn je Runde, kein Workflow, kein Verify (Ausnahme: bestrittener Blocker, Abschnitt 2) |
 | **M** | Architekturplan, Impl-Plan mit `[K]`, `[K]`-Einheit | Workflow: höchstens 2 Linsen + Verify der Blocker (Muster 2–5) |
-| **L** | Einheit mit `Prüftiefe: L` im freigegebenen Impl-Plan (Sicherheit, Datenverlust, Migration, Recovery; schließt `[K]` ein) oder auf ausdrücklichen Wunsch des Menschen | Workflow: höchstens 4 Linsen + Verify + Mutationsphase (Muster 6); ohne Code und Tests entfällt sie mit Begründung per `log()` |
+| **L** | Einheit mit `Prüftiefe: L` im freigegebenen Impl-Plan (Sicherheit, Datenverlust, Migration, Recovery; schließt `[K]` ein) oder auf ausdrücklichen Wunsch des Menschen | Workflow: höchstens 4 Linsen + Verify + Mutationsphase (Muster 6, ab Runde 2 nur Delta); ohne Code und Tests entfällt sie mit Begründung per `log()` |
 
 Reviewer nach Gegenstand, nie schwächer als der erzeugende Sub-Agent (Modell **und** Effort):
 Architekturplan oder ADR im Gegenstand → `reviewer-architektur` (opus, xhigh), auch in Stufe S; `[K]`,
@@ -64,8 +64,9 @@ allgemeine Gründlichkeitsvorgaben heben die Stufe nicht an.
 4. **Session-Wechsel mitten im Gate:** Am Ende jeder Runde und vor dem Fixcheck schreibt die Hauptsession
    „Stand“ in `kontext.md` (bzw. die dort verwiesene projekteigene Übergabe-Ablage): Gegenstand, Prüftiefe,
    Runde, Gate-Schritt (Review / Korrektur / Fixcheck), offene Findings (als Tabelle oder Verweis auf eine
-   Datei in der Gate-Ablage), Unterordner der jüngsten Sicherung, ggf. die Stufen-Abbildung und die
-   max-Eskalation (ab Runde, gewählte Runden, Freigabe-Grundlage). Eine neue Session
+   Datei in der Gate-Ablage), Unterordner der jüngsten Sicherung, in Stufe L die Ordner der
+   Mutationsergebnisse (Muster 6), ggf. die Stufen-Abbildung und die max-Eskalation (ab Runde, gewählte
+   Runden, Freigabe-Grundlage). Eine neue Session
    setzt dort fort, statt den Entwurf neu zu erzeugen (im Arbeitsbaum-Modus: Fortsetzung nach
    `arbeitsbaeume.md` Abschnitt 2).
 5. **Gate-Ablage und Sicherung:** Sicherungen, Findings-Tabellen und Fix-Protokoll liegen in einem
@@ -156,7 +157,8 @@ den Fixcheck.
   gegen Code bzw. Quelle. Ab Runde 3 **Delta:** Vorrunden-Blocker und der Fix-Diff samt Nahtstellen (gleiche
   Regel an anderen Stellen, Aufrufer, Verweise). Kamen seit der Vorrunde neuer Scope, neue
   Akzeptanzkriterien, Verträge oder normative Klauseln oder Entscheidungen des Menschen hinzu, prüft die
-  Runde diese Teile voll wie in Runde 1, samt Nahtstellen zum Rest.
+  Runde diese Teile voll wie in Runde 1, samt Nahtstellen zum Rest. Die Mutationsphase in Stufe L läuft schon
+  ab Runde 2 als Delta (Muster 6).
 - **Konvergenz-Stopp:** Bestätigt Runde 3 oder eine spätere Runde noch Blocker, nicht weiter feilen. Dem
   Menschen einen Konvergenzbericht vorlegen (je Runde erhoben / bestätigt / widerlegt, Anteil Regressionen
   eigener Fixes, wiederkehrende Themen) mit Optionen: Grundsatzentscheidung statt Wortlaut-Feilen, Variante
@@ -262,7 +264,16 @@ Verbrauchsauswertung gruppiert danach.
    keine Rohstimmen, keine Linsentexte. Beim Fixcheck je Befund zusätzlich die Kennzeichnung (Finding-ID, „ohne Auftrag“ oder „außerhalb
    der Fixes“) und die Zuordnungsliste (Änderung → Finding-ID(s) oder „ohne Auftrag“, ohne Severity).
 6. **Mutationsphase** (Stufe L zusätzlich zu den Linsen bzw. auf Wunsch; vor jeder Lösch-Einheit eines
-   Aufräum-Issues unabhängig von der Stufe). Vor einer Lösch-Einheit (`konventionen.md` › Test-Ökonomie) auf
+   Aufräum-Issues unabhängig von der Stufe). In Stufe L wählt der `mutations-pruefer` die Mutationen nur in
+   Runde 1 frei. Vor dem Abräumen kopiert die Hauptsession alle `mut-NNN.diff` samt `ergebnis.tsv` aus dem
+   Sicherungsverzeichnis in die Gate-Ablage (Abschnitt 2, Punkt 5) unter `<gegenstand>-r<N>-mutation/` und
+   nennt den Ordner in „Stand“. Ab Runde 2 (Delta) erhält der `mutations-pruefer` diesen Ordner, den Fix-Diff
+   und die Liste dessen, was seit der Vorrunde neu ist (Scope, Akzeptanzkriterien, Verträge, normative
+   Klauseln; Abschnitt 4): Er fährt die grün gebliebenen Mutationen außer `äquivalent` erneut, ebenso rot
+   gewordene, deren rot machende Tests der Fix-Diff ändert, und mutiert neu nur im Fix-Diff am Produktivcode
+   und im genannten Neuen. Die Mutationsphase vor einer Lösch-Einheit läuft immer voll, nie als Delta.
+   Einstufung der Befunde: `konventionen.md` › Test-Ökonomie › Mutationsbefunde. Vor einer
+   Lösch-Einheit (`konventionen.md` › Test-Ökonomie) auf
    dem committeten Stand davor, die Verhaltensliste des Plans als Faktenliste; ohne Workflow spawnt die
    Hauptsession `mutations-pruefer` direkt, legt das Protokoll statt per `log()` in der Gate-Ablage ab und legt
    es dem Menschen zur Löschentscheidung vor. Ablauf: Die Hauptsession gibt
@@ -287,7 +298,8 @@ Verbrauchsauswertung gruppiert danach.
    - `mut`: nur wenn Platte = `mut`-Hash, Sicherung = `orig`-Hash **und** der mit denselben Labels neu
      erzeugte Diff Sicherung → Platte per `cmp` byte-gleich zur Diff-Datei der Zeile ist, in einem
      Bash-Aufruf per `cp -p` zurückschreiben und Hash + Bytes gegen `orig` prüfen; sonst nur melden.
-   - Sicherungsdateien ohne `orig`-Zeile (außer `baseline/`, `manifest.tsv`, `mut-*.diff`): melden.
+   - Sicherungsdateien ohne `orig`-Zeile (außer `baseline/`, `manifest.tsv`, `ergebnis.tsv`, `mut-*.diff`):
+     melden.
    - Mutation in HEAD/Index: alle Befehle mit `git -C <arbeitsbaum>`; je mutiertem Pfad (repo-relativ per
      `git ls-files --full-name -- <abs>`; leer = untrackt, dann entfällt diese Prüfung) den Index-Blob
      (`git ls-files -s`) und für jeden Commit aus `git log --format=%H <baseline-HEAD>..HEAD -- <relpfad>`

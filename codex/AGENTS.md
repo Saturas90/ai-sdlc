@@ -167,7 +167,16 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   Composition Root, Fabriken): ein Smoke-Test je Einstiegspunkt, kein Test je Abhängigkeit oder Parameter.
   Doku, Meldungen oder Quelltext als Text nur prüfen, wo der Wortlaut Vertrag ist oder ein Scanner bzw. Leser
   eine Architektur-, Import-, Projekt- oder Doku-Regel durchsetzt (Wächter-Set); dass eine Ausgabe bestimmte
-  Inhalte nicht enthält (z. B. Geheimnisse), ist Verhalten. Regressionsfall zu einem Finding nur bei belegtem
+  Inhalte nicht enthält (z. B. Geheimnisse), ist Verhalten. Wächter fangen versehentliche Verstöße gegen ihre
+  Regel auf den im Projekt üblichen Wegen (z. B. direkter Import, Aufruf, Attributzugriff); absichtliche
+  Umgehung (dynamischer Zugriff per `getattr`, `globals` oder `importlib`, Sternimport, Alias- und
+  Zuweisungsketten, Namen als String, Introspektion) decken sie erst ab, wenn eine solche Umgehung im Projekt
+  belegt ist oder ein freigegebenes Artefakt es mit Begründung verlangt; Code im Diff, der eine Wächter-Regel
+  absichtlich umgeht, ist ein Review-Befund nach seiner Wirkung. Kein Pin von Quelltext (wörtlich oder
+  AST-gleich), außer der Wortlaut ist Vertrag (z. B. ausgelieferte Migrationen, veröffentlichte Schemas); was
+  sonst in genau dieser Form bleiben muss, sichern Verhaltenstests und Review. Braucht eine Regel eine eigene Namens- oder Importauflösung, legt ein
+  freigegebenes Artefakt (Architektur oder Implementierungsplan) mit Begründung fest, ob eine Linter- bzw.
+  Typprüfer-Regel, das Review oder ein so ausgebauter Wächter sie durchsetzt. Regressionsfall zu einem Finding nur bei belegtem
   Fehlverhalten, das unbemerkt zurückkehren kann — als Erweiterung eines bestehenden Tests, sonst neu;
   Findings zu Gliederung, Benennung oder Stil bekommen keinen. Planeinheiten mit `[K]` oder `Prüftiefe: L`
   und sicherheits- oder datenkritischer Code testen die Grenz- und Fehlerpfade ihrer kritischen Kanten
@@ -182,7 +191,9 @@ abbilden, bei Unklarheit den Nutzer fragen und die Abbildung im Reviewauftrag un
   vor der Lösch-Einheit je Verhalten die feinste Mutation, die den zu löschenden Test rot macht, geprüft gegen
   die verbleibenden Tests, zu löschende abgewählt). Codex führt dafür keine Mutationen aus: Lösch-Einheiten vor
   der Umsetzung dem Nutzer melden, der das Protokoll beibringt und entscheidet. Reviewer melden Testballast in neu hinzugefügten Tests bzw. Testfällen als mittel/niedrig, in
-  bestehenden höchstens als niedrig mit Hinweis auf ein Aufräum-Issue; bestehende Tests gelöscht,
+  bestehenden höchstens als niedrig mit Hinweis auf ein Aufräum-Issue, fehlende Wächter-Abdeckung absichtlicher
+  Umgehung höchstens als niedrig, außer die Umgehung ist im Projekt belegt oder ein freigegebenes Artefakt
+  verlangt sie mit Begründung; bestehende Tests gelöscht,
   zusammengelegt oder umgeschrieben, ohne dass das Issue ihr Verhalten oder ihre Schnittstelle ändert (die
   erlaubten Fälle ausgenommen), als hoch — außer in der Lösch-Einheit eines Aufräum-Issues für Tests, deren
   Löschung der Nutzer anhand des Mutationsprotokolls entschieden hat; im Plan genügen die Verhaltensliste je zu löschendem Test und die eigene Lösch-Einheit.
